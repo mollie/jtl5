@@ -11,7 +11,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 class PayPal extends PaymentMethod
 {
-    const METHOD = 'paypal';
+    const METHOD = \Mollie\Api\Types\PaymentMethod::PAYPAL;
 
 
 }

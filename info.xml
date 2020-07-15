@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0-rc.2</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2020-07-08</CreateDate>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Install>
         <Adminmenu>
             <Customlink sort="1">
@@ -113,6 +113,146 @@
                     <Name>PayPal</Name>
                     <ChargeName>mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit PayPal.</InfoText>
+                </MethodLanguage>
+            </Method>
+            <Method>
+                <Name>Klarna Pay Later.</Name>
+                <PictureURL>images/Payment_methods/klarna@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>mollie</Provider>
+                <TSCode>INVOICE</TSCode>
+                <PreOrder>0</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>KlarnaPayLater.php</ClassFile>
+                <ClassName>KlarnaPayLater</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Klarna Pay Later.</Name>
+                    <ChargeName>mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem auf Rechnung mit Klarna.</InfoText>
+                </MethodLanguage>
+            </Method>
+            <Method>
+                <Name>Klarna Slice It.</Name>
+                <PictureURL>images/Payment_methods/klarna@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>mollie</Provider>
+                <TSCode>FINANCING</TSCode>
+                <PreOrder>0</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>KlarnaSliceIt.php</ClassFile>
+                <ClassName>KlarnaSliceIt</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Klarna Slice It.</Name>
+                    <ChargeName>mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem in Raten mit Klarna.</InfoText>
+                </MethodLanguage>
+            </Method>
+            <Method>
+                <Name>SOFORT</Name>
+                <PictureURL>images/Payment_methods/sofort@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>mollie</Provider>
+                <TSCode>DIRECT_E_BANKING</TSCode>
+                <PreOrder>0</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Sofort.php</ClassFile>
+                <ClassName>Sofort</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>SOFORT</Name>
+                    <ChargeName>mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit SOFORT.</InfoText>
+                </MethodLanguage>
+            </Method>
+            <Method>
+                <Name>Przelewy24</Name>
+                <PictureURL>images/Payment_methods/Przelewy24@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>mollie</Provider>
+                <TSCode>OTHER</TSCode>
+                <PreOrder>0</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Przelewy24.php</ClassFile>
+                <ClassName>Przelewy24</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Przelewy24</Name>
+                    <ChargeName>mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
+                </MethodLanguage>
+            </Method>
+            <Method>
+                <Name>Giropay</Name>
+                <PictureURL>images/Payment_methods/giropay@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>mollie</Provider>
+                <TSCode>GIROPAY</TSCode>
+                <PreOrder>0</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Giropay.php</ClassFile>
+                <ClassName>Giropay</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>giropay</Name>
+                    <ChargeName>mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
+                </MethodLanguage>
+            </Method>
+            <Method>
+                <Name>iDEAL</Name>
+                <PictureURL>images/Payment_methods/ideal@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>mollie</Provider>
+                <TSCode>DIRECT_E_BANKING</TSCode>
+                <PreOrder>0</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>IDeal.php</ClassFile>
+                <ClassName>IDeal</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>iDeal</Name>
+                    <ChargeName>mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit iDeal.</InfoText>
+                </MethodLanguage>
+            </Method>
+            <Method>
+                <Name>EPS</Name>
+                <PictureURL>images/Payment_methods/eps@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>mollie</Provider>
+                <TSCode>DIRECT_E_BANKING</TSCode>
+                <PreOrder>0</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>EPS.php</ClassFile>
+                <ClassName>EPS</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>eps</Name>
+                    <ChargeName>mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit eps.</InfoText>
                 </MethodLanguage>
             </Method>
         </PaymentMethod>

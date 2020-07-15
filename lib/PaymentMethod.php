@@ -19,6 +19,9 @@ use ws5_mollie\Model\OrderModel;
 
 class PaymentMethod extends Method
 {
+
+    const ALLOW_PAYMENT_BEFORE_ORDER = false;
+
     public const METHOD = '';
     /**
      * @var string
@@ -55,10 +58,16 @@ class PaymentMethod extends Method
     public function isValidIntern(array $args_arr = []): bool
     {
         if ($this->duringCheckout) {
-            return false;
+            return static::ALLOW_PAYMENT_BEFORE_ORDER;
         }
 
         return parent::isValidIntern($args_arr);
+    }
+
+    public function isSelectable(): bool
+    {
+        $selectable = true;
+        return $selectable && parent::isSelectable();
     }
 
     public function handleNotification(Bestellung $order, string $hash, array $args): void

@@ -9,7 +9,9 @@ use ws5_mollie\PaymentMethod;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-class CreditCard extends PaymentMethod
+class Giropay extends PaymentMethod
 {
-    const METHOD = \Mollie\Api\Types\PaymentMethod::CREDITCARD;
+    const METHOD = \Mollie\Api\Types\PaymentMethod::GIROPAY;
+
+
 }

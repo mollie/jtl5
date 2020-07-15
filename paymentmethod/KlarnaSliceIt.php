@@ -12,9 +12,9 @@ use ws5_mollie\PaymentMethod;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-class ApplePay extends PaymentMethod
+class KlarnaSliceIt extends PaymentMethod
 {
-    const METHOD = \Mollie\Api\Types\PaymentMethod::APPLEPAY;
+    const METHOD = \Mollie\Api\Types\PaymentMethod::KLARNA_SLICE_IT;
 
 
 }
