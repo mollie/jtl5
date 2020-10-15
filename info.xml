@@ -8,7 +8,8 @@
     <ShopVersion>5.0.0-rc.2</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2020-07-08</CreateDate>
-    <Version>1.0.2</Version>
+    <Version>1.0.0</Version>
+    <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Adminmenu>
             <Customlink sort="1">
