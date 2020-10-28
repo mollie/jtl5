@@ -4,7 +4,7 @@
  * @copyright 2020 WebStollen GmbH
  */
 
-namespace ws5_mollie;
+namespace Plugin\ws5_mollie\lib;
 
 class Locale
 {
@@ -26,7 +26,7 @@ class Locale
         'eng' => ['lang' => 'en', 'country' => ['GB', 'US']],
     ];
 
-    public static function getLocale($cISOSprache, $country = null)
+    public static function getLocale($cISOSprache, $country = null): string
     {
         if (array_key_exists($cISOSprache, self::$langs)) {
             $locale = self::$langs[$cISOSprache]['lang'];
@@ -39,6 +39,5 @@ class Locale
         }
         // @todo: Einstellung für fallback?
         return "de_DE";
-
     }
 }

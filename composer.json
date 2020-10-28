@@ -25,11 +25,6 @@
       "role": "CTO"
     }
   ],
-  "autoload": {
-    "psr-4": {
-      "ws5_mollie\\": "lib/"
-    }
-  },
   "scripts": {
     "analyze": "phpmetrics --report-html=report ./",
     "test": "phpunit",

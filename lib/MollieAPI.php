@@ -1,15 +1,20 @@
 <?php
 
 
-namespace ws5_mollie;
+namespace Plugin\ws5_mollie\lib;
 
 
 use Composer\CaBundle\CaBundle;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use JTL\Plugin\Helper;
 use JTL\Plugin\PluginInterface;
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\MollieApiClient;
+use RuntimeException;
+use Shop;
 
 class MollieAPI
 {
@@ -30,8 +35,8 @@ class MollieAPI
     /**
      * @param bool $test
      * @return MollieApiClient
-     * @throws \Mollie\Api\Exceptions\ApiException
-     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @throws ApiException
+     * @throws IncompatiblePlatform
      */
     public static function API($test = false): MollieApiClient
     {
@@ -39,8 +44,8 @@ class MollieAPI
 
             self::$test = $test;
 
-            if (!($oPlugin = Helper::getPluginById(__NAMESPACE__))) {
-                throw new \RuntimeException('Could not load Plugin!');
+            if (!($oPlugin = Helper::getPluginById('ws5_mollie'))) {
+                throw new RuntimeException('Could not load Plugin!');
             }
 
 
@@ -65,7 +70,7 @@ class MollieAPI
     protected static function getAPIKey($test, PluginInterface $oPlugin = null): string
     {
         if ($oPlugin === null && !($oPlugin = Helper::getPluginById(__NAMESPACE__))) {
-            throw new \RuntimeException('Could not load Plugin!');
+            throw new RuntimeException('Could not load Plugin!');
         }
         if ($test) {
             return $oPlugin->getConfig()->getValue("test_apiKey");
@@ -88,11 +93,11 @@ class MollieAPI
      * false = LIVE
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getMode(): bool
     {
-        return \Shop::isAdmin();
+        return Shop::isAdmin();
     }
 
 }

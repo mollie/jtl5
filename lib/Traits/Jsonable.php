@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ws5_mollie\Traits;
+namespace Plugin\ws5_mollie\lib\Traits;
 
 
 trait Jsonable

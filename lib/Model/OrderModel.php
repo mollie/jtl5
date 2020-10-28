@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ws5_mollie\Model;
+namespace Plugin\ws5_mollie\lib\Model;
 
 
 use Exception;
@@ -25,6 +25,7 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  *
  * @method void setBestellung(int $bestellung)
  * @method void setOrderId(string $orderId)
+ * @method void setBestellNr(string $bestellNr)
  * @method void setTransactionId(string $transactionId)
  * @method void setThirdId(string $thirdId)
  * @method void setStatus(string $status)
@@ -36,6 +37,7 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  *
  * @method int getBestellung()
  * @method string getOrderId()
+ * @method string getBestellNr()
  * @method string getTransactionId()
  * @method string getThirdId()
  * @method string getStatus()
@@ -46,7 +48,7 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @method string getCreated()
  *
  */
-final class OrderModel extends \JTL\Model\DataModel
+final class OrderModel extends \JTL\Model\DataModel implements \JsonSerializable
 {
 
     /**
@@ -69,6 +71,7 @@ final class OrderModel extends \JTL\Model\DataModel
             $attr['id'] = DataAttribute::create('kId', 'int', null, false, true);
             $attr['bestellung'] = DataAttribute::create('kBestellung', 'int', null, true);
             $attr['orderId'] = DataAttribute::create('cOrderId', 'string', '', false, false);
+            $attr['bestellNr'] = DataAttribute::create('cBestellNr', 'string', '', false, false);
             $attr['transactionId'] = DataAttribute::create('cTransactionId', 'string', '', false);
             $attr['thirdId'] = DataAttribute::create('cThirdId', 'string', '', false);
             $attr['status'] = DataAttribute::create('cStatus', 'string', '', false);
@@ -88,5 +91,10 @@ final class OrderModel extends \JTL\Model\DataModel
     public function getTableName(): string
     {
         return 'xplugin_ws5_mollie_orders';
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->rawArray();
     }
 }

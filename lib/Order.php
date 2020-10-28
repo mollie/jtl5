@@ -4,18 +4,27 @@
  * @copyright 2020 WebStollen GmbH
  */
 
-namespace ws5_mollie;
+namespace Plugin\ws5_mollie\lib;
 
+use Bestellung;
+use Exception;
+use JsonSerializable;
 use JTL\Model\DataModel;
 use JTL\Plugin\Payment\LegacyMethod;
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\Order as MollieOrder;
-use ws5_mollie\Model\OrderModel;
-use ws5_mollie\Order\Address;
-use ws5_mollie\Order\Amount;
-use ws5_mollie\Order\OrderLine;
-use ws5_mollie\Traits\Jsonable;
+use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Order\Address;
+use Plugin\ws5_mollie\lib\Order\Amount;
+use Plugin\ws5_mollie\lib\Order\OrderLine;
+use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use RuntimeException;
+use Session;
+use Shop;
+use stdClass;
 
-class Order implements \JsonSerializable
+class Order implements JsonSerializable
 {
     use Jsonable;
 
@@ -37,7 +46,7 @@ class Order implements \JsonSerializable
     public $lines;
 
     /**
-     * @var \stdClass|null;
+     * @var stdClass|null;
      */
     public $payment;
 
@@ -52,11 +61,14 @@ class Order implements \JsonSerializable
     }
 
     /**
-     * @param \Bestellung $oBestellung
+     * @param Bestellung $oBestellung
+     * @param null $customerID
      * @return MollieOrder
-     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     * @throws Exception
      */
-    public static function createOrder(\Bestellung $oBestellung, $customerID = null): ?MollieOrder
+    public static function createOrder(Bestellung $oBestellung, $customerID = null): ?MollieOrder
     {
 
         $api = MollieAPI::API(MollieAPI::getMode());
@@ -64,19 +76,22 @@ class Order implements \JsonSerializable
         // PayAgain, order already existing?
         if ($oBestellung->kBestellung > 0) {
             try {
-                $order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], \Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
+                $order = OrderModel::loadByAttributes(
+                    ['bestellung' => $oBestellung->kBestellung],
+                    Shop::Container()->getDB(),
+                    DataModel::ON_NOTEXISTS_FAIL);
                 return $api->orders->get($order->getOrderId(), ['embed' => 'payments']);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
 
         /** @var $data Order */
-        list($data, $hash) = self::factory($oBestellung);
+        [$data, $hash] = self::factory($oBestellung);
 
         if ($customerID) {
             if (!$data->payment) {
-                $data->payment = new \stdClass();
+                $data->payment = new stdClass();
             }
             $data->payment->customerId = $customerID;
         }
@@ -87,9 +102,10 @@ class Order implements \JsonSerializable
 
         $orderModel = OrderModel::loadByAttributes([
             'orderId' => $order->id,
-        ], \Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
+        ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
 
         $orderModel->setBestellung($oBestellung->kBestellung);
+        $orderModel->setBestellNr($oBestellung->cBestellNr);
         //$orderModel->setOrderId($order->id);
         //$orderModel->setTransactionId($payments && $payments->count() === 1 && $payments->hasNext() ? $payments->next()->id : '');
         $orderModel->setStatus($order->status);
@@ -98,40 +114,40 @@ class Order implements \JsonSerializable
         $orderModel->setSynced(false);
 
         if (!$orderModel->save()) {
-            throw new \Exception('Could not save OrderModel.');
+            throw new RuntimeException('Could not save OrderModel.');
         }
 
         return $order;
     }
 
     /**
-     * @param \Bestellung $oBestellung
+     * @param Bestellung $oBestellung
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function factory(\Bestellung $oBestellung): array
+    public static function factory(Bestellung $oBestellung): array
     {
         /**
          * @todo
          * - payment->cardToken
          * - payment->customerId
          */
-        $_currFactor = \Session::getCurrency()->getConversionFactor();
+        //$_currFactor = Session::getCurrency()->getConversionFactor();
         $oPaymentMethod = LegacyMethod::create($oBestellung->Zahlungsart->cModulId);
         if (!$oPaymentMethod) {
-            throw new \Exception('Could not load PaymentMethod!');
+            throw new \RuntimeException('Could not load PaymentMethod!');
         }
 
         $hash = $oPaymentMethod->generateHash($oBestellung);
 
         $data = new self();
-        $data->locale = Locale::getLocale(\Session::get('cISOSprache', 'ger'), \Session::getCustomer()->cLand);
+        $data->locale = Locale::getLocale(Session::get('cISOSprache', 'ger'), Session::getCustomer()->cLand);
         $data->amount = new Amount($oBestellung->fGesamtsumme, $oBestellung->Waehrung, true, true);
         $data->orderNumber = $oBestellung->cBestellNr;
         $data->metadata = [
             'kBestellung' => $oBestellung->kBestellung,
             'kKunde' => $oBestellung->kKunde,
-            'kKundengruppe' => \Session::getCustomerGroup()->getID(),
+            'kKundengruppe' => Session::getCustomerGroup()->getID(),
             'cHash' => $oPaymentMethod->generateHash($oBestellung),
         ];
         if ($oPaymentMethod->duringCheckout) {
@@ -152,11 +168,11 @@ class Order implements \JsonSerializable
         }
 
         if (
-            !empty(\Session::getCustomer()->dGeburtstag)
-            && \Session::getCustomer()->dGeburtstag !== '0000-00-00'
-            && preg_match('/^\d{4}-\d{2}-\d{2}$/', trim(\Session::getCustomer()->dGeburtstag))
+            !empty(Session::getCustomer()->dGeburtstag)
+            && Session::getCustomer()->dGeburtstag !== '0000-00-00'
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', trim(Session::getCustomer()->dGeburtstag))
         ) {
-            $data->consumerDateOfBirth = trim(\Session::getCustomer()->dGeburtstag);
+            $data->consumerDateOfBirth = trim(Session::getCustomer()->dGeburtstag);
         }
 
         $data->lines = [];

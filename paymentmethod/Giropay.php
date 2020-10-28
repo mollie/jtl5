@@ -5,13 +5,13 @@
 
 namespace Plugin\ws5_mollie\paymentmethod;
 
-use ws5_mollie\PaymentMethod;
+use Plugin\ws5_mollie\lib\PaymentMethod;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 class Giropay extends PaymentMethod
 {
-    const METHOD = \Mollie\Api\Types\PaymentMethod::GIROPAY;
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::GIROPAY;
 
 
 }

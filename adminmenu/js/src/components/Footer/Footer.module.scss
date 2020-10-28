@@ -1,0 +1,15 @@
+.statusIndicator {
+
+  cursor: help;
+
+  .rtt {
+    display: none;
+    @apply px-2;
+    font-family: "Consolas", monospace !important;
+  }
+
+  &:hover .rtt {
+    display: block;
+  }
+
+}

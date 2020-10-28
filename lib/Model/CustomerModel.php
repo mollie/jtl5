@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ws5_mollie\Model;
+namespace Plugin\ws5_mollie\lib\Model;
 
 
 use Exception;

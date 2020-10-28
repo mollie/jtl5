@@ -1,9 +1,9 @@
 <?php
 
 
-namespace ws5_mollie\Order;
+namespace Plugin\ws5_mollie\lib\Order;
 
-use ws5_mollie\Traits\Jsonable;
+use Plugin\ws5_mollie\lib\Traits\Jsonable;
 
 /**
  * Class Address

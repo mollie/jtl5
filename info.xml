@@ -5,7 +5,7 @@
     <Author>WebStollen GmbH</Author>
     <URL>https://www.webstollen.de</URL>
     <XMLVersion>102</XMLVersion>
-    <ShopVersion>5.0.0-rc.2</ShopVersion>
+    <ShopVersion>5.0.0-rc.3</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2020-07-08</CreateDate>
     <Version>1.0.0</Version>
@@ -14,7 +14,6 @@
         <Adminmenu>
             <Customlink sort="1">
                 <Name>Dashboard</Name>
-                <Filename>dashboard.php</Filename>
             </Customlink>
             <Settingslink sort="900">
                 <Name>Einstellung</Name>

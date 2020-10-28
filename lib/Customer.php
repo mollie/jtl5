@@ -1,14 +1,14 @@
 <?php
 
 
-namespace ws5_mollie;
+namespace Plugin\ws5_mollie\lib;
 
 
 use JTL\Model\DataModel;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Mollie\Api\Exceptions\ApiException;
-use ws5_mollie\Model\CustomerModel;
-use ws5_mollie\Traits\Jsonable;
+use Plugin\ws5_mollie\lib\Model\CustomerModel;
+use Plugin\ws5_mollie\lib\Traits\Jsonable;
 
 class Customer
 {

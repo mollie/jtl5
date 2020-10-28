@@ -1,0 +1,33 @@
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+
+@import "tailwindcss/utilities";
+
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
+
+.position-relative {
+    position: relative;
+}
+
+#App {
+    position: absolute;
+    overflow: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e5e5;
+    color: #333;
+    background-image: url('https://cdn.webstollen.com/plugin/img/ws_bg.jpg');
+    background-size: cover;
+}
+
+#App * {
+    font-family: 'Comfortaa', Sans-Serif;
+}
+
+a {
+    cursor: pointer;
+}
+
