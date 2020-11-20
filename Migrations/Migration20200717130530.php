@@ -13,7 +13,7 @@ class Migration20200717130530 extends Migration implements IMigration
     public function up()
     {
         $this->execute('CREATE TABLE IF NOT EXISTS `xplugin_ws5_mollie_orders` (
-  `kId` int(11) NOT NULL AUTO_INCREMENT,
+  `kId` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `kBestellung` int(11) DEFAULT NULL,
   `cOrderId` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `cTransactionId` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
@@ -28,7 +28,6 @@ class Migration20200717130530 extends Migration implements IMigration
         );
 
         $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders`
-  ADD PRIMARY KEY (`kId`),
   ADD UNIQUE KEY `cOrderId` (`cOrderId`),
   ADD UNIQUE KEY `kBestellung` (`kBestellung`);'
         );

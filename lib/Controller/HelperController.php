@@ -3,15 +3,19 @@
 
 namespace Plugin\ws5_mollie\lib\Controller;
 
-use Currency;
+
 use Exception;
 use JTL\Catalog\Category\Kategorie;
+use JTL\Catalog\Currency;
+use JTL\Catalog\Hersteller;
 use JTL\Catalog\Product\Artikel;
+use JTL\Customer\CustomerGroup;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Helpers\Category;
 use JTL\Language\LanguageHelper;
 use JTL\Language\LanguageModel;
+use JTL\Plugin\Helper;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Response;
 use RuntimeException;
@@ -24,7 +28,7 @@ class HelperController extends AbstractController
     /**
      * @return Response
      */
-    public static function test(): Response
+    public static function info(): Response
     {
         return new Response([
             'test' => true,
@@ -33,12 +37,22 @@ class HelperController extends AbstractController
             'php' => PHP_VERSION,
             'os' => PHP_OS,
             'db' => Shop::Container()->getDB()->getServerInfo(),
+            'pluginID' => Helper::getIDByPluginID("ws5_mollie"),
             'errorReporting' => error_reporting(),
             'adminErrorReporting' => ADMIN_LOG_LEVEL,
+            'maintenanceMode' => Shop::getSettingValue(CONF_GLOBAL, 'wartungsmodus_aktiviert') === 'Y',
+            'defaults' => [
+                'kSprache' => LanguageHelper::getDefaultLanguage(true)->getId(),
+                'kWaehrung' => (new Currency())->getDefault()->getID(),
+                'kKundengruppe' => CustomerGroup::getDefaultGroupID()
+            ]
         ]);
     }
 
     /**
+     * Data properties:
+     * - id?: kSprache
+     *
      * @param $data stdClass
      * @return Response
      * @throws Exception
@@ -71,6 +85,9 @@ class HelperController extends AbstractController
     }
 
     /**
+     * Data properties:
+     * - id?: kWaehrung
+     *
      * @param stdClass $data
      * @return Response
      */
@@ -107,6 +124,13 @@ class HelperController extends AbstractController
     }
 
     /**
+     * Data properties:
+     * - customerGroupID?: kKundengruppe
+     * - langID?: kSprache
+     * - noCache?: bool
+     * - options?: string(detail/export) | stdClass
+     * - id: kArtikel || no: cArtNr
+     *
      * @param stdClass $data
      * @return Response
      * @throws CircularReferenceException
@@ -117,7 +141,7 @@ class HelperController extends AbstractController
 
         $fill = function (int $kArtikel, $options = null): Artikel {
             $product = new Artikel();
-            $product->fuelleArtikel((int)$kArtikel, $options, $data->customerGroupID ?? 0, $data->langID ?? 0, $data->noCache ?? false);
+            $product->fuelleArtikel($kArtikel, $options, $data->customerGroupID ?? 0, $data->langID ?? 0, $data->noCache ?? false);
             if (!$product->getID()) {
                 $product = null;
             }
@@ -127,7 +151,7 @@ class HelperController extends AbstractController
         $product = null;
         $options = null;
         if (isset($data->options)) {
-            if (gettype($data->options) === 'string') {
+            if (is_string($data->options)) {
                 switch ($data->options) {
                     case 'detail':
                         $options = Artikel::getDetailOptions();
@@ -138,7 +162,7 @@ class HelperController extends AbstractController
                     default:
                         $options = null;
                 }
-            } else if (gettype($data->options) === 'stdClass') {
+            } else if (is_object($data->options)) {
                 $options = $data->options;
             }
         }
@@ -159,6 +183,13 @@ class HelperController extends AbstractController
     }
 
     /**
+     * Data properties:
+     * - id?: kKategorie
+     * - parent?: kKategorie
+     * - customerGroupID?: kKundengruppe
+     * - langID?: kSprache
+     * - noCache?: bool
+     *
      * @param stdClass $data
      * @return Response
      */
@@ -175,7 +206,7 @@ class HelperController extends AbstractController
         };
 
         if (($data->id ?? false) && Category::categoryExists((int)$data->id)) {
-            $response = new Kategorie((int)$data->id, $data->langID ?? 0, $data->customerGroupID ?? 0, $data->noCacge ?? false);
+            $response = new Kategorie((int)$data->id, $data->langID ?? 0, $data->customerGroupID ?? 0, $data->noCache ?? false);
         } elseif ($data->parent ?? false) {
             $categories = Shop::Container()->getDB()->selectAll('tkategorie', 'kOberKategorie', (int)$data->parent, 'kKategorie');
             $response = $fill($categories);
@@ -188,10 +219,17 @@ class HelperController extends AbstractController
     }
 
     /**
+     * Data properties:
+     * - section: kEinstellungSektion
+     * - key?: cName (teinstellungen / ttemplateeinstellungen)
+     *
      * @param stdClass $data
      * @return Response
+     * @see \CONF_GLOBAL, ...: includes/defines_inc.php
+     * @see \CONF_TEMPLATE: Template: Section 11
+     *
      */
-    public function config(stdClass $data)
+    public static function config(stdClass $data): Response
     {
 
         $response = null;
@@ -204,10 +242,66 @@ class HelperController extends AbstractController
 
     }
 
+    /**
+     * Data properties:
+     * - id: kHersteller
+     * - langID?: kSprache
+     * - noCache?: bool
+     *
+     * @param stdClass $data
+     * @return Response
+     * @throws RuntimeException
+     */
+    public static function manufacturer(stdClass $data): Response
+    {
+        $response = null;
+        if ($data->id ?? false) {
+            $response = new Hersteller((int)$data->id, $data->langID ?? 0, $data->noCache ?? false);
+            if (!$response->getID()) {
+                throw new RuntimeException('Manufacturer not found', 404);
+            }
+        } else {
+            $hersteller_arr = Shop::Container()->getDB()->selectAll('thersteller', [], []);
+            $response = [];
+            foreach ($hersteller_arr as $hersteller) {
+                $response[$hersteller->kHersteller] = new Hersteller((int)$hersteller->kHersteller, $data->langID ?? 0, $data->noCache ?? false);
+            }
+        }
+        return new Response($response);
+    }
 
+    /**
+     * Data properties:
+     * - query: string, SQL Query
+     * - params?: array, Parameters to bind
+     *
+     * @param stdClass $data
+     * @return Response
+     */
+    public static function selectOne(stdClass $data): Response
+    {
+        $response = null;
+        if ($data->query ?? false) {
+            $response = Shop::Container()->getDB()->executeQueryPrepared($data->query, (array)($data->params ?? []), 1);
+        }
+        return new Response($response);
+    }
 
-    // coupons
-    // template settings
-    // manufacturers
+    /**
+     * Data properties:
+     * - query: string, SQL Query
+     * - params?: array, Parameters to bind
+     *
+     * @param stdClass $data
+     * @return Response
+     */
+    public static function selectAll(stdClass $data): Response
+    {
+        $response = null;
+        if ($data->query ?? false) {
+            $response = Shop::Container()->getDB()->executeQueryPrepared($data->query, (array)($data->params ?? []), 2);
+        }
+        return new Response($response);
+    }
 
 }
