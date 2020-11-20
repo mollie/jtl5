@@ -8,7 +8,7 @@ import tabs from './tabs'
 
 ReactDOM.render(
   <React.StrictMode>
-    <App tabs={tabs} />
+    <App tabs={tabs}  />
   </React.StrictMode>,
   document.getElementById('root')
 )

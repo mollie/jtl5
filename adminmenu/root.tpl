@@ -19,7 +19,7 @@
 </script>
 
 <script type='application/json' id='pluginInfo'>{$infoJSON}</script>
-<div id="root" style="top:0;left:0;right:0;bottom:0;position:absolute"></div>
+<div id="root" style="top:0;left:0;right:0;bottom:0;position:absolute;z-index:1;background:white url('https://cdn.webstollen.com/plugin/img/ws_bg.jpg'); background-size: cover"></div>
 <script>{literal}!function (e) {
         function r(r) {
             for (var n, a, i = r[0], c = r[1], l = r[2], f = 0, s = []; f < i.length; f++) a = i[f], Object.prototype.hasOwnProperty.call(o, a) && o[a] && s.push(o[a][0]), o[a] = 0;

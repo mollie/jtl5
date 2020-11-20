@@ -284,6 +284,9 @@ class HelperController extends AbstractController
         if ($data->query ?? false) {
             $response = Shop::Container()->getDB()->executeQueryPrepared($data->query, (array)($data->params ?? []), 1);
         }
+        if ($response === false) {
+            throw new \RuntimeException('DB Error');
+        }
         return new Response($response);
     }
 
@@ -297,9 +300,22 @@ class HelperController extends AbstractController
      */
     public static function selectAll(stdClass $data): Response
     {
+
         $response = null;
         if ($data->query ?? false) {
-            $response = Shop::Container()->getDB()->executeQueryPrepared($data->query, (array)($data->params ?? []), 2);
+
+            if (isset($data->query) && array_key_exists(':limit', $data->params) && array_key_exists(':offset', $data->params) && strpos($data->query, 'LIMIT') === false) {
+                $query = rtrim($data->query, ';') . ' LIMIT :offset, :limit;';
+                $response = (object)[
+                    'items' => Shop::Container()->getDB()->executeQueryPrepared($query, (array)($data->params ?? []), 2),
+                    'maxItems' => Shop::Container()->getDB()->executeQueryPrepared($data->query, (array)($data->params ?? []), 3),
+                ];
+            } else {
+                $response = Shop::Container()->getDB()->executeQueryPrepared($data->query, (array)($data->params ?? []), 2);
+            }
+        }
+        if (!is_array($response) && ($error = Shop::Container()->getDB()->getErrorMessage())) {
+            throw new \RuntimeException('DB Error: ' . $error);
         }
         return new Response($response);
     }
