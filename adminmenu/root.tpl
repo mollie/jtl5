@@ -14,8 +14,8 @@
             head.appendChild(link);
         }
     };
-    addCss('{$root}app/build/static/css/2.c2e050cf.chunk.css');
-    addCss('{$root}app/build/static/css/main.75b3d7ba.chunk.css');
+    addCss('{$root}app/build/static/css/2.6ed41b81.chunk.css');
+    addCss('{$root}app/build/static/css/main.c1c11bec.chunk.css');
 </script>
 
 <script type='application/json' id='pluginInfo'>{$infoJSON}</script>
@@ -109,5 +109,5 @@
         var p = c;
         t()
     }([]){/literal}</script>
-<script src="{$root}app/build/static/js/2.0b21ebfd.chunk.js"></script>
-<script src="{$root}app/build/static/js/main.5b529cf4.chunk.js"></script>
+<script src="{$root}app/build/static/js/2.d40a3338.chunk.js"></script>
+<script src="{$root}app/build/static/js/main.a5b7a7c6.chunk.js"></script>

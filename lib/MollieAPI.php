@@ -63,11 +63,11 @@ class MollieAPI
     }
 
     /**
-     * @param $test
+     * @param boolean $test
      * @param PluginInterface|null $oPlugin
      * @return string
      */
-    protected static function getAPIKey($test, PluginInterface $oPlugin = null): string
+    protected static function getAPIKey(bool $test, PluginInterface $oPlugin = null): string
     {
         if ($oPlugin === null && !($oPlugin = Helper::getPluginById(__NAMESPACE__))) {
             throw new RuntimeException('Could not load Plugin!');
@@ -97,7 +97,8 @@ class MollieAPI
      */
     public static function getMode(): bool
     {
-        return Shop::isAdmin();
+        $_GET['fromAdmin'] = 'yes';
+        return Shop::isAdmin(true);
     }
 
 }

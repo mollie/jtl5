@@ -18,6 +18,11 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @property string $thirdId
  * @property string $status
  * @property string $hash
+ * @property float $amount
+ * @property float $amountRefunded
+ * @property string $method
+ * @property string $curreny
+ * @property string $locale
  * @property bool $test
  * @property bool $synced
  * @property DateTime $modified
@@ -30,6 +35,11 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @method void setThirdId(string $thirdId)
  * @method void setStatus(string $status)
  * @method void setHash(string $hash)
+ * @method void setAmount(float $amount)
+ * @method void setAmountRefunded(float $amountRefunded)
+ * @method void setMethod(string $method)
+ * @method void setCurrency(string $currency)
+ * @method void setLocale(string $locale)
  * @method void setTest(bool $test)
  * @method void setSynced(bool $synced)
  * @method void setModified(string $modified)
@@ -42,6 +52,11 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @method string getThirdId()
  * @method string getStatus()
  * @method string getHash()
+ * @method float getAmount()
+ * @method float getAmountRefunded()
+ * @method string getMethod()
+ * @method string getCurrency()
+ * @method string getLocale()
  * @method bool getTest()
  * @method bool getSynced()
  * @method string getModified()
@@ -76,6 +91,13 @@ final class OrderModel extends \JTL\Model\DataModel implements \JsonSerializable
             $attr['thirdId'] = DataAttribute::create('cThirdId', 'string', '', false);
             $attr['status'] = DataAttribute::create('cStatus', 'string', '', false);
             $attr['hash'] = DataAttribute::create('cHash', 'string', '', false);
+
+            $attr['amount'] = DataAttribute::create('fAmount', 'float', '', false);
+            $attr['amountRefunded'] = DataAttribute::create('fAmountRefunded', 'float', 0.0, false);
+            $attr['method'] = DataAttribute::create('cMethod', 'string', '', false);
+            $attr['locale'] = DataAttribute::create('cLocale', 'string', '', false);
+            $attr['currency'] = DataAttribute::create('cCurrency', 'string', '', false);
+
             $attr['test'] = DataAttribute::create('bTest', 'bool', false, false);
             $attr['synced'] = DataAttribute::create('bSynced', 'bool', false, false);
             $attr['modified'] = DataAttribute::create('dModified', 'datetime', date('Y-m-d H:i:s'), false);

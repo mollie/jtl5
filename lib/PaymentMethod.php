@@ -80,6 +80,7 @@ class PaymentMethod extends Method
      */
     public function preparePaymentProcess(Bestellung $order): void
     {
+
         parent::preparePaymentProcess($order);
         try {
             $payable = (float)$order->fGesamtsumme > 0;
@@ -164,6 +165,11 @@ class PaymentMethod extends Method
             $orderModel->setStatus($mOrder->status);
             $orderModel->setTransactionId($payment->id ?? '');
             $orderModel->setThirdId($payment->details->paypalReference ?? '');
+            $orderModel->setMethod($mOrder->method);
+            $orderModel->setAmount($mOrder->amount->value);
+            $orderModel->setCurrency($mOrder->amount->currency);
+            $orderModel->setAmountRefunded($mOrder->amountRefunded->value ?? 0);
+            $orderModel->setLocale($mOrder->locale);
 
             /** @noinspection NotOptimalIfConditionsInspection */
             if ($orderModel->save() && $order->dBezahltDatum === null && $payment) {
@@ -183,7 +189,7 @@ class PaymentMethod extends Method
                 }
             }
         } catch (Exception $e) {
-            Shop::Container()->getLogService()->addCritical($e->getMessage(), $_REQUEST);
+            Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
 
     }

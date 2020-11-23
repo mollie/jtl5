@@ -14,6 +14,7 @@ use JTL\Plugin\Payment\LegacyMethod;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\Order as MollieOrder;
+use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Order\Address;
 use Plugin\ws5_mollie\lib\Order\Amount;
@@ -71,7 +72,7 @@ class Order implements JsonSerializable
     public static function createOrder(Bestellung $oBestellung, $customerID = null): ?MollieOrder
     {
 
-        $api = MollieAPI::API(MollieAPI::getMode());
+        $api = null;
 
         // PayAgain, order already existing?
         if ($oBestellung->kBestellung > 0) {
@@ -80,12 +81,17 @@ class Order implements JsonSerializable
                     ['bestellung' => $oBestellung->kBestellung],
                     Shop::Container()->getDB(),
                     DataModel::ON_NOTEXISTS_FAIL);
-                return $api->orders->get($order->getOrderId(), ['embed' => 'payments']);
+                $api = MollieAPI::API($order->test);
+                $order = $api->orders->get($order->getOrderId(), ['embed' => 'payments']);
+                if ($order->status === OrderStatus::STATUS_CREATED) {
+                    return $order;
+                }
             } catch (Exception $e) {
             }
         }
-
-
+        if (!$api) {
+            $api = MollieAPI::API(MollieAPI::getMode());
+        }
         /** @var $data Order */
         [$data, $hash] = self::factory($oBestellung);
 
@@ -106,11 +112,15 @@ class Order implements JsonSerializable
 
         $orderModel->setBestellung($oBestellung->kBestellung);
         $orderModel->setBestellNr($oBestellung->cBestellNr);
+        $orderModel->setLocale($order->locale);
+        $orderModel->setAmount($order->amount->value);
+        $orderModel->setMethod($order->method);
+        $orderModel->setCurrency($order->amount->currency);
         //$orderModel->setOrderId($order->id);
         //$orderModel->setTransactionId($payments && $payments->count() === 1 && $payments->hasNext() ? $payments->next()->id : '');
         $orderModel->setStatus($order->status);
         $orderModel->setHash($hash);
-        $orderModel->setTest(MollieAPI::isTest());
+        $orderModel->setTest(MollieAPI::getMode());
         $orderModel->setSynced(false);
 
         if (!$orderModel->save()) {
