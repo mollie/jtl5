@@ -14,7 +14,7 @@
             head.appendChild(link);
         }
     };
-    addCss('{$root}app/build/static/css/2.6ed41b81.chunk.css');
+    addCss('{$root}app/build/static/css/2.572c64f8.chunk.css');
     addCss('{$root}app/build/static/css/main.c1c11bec.chunk.css');
 </script>
 
@@ -109,5 +109,5 @@
         var p = c;
         t()
     }([]){/literal}</script>
-<script src="{$root}app/build/static/js/2.d40a3338.chunk.js"></script>
-<script src="{$root}app/build/static/js/main.a5b7a7c6.chunk.js"></script>
+<script src="{$root}app/build/static/js/2.20888a41.chunk.js"></script>
+<script src="{$root}app/build/static/js/main.6388b867.chunk.js"></script>
