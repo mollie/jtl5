@@ -154,3 +154,7 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
     }
     return <pre>{method}</pre>;
 }
+
+export type ApiError = {
+    message: string
+}

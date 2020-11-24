@@ -3,6 +3,8 @@ import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/T
 import {formatAmount, Label} from "@webstollen/react-jtl-plugin/lib";
 import {jtlStatus2label, MollieOrder, molliePaymentStatusLabel, PaymentMethod2img} from "../../helper";
 import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
+import OrderDetails from "./OrderDetails";
+import TextLink from "@webstollen/react-jtl-plugin/lib/components/TextLink";
 
 
 const Dashboard = () => {
@@ -11,10 +13,12 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const api = useApi();
 
+    const [detailId, setDetailId] = useState<string | null>(null)
+
     const template = {
         cBestellNr: {
             header: () => 'BestellNr',
-            data: row => <>{row.cBestellNr}</>
+            data: row => <TextLink color={"blue"} onClick={() => setDetailId(row.cOrderId)}>{row.cBestellNr}</TextLink>
         },
         cOrderId: {
             header: () => 'mollie ID',
@@ -33,15 +37,6 @@ const Dashboard = () => {
             data: row => jtlStatus2label(row.cJTLStatus),
             align: "center"
         },
-        fAmount: {
-            header: () => 'Betrag',
-            data: row => formatAmount(row.fAmount),
-            align: "right"
-        },
-        cCurrency: {
-            header: () => 'Währung',
-            data: row => row.cCurrency
-        },
         cLocale: {
             header: () => 'Locale',
             data: row => row.cLocale
@@ -50,6 +45,15 @@ const Dashboard = () => {
             header: () => 'Methode',
             data: row => <PaymentMethod2img method={row.cMethod}/>,
             align: "center"
+        },
+        fAmount: {
+            header: () => 'Betrag',
+            data: row => formatAmount(row.fAmount),
+            align: "right"
+        },
+        cCurrency: {
+            header: () => 'Währung',
+            data: row => row.cCurrency
         },
         dCreated: {
             header: () => 'Erstellt',
@@ -75,8 +79,10 @@ const Dashboard = () => {
         })
     };
 
-    return <div className='container mx-auto'>
-        <Table template={template}
+    return <div className='container mx-auto relative'>
+        {detailId && <OrderDetails onClose={() => setDetailId(null)} id={detailId}/>}
+        {/*<div className={detailId ? 'hidden' : undefined}>*/}
+        <Table striped template={template}
                loading={loading}
                onData={handleOnData}
                paginate={{
@@ -84,6 +90,7 @@ const Dashboard = () => {
                    maxItems: maxItems,
                    itemsPerPage: 10
                }}/>
+        {/*</div>*/}
     </div>;
 };
 
