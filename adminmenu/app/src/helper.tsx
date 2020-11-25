@@ -15,7 +15,7 @@ import klarnaImg from './assets/img/klarna.svg';
 import mybankImg from './assets/img/mybank.svg';
 import paypalImg from './assets/img/paypal.svg';
 import paysafecardImg from './assets/img/paysafecard.svg';
-import Przelewy24Img from './assets/img/Przelewy24.svg';
+import przelewy24Img from './assets/img/Przelewy24.svg';
 import sofortImg from './assets/img/sofort.svg';
 
 
@@ -126,7 +126,8 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
             mybank: mybankImg,
             paypal: paypalImg,
             paysafecard: paysafecardImg,
-            Przelewy24: Przelewy24Img,
+            Przelewy24: przelewy24Img,
+            przelewy24: przelewy24Img,
             sofort: sofortImg,
         }
         switch (method) {
@@ -145,11 +146,14 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
             case 'paypal':
             case 'paysafecard':
             case 'Przelewy24':
+            case 'przelewy24':
             case 'sofort':
                 return <img className={'inline'} src={prefix + images[method]} title={method} alt={method}/>
             case 'klarnasliceit':
             case 'klarnapaylater':
                 return <img className={'inline'} src={prefix + images.klarna} title={method} alt={method}/>
+            case 'banktransfer':
+                return <img className={'inline'} src={prefix + images.directdebit} title={method} alt={method}/>
         }
     }
     return <pre>{method}</pre>;
