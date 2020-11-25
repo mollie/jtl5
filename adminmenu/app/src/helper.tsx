@@ -155,6 +155,14 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
     return <pre>{method}</pre>;
 }
 
+export function removeItemOnce<T>(arr: T[], value: T) {
+    const index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}
+
 export type ApiError = {
     message: string
 }

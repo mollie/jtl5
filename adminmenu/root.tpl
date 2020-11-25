@@ -2,7 +2,7 @@
     document.getElementById('content_wrapper').setAttribute('style', 'position:relative');
 
     const addCss = function (url) {
-        var cssId = btoa(url).substr(btoa(url).length-32,32);  // you could encode the css path itself to generate id..
+        var cssId = btoa(url).substr(btoa(url).length - 32, 32);  // you could encode the css path itself to generate id..
         if (!document.getElementById(cssId)) {
             var head = document.getElementsByTagName('head')[0];
             var link = document.createElement('link');
@@ -14,12 +14,14 @@
             head.appendChild(link);
         }
     };
-    addCss('{$root}app/build/static/css/2.07ba4f98.chunk.css');
-    addCss('{$root}app/build/static/css/main.c1c11bec.chunk.css');
+    {foreach from=$css item=file}
+    addCss('{$root}app/build/static/css/{$file}');
+    {/foreach}
 </script>
 
 <script type='application/json' id='pluginInfo'>{$infoJSON}</script>
-<div id="root" style="top:0;left:0;right:0;bottom:0;position:absolute;z-index:1;background:white url('https://cdn.webstollen.com/plugin/img/ws_bg.jpg'); background-size: cover"></div>
+<div id="root"
+     style="top:0;left:0;right:0;bottom:0;position:absolute;z-index:1;background:white url('https://cdn.webstollen.com/plugin/img/ws_bg.jpg'); background-size: cover"></div>
 <script>{literal}!function (e) {
         function r(r) {
             for (var n, a, i = r[0], c = r[1], l = r[2], f = 0, s = []; f < i.length; f++) a = i[f], Object.prototype.hasOwnProperty.call(o, a) && o[a] && s.push(o[a][0]), o[a] = 0;
@@ -109,5 +111,6 @@
         var p = c;
         t()
     }([]){/literal}</script>
-<script src="{$root}app/build/static/js/2.8961064d.chunk.js"></script>
-<script src="{$root}app/build/static/js/main.5a003ad1.chunk.js"></script>
+{foreach from=$js item=file}
+    <script src="{$root}app/build/static/js/{$file}"></script>
+{/foreach}

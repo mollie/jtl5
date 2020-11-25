@@ -18,7 +18,7 @@ class OrdersController extends AbstractController
         $order = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM `xplugin_ws5_mollie_orders` WHERE cOrderId = :cOrderId;", [':cOrderId' => $data->id], 1);
 
         $result = (object)[
-            'mollie' => MollieAPI::API((bool)$order->bTest)->orders->get($order->cOrderId),
+            'mollie' => MollieAPI::API((bool)$order->bTest)->orders->get($order->cOrderId, ['embed' => 'payments,shipments']),
             'order' => $order,
             'bestellung' => new Bestellung($order->kBestellung, true)
         ];

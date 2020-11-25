@@ -4,6 +4,9 @@ import Alert from "@webstollen/react-jtl-plugin/lib/components/Alert";
 import {faExclamation} from "@fortawesome/pro-solid-svg-icons";
 import {Loading} from "@webstollen/react-jtl-plugin/lib";
 import {ApiError} from "../../../helper";
+import Payments from "./Payments";
+import Details from "./Details";
+import OrderLines from "./OrderLines";
 
 export type OrderDetailsProps = {
     id: string
@@ -38,17 +41,29 @@ const OrderDetails = (props: OrderDetailsProps) => {
             "{props.id}": {error.message}</Alert>;
     }
 
-    return <div className="relative flex-col mb-3">
-        <Loading loading={loading}>
-            <div className="flex-row bg-gray-300 rounded-t p-3">
-                <div className=" font-bold text-2xl flex-grow">
-                    Bestellung: <pre className="inline">{props.id}</pre>
+    return <div className="relative flex-col mb-3 rounded-md w-full">
+        <Loading loading={loading} className="rounded-md">
+            <div className="flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
+                <div className="flex-grow">
+                    Bestellung: {data?.order.cBestellNr} (<pre className="inline text-ws_gray-light">{props.id}</pre>)
                 </div>
-                <a className="font-bold text-2xl" onClick={props.onClose}>X</a>
+                <a onClick={props.onClose}>X</a>
             </div>
-            <div className="bg-white rounded-b">
-                ORDER DETAILS for {props.id}
-                <pre style={{overflow: "scroll", maxHeight: "250px"}}>{JSON.stringify(data, null, 2)}</pre>
+            <div className=" rounded-md">
+
+                {data && data.mollie && <Details mollie={data.mollie}/>}
+
+                {data && data.mollie && <div>
+                    <h3 className="font-bold text-2xl mb-1">Zahlungen</h3>
+                    <Payments mollie={data.mollie}/>
+                </div>}
+
+                {data && data.mollie && <div>
+                    <h3 className="font-bold text-2xl mb-1">Positionen</h3>
+                    <OrderLines mollie={data.mollie}/>
+                </div>}
+
+                {/*<pre style={{overflow: "scroll", maxHeight: "500px"}}>{JSON.stringify(data, null, 2)}</pre>*/}
             </div>
         </Loading>
     </div>;
