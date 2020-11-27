@@ -31,7 +31,7 @@ const Payments = ({mollie}: PaymentsProps) => {
         },
         settlement: {
             header: () => 'Settlement',
-            data: row => row.settlementAmount.value ? formatAmount(row.settlementAmount.value, 2, row.settlementAmount.currency) : '-',
+            data: row => row.settlementAmount?.value ? formatAmount(row.settlementAmount.value, 2, row.settlementAmount.currency) : '-',
         },
         refunded: {
             header: () => 'Refunded',

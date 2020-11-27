@@ -17,15 +17,24 @@
             </Customlink>
             <Settingslink sort="900">
                 <Name>Einstellung</Name>
+                <Setting type="text" conf="N" initialValue="Y" sort="0">
+                    <Name>mollie API</Name>
+                    <ValueName>h0</ValueName>
+                </Setting>
                 <Setting type="password" initialValue="" sort="10" conf="Y">
-                    <Name>API Key (live)</Name>
+                    <Name>Live Key:</Name>
                     <Description>Füge hier deinen mollie API Key ein</Description>
                     <ValueName>apiKey</ValueName>
                 </Setting>
-                <Setting type="text" initialValue="" sort="10" conf="Y">
-                    <Name>API Key (test)</Name>
+                <Setting type="text" initialValue="" sort="15" conf="Y">
+                    <Name>Test Key:</Name>
                     <Description>Füge hier deinen mollie API Key ein</Description>
                     <ValueName>test_apiKey</ValueName>
+                </Setting>
+                <Setting type="checkbox" initialValue="on" sort="20" conf="Y">
+                    <Name>Test API als Admin:</Name>
+                    <Description>Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet, wenn man als Admin im Backend eingeloggt ist.</Description>
+                    <ValueName>testAsAdmin</ValueName>
                 </Setting>
             </Settingslink>
         </Adminmenu>
