@@ -287,8 +287,8 @@
             <Variable>
                 <Name>cctitle</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Zahlungsinformationen]]></VariableLocalized>
-                <VariableLocalized iso="ENG"><![CDATA[Enter your payment information]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[Kreditkarten-Informationen]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Enter your credit card information]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Informations de paiement]]></VariableLocalized>
             </Variable>
             <Variable>

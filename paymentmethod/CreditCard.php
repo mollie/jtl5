@@ -5,6 +5,7 @@
 
 namespace Plugin\ws5_mollie\paymentmethod;
 
+use JTL\Checkout\Bestellung;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\PaymentMethod;
@@ -13,11 +14,25 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 class CreditCard extends PaymentMethod
 {
-    public const CACHE_TOKEN = 'creditcard:token';
-    public const CACHE_TOKEN_TIMESTAMP = 'creditcard:token:timestamp';
+    public const CACHE_PREFIX = 'creditcard';
+    public const CACHE_TOKEN = self::CACHE_PREFIX . ':token';
+    public const CACHE_TOKEN_TIMESTAMP = self::CACHE_TOKEN . ':timestamp';
 
     public const METHOD = \Mollie\Api\Types\PaymentMethod::CREDITCARD;
 
+
+    public function handleNotification(Bestellung $order, string $hash, array $args): void
+    {
+        parent::handleNotification($order, $hash, $args);
+        $this->clearToken();
+    }
+
+    protected function clearToken(): bool
+    {
+        $this->unsetCache(self::CACHE_TOKEN)
+            ->unsetCache(self::CACHE_TOKEN_TIMESTAMP);
+        return true;
+    }
 
     public function handleAdditional(array $post): bool
     {
@@ -28,9 +43,9 @@ class CreditCard extends PaymentMethod
             return parent::handleAdditional($post);
         }
 
+        $cleared = false;
         if (array_key_exists('clear', $post) && (int)$post['clear']) {
-            $this->unsetCache(self::CACHE_TOKEN)
-                ->unsetCache(self::CACHE_TOKEN_TIMESTAMP);
+            $cleared = $this->clearToken();
         }
 
         if ($components === 'S' && array_key_exists('skip', $post) && (int)$post['skip']) {
@@ -47,10 +62,8 @@ class CreditCard extends PaymentMethod
             return parent::handleAdditional($post);
         }
 
-        if (array_key_exists('cardToken', $post) && ($token = trim($post['cardToken']))) {
-            $this->addCache(self::CACHE_TOKEN, $token)
-                ->addCache(self::CACHE_TOKEN_TIMESTAMP, time() + 3600);
-            return parent::handleAdditional($post);
+        if (!$cleared && array_key_exists('cardToken', $post) && ($token = trim($post['cardToken']))) {
+            return $this->setToken($token) && parent::handleAdditional($post);
         }
 
         if (($ctTS = (int)$this->getCache(self::CACHE_TOKEN_TIMESTAMP)) && $ctTS > time()) {
@@ -67,6 +80,13 @@ class CreditCard extends PaymentMethod
             ->assign('mollieLang', self::Plugin()->getLocalization()->getTranslations());
 
         return false;
+    }
+
+    protected function setToken(string $token): bool
+    {
+        $this->addCache(self::CACHE_TOKEN, $token)
+            ->addCache(self::CACHE_TOKEN_TIMESTAMP, time() + 3600);
+        return true;
     }
 
 
