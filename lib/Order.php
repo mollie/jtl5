@@ -63,13 +63,12 @@ class Order implements JsonSerializable
 
     /**
      * @param Bestellung $oBestellung
-     * @param null $customerID
+     * @param array $paymentOptions
      * @return MollieOrder
      * @throws ApiException
      * @throws IncompatiblePlatform
-     * @throws Exception
      */
-    public static function createOrder(Bestellung $oBestellung, $customerID = null): ?MollieOrder
+    public static function createOrder(Bestellung $oBestellung, array $paymentOptions = []): ?MollieOrder
     {
 
         $api = null;
@@ -95,11 +94,8 @@ class Order implements JsonSerializable
         /** @var $data Order */
         [$data, $hash] = self::factory($oBestellung);
 
-        if ($customerID) {
-            if (!$data->payment) {
-                $data->payment = new stdClass();
-            }
-            $data->payment->customerId = $customerID;
+        if (count($paymentOptions)) {
+            $data->payment = (object)$paymentOptions;
         }
 
 

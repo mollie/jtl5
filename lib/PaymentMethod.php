@@ -15,10 +15,11 @@ use JTL\Model\DataModel;
 use JTL\Plugin\Helper as PluginHelper;
 use JTL\Plugin\Payment\Method;
 use JTL\Plugin\Payment\MethodInterface;
-use JTL\Plugin\Plugin;
+use JTL\Plugin\PluginInterface;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\paymentmethod\CreditCard;
 use RuntimeException;
 use Session;
 use Shop;
@@ -31,13 +32,75 @@ class PaymentMethod extends Method
 
     public const METHOD = '';
     /**
+     * @var PluginInterface
+     */
+    protected static $oPlugin;
+    /**
      * @var string
      */
     protected $pluginID;
+
     /**
-     * @var Plugin
+     * @return PluginInterface
      */
-    protected $oPlugin;
+    public static function Plugin(): PluginInterface
+    {
+        if (!(self::$oPlugin = PluginHelper::getPluginById('ws5_mollie'))) {
+            throw new RuntimeException('Could not load Plugin!');
+        }
+        return self::$oPlugin;
+    }
+
+    /**
+     * @param string $cISOSprache
+     * @param string|null $country
+     * @return string
+     */
+    public static function getLocale(string $cISOSprache, string $country = null): string
+    {
+        switch ($cISOSprache) {
+            case "ger":
+                if ($country === "AT") {
+                    return "de_AT";
+                }
+                if ($country === "CH") {
+                    return "de_CH";
+                }
+                return "de_DE";
+            case "fre":
+                if ($country === "BE") {
+                    return "fr_BE";
+                }
+                return "fr_FR";
+            case "dut":
+                if ($country === "BE") {
+                    return "nl_BE";
+                }
+                return "nl_NL";
+            case "spa":
+                return "es_ES";
+            case "ita":
+                return "it_IT";
+            case "pol":
+                return "pl_PL";
+            case "hun":
+                return "hu_HU";
+            case "por":
+                return "pt_PT";
+            case "nor":
+                return "nb_NO";
+            case "swe":
+                return "sv_SE";
+            case "fin":
+                return "fi_FI";
+            case "dan":
+                return "da_DK";
+            case "ice":
+                return "is_IS";
+            default:
+                return "en_US";
+        }
+    }
 
     /**
      * @param int $nAgainCheckout
@@ -48,7 +111,6 @@ class PaymentMethod extends Method
         parent::init($nAgainCheckout);
 
         $this->pluginID = PluginHelper::getIDByModuleID($this->moduleID);
-        $this->oPlugin = PluginHelper::getLoaderByPluginID($this->pluginID)->init($this->pluginID);
 
         return $this;
     }
@@ -92,16 +154,22 @@ class PaymentMethod extends Method
                 }
             }
 
-            $customerID = null;
+            $paymentOptions = [];
+
             if ((int)Session::getCustomer()->nRegistriert) {
-                $customerID = Customer::createOrUpdate(Session::getCustomer());
+                $paymentOptions['customerId'] = Customer::createOrUpdate(Session::getCustomer());
             }
 
+            if (static::METHOD === \Mollie\Api\Types\PaymentMethod::CREDITCARD) {
+                if ((int)$this->getCache(CreditCard::CACHE_TOKEN_TIMESTAMP) > time() && ($token = trim($this->getCache(CreditCard::CACHE_TOKEN)))) {
+                    $paymentOptions['cardToken'] = $token;
+                }
+            }
 
             if ($this->duringCheckout) {
                 // TODO: derzeit deaktiviert
             } else {
-                $mollieOrder = Order::createOrder($order, $customerID);
+                $mollieOrder = Order::createOrder($order, $paymentOptions);
 
                 if ($mollieOrder) {
 
@@ -212,6 +280,11 @@ class PaymentMethod extends Method
             }
         }
         return false;
+    }
+
+    public function handleAdditional(array $post): bool
+    {
+        return parent::handleAdditional($post);
     }
 
 

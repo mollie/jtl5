@@ -57,7 +57,7 @@ class MollieAPI
                     RequestOptions::TIMEOUT => 60,
                 ])
             );
-            self::$client->setApiKey(self::getAPIKey(self::$test, self::Plugin()));
+            self::$client->setApiKey(self::getAPIKey(self::$test));
             self::$client->addVersionString("JTL-Shop/" . APPLICATION_VERSION);
             self::$client->addVersionString('ws5_mollie/' . self::Plugin()->getCurrentVersion());
         }
@@ -66,18 +66,14 @@ class MollieAPI
 
     /**
      * @param boolean $test
-     * @param PluginInterface|null $oPlugin
      * @return string
      */
-    protected static function getAPIKey(bool $test, PluginInterface $oPlugin = null): string
+    protected static function getAPIKey(bool $test): string
     {
-        if ($oPlugin === null && !($oPlugin = Helper::getPluginById(__NAMESPACE__))) {
-            throw new RuntimeException('Could not load Plugin!');
-        }
         if ($test) {
-            return $oPlugin->getConfig()->getValue("test_apiKey");
+            return self::Plugin()->getConfig()->getValue("test_apiKey");
         }
-        return $oPlugin->getConfig()->getValue("apiKey");
+        return self::Plugin()->getConfig()->getValue("apiKey");
     }
 
     /**
