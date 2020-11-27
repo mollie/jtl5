@@ -42,7 +42,12 @@ const Details = ({mollie}: DetailsProps) => {
             <th>Kunde:</th>
             <td>{mollie.billingAddress.title} {mollie.billingAddress.givenName} {mollie.billingAddress.familyName}</td>
             <th>Zahlungslink:</th>
-            <td colSpan={3}>{mollie._links.checkout ?? '-'}</td>
+            <td colSpan={3}>{mollie._links.checkout?.href ?
+                <TextLink target="_blank"
+                          color="red"
+                          href={mollie._links.checkout.href}>{mollie._links.checkout.href}</TextLink>
+                : '-'}
+            </td>
         </tr>
     </table>;
 }

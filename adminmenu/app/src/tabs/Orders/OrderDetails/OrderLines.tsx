@@ -1,6 +1,6 @@
 import React from "react";
 import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/Table";
-import {formatAmount, Label} from "@webstollen/react-jtl-plugin/lib";
+import {formatAmount} from "@webstollen/react-jtl-plugin/lib";
 import {molliePaymentStatusLabel} from "../../../helper";
 
 export type OrderLinesProps = {
@@ -59,10 +59,7 @@ const OrderLines = ({mollie}: OrderLinesProps) => {
         }
     } as Record<string, ItemTemplate<Record<string, any>>>;
 
-    return <div>
-        <Label className="inline" color={"green"}>TEST</Label>
-        <Table template={template} items={mollie.lines}/>
-    </div>
+    return <Table template={template} items={mollie.lines}/>;
 }
 
 export default OrderLines;

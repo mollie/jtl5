@@ -20,8 +20,8 @@ import sofortImg from './assets/img/sofort.svg';
 
 
 export type MollieOrder = {
-    bSynced: boolean
-    bTest: boolean
+    bSynced: string
+    bTest: string
     cBestellNr: string
     cCurrency: string
     cHash: string
@@ -64,16 +64,17 @@ export const molliePaymentStatusLabel = (status: string) => {
         case 'authorized':
             color = 'green';
             break;
+        case 'created':
         case 'pending':
-            color = 'orange';
+            color = 'gray';
             break;
         case 'open':
             color = 'blue';
             break;
         case 'canceled':
-        case 'expired':
-            color = 'gray';
+            color = 'orange';
             break;
+        case 'expired':
         case 'failed':
             color = 'red';
             break;

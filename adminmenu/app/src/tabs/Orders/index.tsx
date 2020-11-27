@@ -17,13 +17,17 @@ const Orders = () => {
     const template = {
         cBestellNr: {
             header: () => 'BestellNr',
-            data: row => <TextLink color={"blue"}
-                                   onClick={() => setOpenTabs(prevState => prevState[row.cOrderId] ? {...prevState} : {[row.cOrderId]: row.cBestellNr, ...prevState})}>{row.cBestellNr}</TextLink>
+            data: row => <>
+                <TextLink color={"blue"}
+                          onClick={() => setOpenTabs(prevState => prevState[row.cOrderId] ? {...prevState} : {[row.cOrderId]: row.cBestellNr, ...prevState})}>
+                    {row.cBestellNr}
+                </TextLink>{!parseInt(row.bSynced) ? '*' : null}
+            </>
         },
         cOrderId: {
             header: () => 'mollie ID',
             data: row => <>
-                {row.bTest ? <Label className={'inline mr-1'} color={"red"}>TEST</Label> : null}
+                {parseInt(row.bTest) ? <Label className={'inline mr-1'} color={"red"}>TEST</Label> : null}
                 <pre className={'inline'}>{row.cOrderId}</pre>
             </>
         },
@@ -103,18 +107,18 @@ const Orders = () => {
         {Object.keys(openTabs).length > 0 ? <div className="container bg-white p-1 mx-auto rounded-md">
             <Tabs active={Object.keys(openTabs).length}
                   tabs={[{
-                component: table,
-                title: 'Übersicht',
-                isDashboard: false,
-                color: "blue"
-            }, ...Object.keys(openTabs).reverse().map((key, i) => {
-                return {
-                    component: <OrderDetails id={key} onClose={() => handleCloseTab(key)}/>,
-                    isDashboard: false,
-                    title: openTabs[key],
-                } as TabInfo
-            })]}/>
-        </div> : <div className="bg-white rounded-md p-1">{table}</div> }
+                      component: table,
+                      title: 'Übersicht',
+                      isDashboard: false,
+                      color: "blue"
+                  }, ...Object.keys(openTabs).reverse().map((key, i) => {
+                      return {
+                          component: <OrderDetails id={key} onClose={() => handleCloseTab(key)}/>,
+                          isDashboard: false,
+                          title: openTabs[key],
+                      } as TabInfo
+                  })]}/>
+        </div> : <div className="bg-white rounded-md p-1">{table}</div>}
     </div>;
 };
 

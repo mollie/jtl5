@@ -9,6 +9,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use JTL\Plugin\Helper;
+use JTL\Plugin\Plugin;
 use JTL\Plugin\PluginInterface;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
@@ -22,6 +23,12 @@ class MollieAPI
      * @var MollieApiClient
      */
     protected static $client;
+
+
+    /**
+     * @var PluginInterface
+     */
+    protected static $oPlugin;
 
     /**
      * @var bool
@@ -44,20 +51,15 @@ class MollieAPI
 
             self::$test = $test;
 
-            if (!($oPlugin = Helper::getPluginById('ws5_mollie'))) {
-                throw new RuntimeException('Could not load Plugin!');
-            }
-
-
             self::$client = new MollieApiClient(
                 new Client([
                     RequestOptions::VERIFY => CaBundle::getBundledCaBundlePath(),
                     RequestOptions::TIMEOUT => 60,
                 ])
             );
-            self::$client->setApiKey(self::getAPIKey(self::$test, $oPlugin));
+            self::$client->setApiKey(self::getAPIKey(self::$test, self::Plugin()));
             self::$client->addVersionString("JTL-Shop/" . APPLICATION_VERSION);
-            self::$client->addVersionString('ws5_mollie/' . $oPlugin->getCurrentVersion());
+            self::$client->addVersionString('ws5_mollie/' . self::Plugin()->getCurrentVersion());
         }
         return self::$client;
     }
@@ -79,6 +81,17 @@ class MollieAPI
     }
 
     /**
+     * @return PluginInterface
+     */
+    public static function Plugin(): PluginInterface
+    {
+        if (!(self::$oPlugin = Helper::getPluginById('ws5_mollie'))) {
+            throw new RuntimeException('Could not load Plugin!');
+        }
+        return self::$oPlugin;
+    }
+
+    /**
      * @return bool
      */
     public static function isTest(): ?bool
@@ -97,8 +110,11 @@ class MollieAPI
      */
     public static function getMode(): bool
     {
-        $_GET['fromAdmin'] = 'yes';
-        return Shop::isAdmin(true);
+        if (self::Plugin()->getConfig()->getValue("testAsAdmin") === 'on') {
+            $_GET['fromAdmin'] = 'yes';
+            return Shop::isAdmin(true);
+        }
+        return false;
     }
 
 }
