@@ -17,7 +17,7 @@
             </Customlink>
             <Settingslink sort="900">
                 <Name>Einstellung</Name>
-                <Setting type="text" initialValue="" sort="10" conf="Y">
+                <Setting type="password" initialValue="" sort="10" conf="Y">
                     <Name>API Key (live)</Name>
                     <Description>Füge hier deinen mollie API Key ein</Description>
                     <ValueName>apiKey</ValueName>
