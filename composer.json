@@ -1,6 +1,6 @@
 {
   "type": "project",
-  "name": "webstollen/ws5_plugin",
+  "name": "webstollen/ws5_mollie",
   "description": "JTL-Shop 5 Plugin Container",
   "config": {
     "optimize-autoloader": true,

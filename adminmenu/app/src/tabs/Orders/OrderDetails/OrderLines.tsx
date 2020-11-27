@@ -1,6 +1,6 @@
 import React from "react";
 import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/Table";
-import {formatAmount} from "@webstollen/react-jtl-plugin/lib";
+import {formatAmount, Label} from "@webstollen/react-jtl-plugin/lib";
 import {molliePaymentStatusLabel} from "../../../helper";
 
 export type OrderLinesProps = {
@@ -60,10 +60,8 @@ const OrderLines = ({mollie}: OrderLinesProps) => {
     } as Record<string, ItemTemplate<Record<string, any>>>;
 
     return <div>
+        <Label className="inline" color={"green"}>TEST</Label>
         <Table template={template} items={mollie.lines}/>
-        {/*<pre>
-        {JSON.stringify(mollie.lines, null, 2)}
-        </pre>*/}
     </div>
 }
 

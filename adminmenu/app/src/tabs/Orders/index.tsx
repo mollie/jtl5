@@ -101,7 +101,8 @@ const Orders = () => {
 
     return <div className='relative container mx-auto'>
         {Object.keys(openTabs).length > 0 ? <div className="container bg-white p-1 mx-auto rounded-md">
-            <Tabs active={Object.keys(openTabs).length} tabs={[{
+            <Tabs active={Object.keys(openTabs).length}
+                  tabs={[{
                 component: table,
                 title: 'Übersicht',
                 isDashboard: false,
