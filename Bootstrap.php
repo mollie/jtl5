@@ -5,30 +5,84 @@
 
 namespace Plugin\ws5_mollie;
 
+use JTL\Checkout\Bestellung;
 use JTL\Events\Dispatcher;
 use JTL\Plugin\Bootstrapper;
 use JTL\Plugin\Helper;
 use JTL\Shop;
 use JTL\Smarty\JTLSmarty;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\Order;
 
 class Bootstrap extends Bootstrapper
 {
+
+    /** @var Dispatcher */
+    protected $dispatcher;
+
     public function boot(Dispatcher $dispatcher)
     {
+
+        parent::boot($dispatcher);
+        $this->dispatcher = $dispatcher;
+
         require_once __DIR__ . '/vendor/autoload.php';
-        try {
-            $dispatcher->listen('shop.hook.' . HOOK_BESTELLABSCHLUSS_INC_BESTELLUNGINDB, function ($args_arr) {
-                if (array_key_exists('oBestellung', $args_arr)) {
+
+        $saveToQueue = function ($hook, $args_arr, $type = 'hook') {
+            $mQueue = QueueModel::newInstance(Shop::Container()->getDB());
+            $mQueue->setType($type . ':' . $hook);
+            $mQueue->setData(serialize($args_arr));
+            $mQueue->setCreated(date('Y-m-d H:i:s'));
+            return $mQueue->save();
+        };
+
+        $this->listen(HOOK_BESTELLABSCHLUSS_INC_BESTELLUNGINDB, function ($args_arr) {
+            if (array_key_exists('oBestellung', $args_arr)) {
+                /** @var Bestellung $oBestellung */
+                $oBestellung = $args_arr['oBestellung'];
+                if (Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart)) {
+                    $oBestellung->cAbgeholt = 'Y';
                     $args_arr['oBestellung']->cAbgeholt = 'Y';
+                    Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr, 1));
                 }
+            }
+        })
+            ->listen(HOOK_INDEX_NAVI_HEAD_POSTGET, function ($args_arr) use ($saveToQueue) {
+                if (array_key_exists('mollie', $_REQUEST) && (int)$_REQUEST['mollie'] === 1 && array_key_exists('id', $_REQUEST)) {
+                    $saveToQueue($_REQUEST['id'], $_REQUEST['id'], 'webhook');
+                    exit();
+                }
+            })
+            ->listen(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS, function ($args_arr) use ($saveToQueue) {
+                if (Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart)) {
+                    $saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS, $args_arr);
+                }
+            })
+            //->listen(HOOK_BESTELLUNGEN_XML_BEARBEITEUPDATE, function ($args_arr) use ($saveToQueue) {
+            //    // TODO: Check if this is mollie
+            //    $saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITEUPDATE, $args_arr);
+            //})
+            ->listen(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, function ($args_arr) use ($saveToQueue) {
+                // TODO: Check if this is mollie
+                $saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, $args_arr);
             });
-        } catch (\Exception $e) {
-            if (\Shop::isFrontend()) {
-                \Shop::Container()->getBackendLogService()->addCritical($e->getMessage());
-            } else {
-                \Shop::Container()->getLogService()->addCritical($e->getMessage());
+
+    }
+
+    protected function listen(int $hook, callable $listener, int $priority = 5): Bootstrap
+    {
+        if ($this->dispatcher) {
+            try {
+                $this->dispatcher->listen('shop.hook.' . $hook, $listener, $priority);
+            } catch (\Exception $e) {
+                if (\Shop::isFrontend()) {
+                    \Shop::Container()->getBackendLogService()->addCritical($e->getMessage());
+                } else {
+                    \Shop::Container()->getLogService()->addCritical($e->getMessage());
+                }
             }
         }
+        return $this;
     }
 
     public function renderAdminMenuTab(string $tabName, int $menuID, JTLSmarty $smarty): string

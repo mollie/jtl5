@@ -1,4 +1,3 @@
-import React from 'react'
 import {TabInfo} from '@webstollen/react-jtl-plugin/lib'
 import Orders from "./tabs/Orders";
 import Dashboard from "./tabs/Dashboard";

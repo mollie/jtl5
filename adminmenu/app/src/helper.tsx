@@ -55,6 +55,30 @@ export type MollieOrder = {
     // kWarenkorb: number
 };
 
+export type OrderLineType =
+    "physical"
+    | "discount"
+    | "digital"
+    | "shipping_fee"
+    | "store_credit"
+    | "gift_card"
+    | "surcharge";
+
+export const mollieOrderLineTypeLabel = (type: OrderLineType) => {
+    switch (type) {
+        case "physical":
+        case "digital":
+            return <Label className={'inline'} color={"blue"}>{type}</Label>
+        case "discount":
+        case "store_credit":
+        case "gift_card":
+            return <Label className={'inline'} color={"green"}>{type}</Label>
+        default:
+            return <Label className={'inline'} color={"orange"}>{type}</Label>
+    }
+
+}
+
 export type ColorType = "green" | "black" | "gray" | "orange" | "red" | "blue" | "white" | undefined;
 
 export const molliePaymentStatusLabel = (status: string) => {
@@ -62,6 +86,7 @@ export const molliePaymentStatusLabel = (status: string) => {
     switch (status) {
         case 'paid':
         case 'authorized':
+        case 'completed':
             color = 'green';
             break;
         case 'created':
@@ -69,6 +94,7 @@ export const molliePaymentStatusLabel = (status: string) => {
             color = 'gray';
             break;
         case 'open':
+        case 'shipping':
             color = 'blue';
             break;
         case 'canceled':

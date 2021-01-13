@@ -1,10 +1,17 @@
 import React from "react";
 import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/Table";
 import {formatAmount} from "@webstollen/react-jtl-plugin/lib";
-import {molliePaymentStatusLabel} from "../../../helper";
+import {mollieOrderLineTypeLabel, molliePaymentStatusLabel, OrderLineType} from "../../../helper";
 
 export type OrderLinesProps = {
     mollie: Record<string, any>
+}
+
+type Variation = {
+    name: string
+    value: string
+    kEigenschaft: number
+    kEigenschaftWert: number
 }
 
 const OrderLines = ({mollie}: OrderLinesProps) => {
@@ -25,11 +32,13 @@ const OrderLines = ({mollie}: OrderLinesProps) => {
         },
         name: {
             header: () => 'Name',
-            data: row => row.name ?? '-',
+            data: row => <>{row.name ?? '-'}
+                {row.metadata?.properties?.length ? row.metadata?.properties.map((prop: Variation) => <>
+                    <br/><b>{prop.name}</b>: <i>{prop.value}</i></>) : null}</>,
         },
         type: {
             header: () => 'Typ',
-            data: row => row.type ?? '-',
+            data: row => row.type ? mollieOrderLineTypeLabel(row.type as OrderLineType) : '-',
             align: "center"
         },
         quantity: {

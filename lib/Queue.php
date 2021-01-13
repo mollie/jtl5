@@ -1,0 +1,170 @@
+<?php
+
+
+namespace Plugin\ws5_mollie\lib;
+
+
+use Exception;
+use Generator;
+use JTL\Checkout\Bestellung;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Plugin\Payment\Method;
+use JTL\Plugin\Payment\MethodInterface;
+use JTL\Shop;
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\Traits\Plugin;
+use RuntimeException;
+use stdClass;
+
+class Queue
+{
+
+    use Plugin;
+
+    /**
+     * @param int $limit
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     */
+    public static function run($limit = 10): void
+    {
+
+        /** @var QueueModel $todo */
+        foreach (self::getOpen($limit) as $todo) {
+            try {
+                if ((list($type, $id) = explode(':', $todo->getType()))) {
+                    switch ($type) {
+                        case 'webhook':
+                            self::handleWebhook($id, $todo);
+                            break;
+
+                        case 'hook':
+                            self::handleHook((int)$id, $todo);
+                            break;
+                    }
+                }
+            } catch (Exception $e) {
+                // TODO: LOGGING!
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * @param $limit
+     * @return Generator|null
+     */
+    private static function getOpen($limit): ?Generator
+    {
+        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE cResult IS NULL AND dDone IS NULL ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
+            ':LIMIT' => $limit
+        ], 2);
+
+        foreach ($open as $_raw) {
+            $queueModel = QueueModel::newInstance(Shop::Container()->getDB());
+            $queueModel->fill($_raw);
+            $queueModel->setWasLoaded(true);
+            yield $queueModel;
+        }
+    }
+
+    /**
+     * @param string $id
+     * @param QueueModel $todo
+     * @return bool
+     * @throws Exception
+     */
+    protected static function handleWebhook(string $id, QueueModel $todo): bool
+    {
+        $order = OrderModel::loadByAttributes(['orderId' => $id], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
+        $oBestellung = new Bestellung($order->getBestellung());
+        if ($method = self::paymentMethod((int)$oBestellung->kZahlungsart)) {
+            $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
+            $todo->setDone(date('Y-m-d H:i:s'));
+            return $todo->save();
+        }
+        return false;
+    }
+
+    /**
+     * @param int $kZahlungsart
+     * @return MethodInterface
+     */
+    public static function paymentMethod(int $kZahlungsart): MethodInterface
+    {
+        if ($za = Shop::Container()->getDB()->executeQueryPrepared('SELECT cModulId from tzahlungsart WHERE kZahlungsart = :kZahlungsart AND cModulId LIKE \'kPlugin_%\'', [':kZahlungsart' => $kZahlungsart], 1)) {
+            return Method::create($za->cModulId);
+        }
+        $fallback = sprintf("kPlugin_%s_mollie", self::Plugin()->getID());
+        if ($fallbackZA = Method::create($fallback)) {
+            return $fallbackZA;
+        }
+        throw new RuntimeException('PaymentMethod not found');
+    }
+
+    /**
+     * @param int $hook
+     * @param QueueModel $todo
+     * @return bool
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     * @throws Exception
+     */
+    protected static function handleHook(int $hook, QueueModel $todo): bool
+    {
+        $data = unserialize($todo->getData(), [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
+        if (array_key_exists('oBestellung', $data)) {
+            switch ($hook) {
+                case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
+                    /** @var Bestellung $oBestellung */
+                    $oBestellung = new Bestellung($data['oBestellung']->kBestellung, true);
+
+                    /** @var $method PaymentMethod */
+                    if ($oBestellung->kBestellung
+                        && array_key_exists('status', $data)
+                        && ($status = (int)$data['status'])
+                        && ($method = self::paymentMethod((int)$oBestellung->kZahlungsart))
+                        && ($order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL))
+                        && ($mollie = MollieAPI::API($order->getTest())->orders->get($order->getOrderId(), ['embed' => 'payments']))) {
+
+
+                        $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
+
+                        if ($mollie->isCreated() || $mollie->isPaid() || $mollie->isAuthorized() || $mollie->isShipping() || $mollie->isPending()) {
+                            // TODO #9
+
+                            $options = Order::getShipmentOptions($oBestellung, $mollie, $status !== (int)$data['oBestellung']->cStatus);
+                            if ($options && array_key_exists('lines', $options) && is_array($options['lines'])) {
+                                $shipment = MollieAPI::API($order->getTest())->shipments->createFor($mollie, $options);
+                                // TODO: LOG
+                            }
+                        }
+
+                        $todo->setDone(date('Y-m-d H:i:s'));
+                        return $todo->save();
+
+                    }
+
+                    break;
+                case HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO:
+                    /** @var Bestellung $oBestellung */
+                    //$oBestellung = $data['oBestellung'];
+                    //echo "<pre>";
+                    //print_r($data);
+                    //echo "</pre>";
+                    break;
+            }
+
+        }
+        return false;
+    }
+
+}

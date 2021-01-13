@@ -1,0 +1,71 @@
+image: registry.webstollen.com:443/docker/jtl-plugin-ci:latest
+
+stages:
+  - build
+  - finalize
+
+before_script:
+  - npm config set "@fortawesome:registry" https://npm.fontawesome.com/
+  - npm config set "//npm.fontawesome.com/:_authToken" $FONT_AWESOME_TOKEN
+  - npm config set "@dash.bar:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
+  - npm config set "@webstollen:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
+  - npm config set "//gitlab.webstollen.com/api/v4/packages/npm/:_authToken" $CI_JOB_TOKEN
+  - npm config set "//gitlab.webstollen.com/api/v4/projects/444/packages/npm/:_authToken" $CI_JOB_TOKEN
+
+composer:
+  stage: build
+  only:
+    - tags
+    - master
+  cache:
+    key:
+      files:
+        - composer.lock
+    paths:
+      - vendor
+    policy: pull
+  script:
+    - composer install --no-dev -o
+  artifacts:
+    expire_in: 3 days
+    untracked: true
+
+node:
+  stage: build
+  only:
+    - tags
+    - master
+  cache:
+    key:
+      files:
+        - adminmenu/app/yarn.lock
+    paths:
+      - adminmenu/app/node_modules
+      - adminmenu/app/.yarn-cache
+    policy: pull
+  script:
+    - cd adminmenu/app
+    - yarn install --frozen-lockfile --cache-folder .yarn-cache
+    - yarn build
+    - rm -rf node_modules/
+  artifacts:
+    expire_in: 3 days
+    untracked: false
+    paths:
+      - adminmenu/app/build
+
+pack:
+  stage: finalize
+  only:
+    - tags
+    - master
+  script:
+    - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/
+    - rm -f adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md
+    - cd ..
+    - compiler $CI_PROJECT_DIR $CI_PROJECT_DIR
+    - zip -r $CI_PROJECT_DIR/$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA.zip $CI_PROJECT_NAME
+  artifacts:
+    expire_in: 30 days
+    paths:
+      - $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip

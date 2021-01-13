@@ -25,5 +25,4 @@ class OrdersController extends AbstractController
         return new Response($result);
     }
 
-
 }

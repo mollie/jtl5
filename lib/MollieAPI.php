@@ -8,13 +8,10 @@ use Composer\CaBundle\CaBundle;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
-use JTL\Plugin\Helper;
-use JTL\Plugin\Plugin;
-use JTL\Plugin\PluginInterface;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\MollieApiClient;
-use RuntimeException;
+use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Shop;
 
 class MollieAPI
@@ -25,10 +22,7 @@ class MollieAPI
     protected static $client;
 
 
-    /**
-     * @var PluginInterface
-     */
-    protected static $oPlugin;
+    use Plugin;
 
     /**
      * @var bool
@@ -76,16 +70,6 @@ class MollieAPI
         return self::Plugin()->getConfig()->getValue("apiKey");
     }
 
-    /**
-     * @return PluginInterface
-     */
-    public static function Plugin(): PluginInterface
-    {
-        if (!(self::$oPlugin = Helper::getPluginById('ws5_mollie'))) {
-            throw new RuntimeException('Could not load Plugin!');
-        }
-        return self::$oPlugin;
-    }
 
     /**
      * @return bool

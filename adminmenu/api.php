@@ -1,7 +1,7 @@
 <?php
 
 use JTL\Helpers\Form;
-use Plugin\ws5_mollie\Lib\API;
+use Plugin\ws5_mollie\lib\API;
 
 if ($_SERVER['HTTP_HOST'] === 'localhost') {
     header('Access-Control-Allow-Origin: *');

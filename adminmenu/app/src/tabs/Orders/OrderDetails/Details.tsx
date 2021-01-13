@@ -10,12 +10,13 @@ export type DetailsProps = {
 
 const Details = ({mollie}: DetailsProps) => {
     return <table className="w-full my-2">
+        <tbody>
         <tr>
             <th>Mollie ID:</th>
             <td>
                 <TextLink target="_blank"
                           color="blue"
-                          href={mollie._links.dashboard.href}>{mollie.id}</TextLink>
+                          href={mollie._links.dashboard?.href}>{mollie.id}</TextLink>
             </td>
             <th>Mode:</th>
             <td>{mollie.mode}</td>
@@ -45,10 +46,11 @@ const Details = ({mollie}: DetailsProps) => {
             <td colSpan={3}>{mollie._links.checkout?.href ?
                 <TextLink target="_blank"
                           color="red"
-                          href={mollie._links.checkout.href}>{mollie._links.checkout.href}</TextLink>
+                          href={mollie._links.checkout?.href}>{mollie._links.checkout.href}</TextLink>
                 : '-'}
             </td>
         </tr>
+        </tbody>
     </table>;
 }
 

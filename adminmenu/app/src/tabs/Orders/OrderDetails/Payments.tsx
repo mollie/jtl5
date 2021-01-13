@@ -15,7 +15,7 @@ const Payments = ({mollie}: PaymentsProps) => {
             header: () => 'ID',
             data: row => <TextLink target="_blank"
                                    color="blue"
-                                   href={row._links.dashboard.href}>{row.id}</TextLink>,
+                                   href={row._links.dashboard?.href}>{row.id}</TextLink>,
         },
         status: {
             header: () => 'Status',
@@ -44,6 +44,10 @@ const Payments = ({mollie}: PaymentsProps) => {
         details: {
             header: () => 'Details',
             data: row => <pre>{JSON.stringify(row.details, null, 2)}</pre>
+        },
+        actions: {
+            header: () => ' ',
+            data: row => row._links.changePaymentState ? <TextLink href={row._links.changePaymentState.href} target="_blank">E</TextLink> : ''
         }
     } as Record<string, ItemTemplate<Record<string, any>>>
 

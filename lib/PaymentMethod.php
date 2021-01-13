@@ -15,10 +15,10 @@ use JTL\Model\DataModel;
 use JTL\Plugin\Helper as PluginHelper;
 use JTL\Plugin\Payment\Method;
 use JTL\Plugin\Payment\MethodInterface;
-use JTL\Plugin\PluginInterface;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Plugin\ws5_mollie\paymentmethod\CreditCard;
 use RuntimeException;
 use Session;
@@ -31,25 +31,13 @@ class PaymentMethod extends Method
     public const ALLOW_PAYMENT_BEFORE_ORDER = false;
 
     public const METHOD = '';
-    /**
-     * @var PluginInterface
-     */
-    protected static $oPlugin;
+
     /**
      * @var string
      */
     protected $pluginID;
 
-    /**
-     * @return PluginInterface
-     */
-    public static function Plugin(): PluginInterface
-    {
-        if (!(self::$oPlugin = PluginHelper::getPluginById('ws5_mollie'))) {
-            throw new RuntimeException('Could not load Plugin!');
-        }
-        return self::$oPlugin;
-    }
+    use Plugin;
 
     /**
      * @param string $cISOSprache
@@ -206,8 +194,6 @@ class PaymentMethod extends Method
 
         try {
 
-            //throw new \RuntimeException('FUCK!');
-
             $orderId = $args['id'];
 
             $orderModel = OrderModel::loadByAttributes(
@@ -216,31 +202,8 @@ class PaymentMethod extends Method
                 DataModel::ON_NOTEXISTS_NEW);
 
             $mOrder = MollieAPI::API($orderModel->getTest())->orders->get($orderId, ['embed' => 'payments']);
-            $payment = null;
-            /** @var Payment $payment */
-            /** @var Payment $_payment */
-            $payValue = 0.0;
-            foreach ($mOrder->payments() as $_payment) {
-                if (in_array($_payment->status,
-                    [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
-                    $payment = $_payment;
-                    $payValue += (float)$_payment->amount->value;
-                }
-            }
 
-            $orderModel->setBestellung($order->kBestellung);
-            $orderModel->setModified(date('Y-m-d H:i:s'));
-            $orderModel->setStatus($mOrder->status);
-            $orderModel->setTransactionId($payment->id ?? '');
-            $orderModel->setThirdId($payment->details->paypalReference ?? '');
-            $orderModel->setMethod($mOrder->method);
-            $orderModel->setAmount($mOrder->amount->value);
-            $orderModel->setCurrency($mOrder->amount->currency);
-            $orderModel->setAmountRefunded($mOrder->amountRefunded->value ?? 0);
-            $orderModel->setLocale($mOrder->locale);
-
-            /** @noinspection NotOptimalIfConditionsInspection */
-            if ($orderModel->save() && $order->dBezahltDatum === null && $payment) {
+            if ((null === $order->dBezahltDatum) && (list($payValue, $payment) = $this->updateOrder($order->kBestellung, $orderModel, $mOrder))) {
 
                 $this->addIncomingPayment($order, (object)[
                     'fBetrag' => $payment->amount->value,
@@ -256,10 +219,47 @@ class PaymentMethod extends Method
                     $this->deletePaymentHash($hash);
                 }
             }
+
         } catch (Exception $e) {
             Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
+    }
 
+    /**
+     * @param int $kBestellung
+     * @param OrderModel $order
+     * @param \Mollie\Api\Resources\Order $mollie
+     * @return array|null
+     * @throws Exception
+     */
+    public function updateOrder(int $kBestellung, OrderModel $order, \Mollie\Api\Resources\Order $mollie): ?array
+    {
+        $payment = null;
+        /** @var Payment $payment */
+        /** @var Payment $_payment */
+        $payValue = 0.0;
+        foreach ($mollie->payments() as $_payment) {
+            if (in_array($_payment->status,
+                [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
+                $payment = $_payment;
+                $payValue += (float)$_payment->amount->value;
+            }
+        }
+        $order->setBestellung($kBestellung);
+        $order->setModified(date('Y-m-d H:i:s'));
+        $order->setStatus($mollie->status);
+        $order->setTransactionId($payment->id ?? '');
+        $order->setThirdId($payment->details->paypalReference ?? '');
+        $order->setMethod($mollie->method);
+        $order->setAmount($mollie->amount->value);
+        $order->setCurrency($mollie->amount->currency);
+        $order->setAmountRefunded($mollie->amountRefunded->value ?? 0);
+        $order->setLocale($mollie->locale);
+
+        if ($order->save()) {
+            return [$payValue, $payment];
+        }
+        return null;
     }
 
     /**
@@ -282,6 +282,10 @@ class PaymentMethod extends Method
         return false;
     }
 
+    /**
+     * @param array $post
+     * @return bool
+     */
     public function handleAdditional(array $post): bool
     {
         return parent::handleAdditional($post);
