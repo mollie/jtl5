@@ -5,7 +5,6 @@ namespace Plugin\ws5_mollie\lib;
 
 
 use JTL\Model\DataModel;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
@@ -49,14 +48,14 @@ class Customer
             'cKundenNr' => $oKunde->cKundenNr,
         ];
 
-        if($customer instanceof \Mollie\Api\Resources\Customer){
+        if ($customer instanceof \Mollie\Api\Resources\Customer) {
             $customer->update();
-        }else{
-            try{
+        } else {
+            try {
                 $customer = $api->customers->create($customer->toArray());
                 $mCustomer->setCustomerId($customer->id);
                 $mCustomer->save();
-            }catch (ApiException $e){
+            } catch (ApiException $e) {
                 return null;
             }
         }

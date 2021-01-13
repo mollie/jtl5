@@ -4,9 +4,11 @@
 namespace Plugin\ws5_mollie\lib\Model;
 
 
-use Exception;
+use JsonSerializable;
 use JTL\Model\DataAttribute;
+use JTL\Model\DataModel;
 use JTL\Services\JTL\Validation\Rules\DateTime;
+use RuntimeException;
 
 /**
  * Class OrderModel
@@ -63,7 +65,7 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @method string getCreated()
  *
  */
-final class OrderModel extends \JTL\Model\DataModel implements \JsonSerializable
+final class OrderModel extends DataModel implements JsonSerializable
 {
 
     /**
@@ -71,7 +73,7 @@ final class OrderModel extends \JTL\Model\DataModel implements \JsonSerializable
      */
     public function setKeyName($keyName): void
     {
-        throw new Exception(__METHOD__ . ': setting of keyname is not supported', self::ERR_DATABASE);
+        throw new RuntimeException(__METHOD__ . ': setting of keyname is not supported', self::ERR_DATABASE);
     }
 
     /**

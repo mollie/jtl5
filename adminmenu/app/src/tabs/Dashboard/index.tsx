@@ -33,12 +33,14 @@ const Dashboard = () => {
             .then(res => setStatistics(res.data))
             .catch(console.error)
             .finally(() => setLoading('statistics', false));
-    }, [])
+    }, [api])
 
     return <div className="mx-2">
         <div className="mb-4 w-full bg-white rounded-md p-4 relative">
             <div className="flex items-center my-3">
-                <img src="https://cdn.webstollen.de/plugins/ws_mollie_ws.svg" className="mr-2"
+                <img src="https://cdn.webstollen.de/plugins/ws_mollie_ws.svg"
+                     alt="Plugin Icon"
+                     className="mr-2"
                      style={{maxWidth: '100px'}}/>
                 <div className="text-xl">Integireren Sie alle wichtigen<br/>Zahlungsmethoden in kürzester zeit.</div>
             </div>

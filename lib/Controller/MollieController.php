@@ -17,7 +17,7 @@ class MollieController extends AbstractController
         $_methods = MollieAPI::API()->methods->allActive(['includeWallets' => 'applepay']);
         $methods = [];
         foreach ($_methods as $method) {
-            $id = 'kPlugin_' . Helper::getIDByPluginID("ws5_mollie") . '_' . ($method->id === 'creditcard' ? 'kreditkarte' : $method->id);
+            $id = 'kPlugin_' . Helper::getIDByPluginID("ws5_mollie") . '_' . $method->id;
             $methods[$method->id] = (object)[
                 'mollie' => $method,
                 'shipping' => \Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tversandart v

@@ -4,9 +4,14 @@
 namespace Plugin\ws5_mollie\lib\Order;
 
 
+use Bestellung;
+use Currency;
+use Exception;
 use JTL\Cart\CartItem;
+use JTL\Cart\CartItemProperty;
 use Mollie\Api\Types\OrderLineType;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use stdClass;
 
 class OrderLine implements \JsonSerializable
 {
@@ -40,20 +45,22 @@ class OrderLine implements \JsonSerializable
     public $metadata;
 
     /**
-     * @param CartItem|\stdClass $oPosition
+     * @param CartItem|stdClass $oPosition
+     * @param Currency $currency
      * @return OrderLine
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function factory($oPosition, \Currency $currency): OrderLine
+    public static function factory($oPosition, Currency $currency): OrderLine
     {
 
         $orderLine = new self();
 
         $orderLine->type = self::getType($oPosition->nPosTyp);
-        // @todo FktAttr? $orderLine->category
+        // TODO: FktAttr? $orderLine->category
         $orderLine->name = $oPosition->cName;
 
-        $_netto = round($oPosition->fPreis, 2);
+        // TODO: 2 vorher
+        $_netto = round($oPosition->fPreis, 4);
         $_vatRate = (float)$oPosition->fMwSt / 100;
         $_amount = (float)$oPosition->nAnzahl;
 
@@ -63,7 +70,8 @@ class OrderLine implements \JsonSerializable
             $orderLine->name .= sprintf(" (%.2f %s)", (float)$oPosition->nAnzahl, $oPosition->cEinheit);
         }
 
-        $unitPriceNetto = round(($currency->getConversionFactor() * $_netto), 2);
+        // TODO vorher 2
+        $unitPriceNetto = round(($currency->getConversionFactor() * $_netto), 4);
         $unitPrice = round($unitPriceNetto * (1 + $_vatRate), 2);
         $totalAmount = round($_amount * $unitPrice, 2);
         $vatAmount = round($totalAmount - ($totalAmount / (1 + $_vatRate)), 2);
@@ -73,6 +81,20 @@ class OrderLine implements \JsonSerializable
         $orderLine->totalAmount = new Amount($totalAmount, $currency, false);
         $orderLine->vatRate = (string)$oPosition->fMwSt;
         $orderLine->vatAmount = new Amount($vatAmount, $currency, false);
+        $orderLine->sku = $oPosition->Artikel->cArtNr;
+        if (is_array($oPosition->WarenkorbPosEigenschaftArr) && count($oPosition->WarenkorbPosEigenschaftArr)) {
+            $metadata = ['properties' => []];
+            /** @var CartItemProperty $eigenschaft */
+            foreach ($oPosition->WarenkorbPosEigenschaftArr as $eigenschaft) {
+                $metadata['properties'][] = [
+                    'kEigenschaft' => (int)$eigenschaft->kEigenschaft,
+                    'kEigenschaftWert' => (int)$eigenschaft->kEigenschaftWert,
+                    'name' => $eigenschaft->cEigenschaftName,
+                    'value' => $eigenschaft->cEigenschaftWertName,
+                ];
+            }
+            $orderLine->metadata = $metadata;
+        }
 
         return $orderLine;
     }
@@ -80,14 +102,14 @@ class OrderLine implements \JsonSerializable
     /**
      * @param $nPosTyp
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     protected static function getType($nPosTyp): string
     {
         switch ($nPosTyp) {
             case C_WARENKORBPOS_TYP_ARTIKEL:
             case C_WARENKORBPOS_TYP_GRATISGESCHENK:
-                // @todo: digital / Download Artikel?
+                // TODO: digital / Download Artikel?
                 return OrderLineType::TYPE_PHYSICAL;
 
             case C_WARENKORBPOS_TYP_VERSANDPOS:
@@ -107,16 +129,19 @@ class OrderLine implements \JsonSerializable
 
         }
 
-        throw new \Exception('Unknown PosTyp.', (int)$nPosTyp);
+        throw new Exception('Unknown PosTyp.', (int)$nPosTyp);
     }
 
     /**
-     * @param OrderLine[] $orderlines
+     * @param OrderLine[] $orderLines
+     * @param Amount $amount
+     * @param Currency $currency
+     * @return OrderLine|null
      */
-    public static function getRoundingCompensation(array $orderlines, Amount $amount, \Currency $currency)
+    public static function getRoundingCompensation(array $orderLines, Amount $amount, Currency $currency): ?OrderLine
     {
         $sum = .0;
-        foreach ($orderlines as $line) {
+        foreach ($orderLines as $line) {
             $sum += (float)$line->totalAmount->value;
         }
         if (abs($sum - (float)$amount->value) > 0) {
@@ -138,10 +163,10 @@ class OrderLine implements \JsonSerializable
     }
 
     /**
-     * @param \Bestellung $oBestellung
+     * @param Bestellung $oBestellung
      * @return OrderLine
      */
-    public static function getCredit(\Bestellung $oBestellung): OrderLine
+    public static function getCredit(Bestellung $oBestellung): OrderLine
     {
         $line = new self();
         $line->type = OrderLineType::TYPE_STORE_CREDIT;

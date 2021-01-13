@@ -9,17 +9,22 @@ namespace Plugin\ws5_mollie\lib;
 use Bestellung;
 use Exception;
 use JsonSerializable;
+use JTL\Checkout\Lieferschein;
+use JTL\Checkout\Lieferscheinpos;
+use JTL\Checkout\Versand;
 use JTL\Model\DataModel;
 use JTL\Plugin\Payment\LegacyMethod;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\Order as MollieOrder;
+use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Order\Address;
 use Plugin\ws5_mollie\lib\Order\Amount;
-use Plugin\ws5_mollie\lib\Order\OrderLine;
+use Plugin\ws5_mollie\lib\Order\OrderLine as WSOrderLine;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use Plugin\ws5_mollie\lib\Traits\Plugin;
 use RuntimeException;
 use Session;
 use Shop;
@@ -28,6 +33,7 @@ use stdClass;
 class Order implements JsonSerializable
 {
     use Jsonable;
+    use Plugin;
 
     public $locale;
     public $amount;
@@ -60,6 +66,91 @@ class Order implements JsonSerializable
     {
 
     }
+
+    public static function isMollie(int $kZahlungsart): bool
+    {
+        return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT cModulId FROM tzahlungsart WHERE kZahlungsart = :kZahlungsart AND cModulId LIKE :cModulId;', [
+                ':kZahlungsart' => $kZahlungsart,
+                ':cModulId' => sprintf('kPlugin_%d_%%', self::Plugin()->getID())
+            ], 1)) && $res->cModulId;
+    }
+
+    /**
+     * @param Bestellung $oBestellung
+     * @param MollieOrder $mollie
+     * @param bool $newStatus
+     * @return array|null
+     */
+    public static function getShipmentOptions(Bestellung $oBestellung, MollieOrder $mollie, bool $newStatus): ?array
+    {
+
+        $options = [];
+
+        if (!$newStatus && (int)$oBestellung->cStatus !== BESTELLUNG_STATUS_TEILVERSANDT) {
+            return null;
+        }
+
+        $getSentQuantity = static function (stdClass $line, Bestellung $oBestellung): int {
+            if ($line->sku === null) {
+                return 1;
+            }
+            /** @var \WarenkorbPos $oPosition */
+            foreach ($oBestellung->Positionen as $oPosition) {
+                if ($oPosition->cArtNr === $line->sku) {
+                    $sent = 0;
+                    /** @var Lieferschein $oLieferschein */
+                    foreach ($oBestellung->oLieferschein_arr as $oLieferschein) {
+                        /** @var Lieferscheinpos $oLieferscheinPos */
+                        foreach ($oLieferschein->oLieferscheinPos_arr as $oLieferscheinPos) {
+                            if ($oLieferscheinPos->getBestellPos() === $oPosition->kBestellpos) {
+                                $sent += $oLieferscheinPos->getAnzahl();
+                            }
+                        }
+                    }
+                    return $sent;
+                }
+            }
+            return 0;
+        };
+
+        if (isset($oBestellung->oLieferschein_arr)
+            && ($nLS = count($oBestellung->oLieferschein_arr) - 1) >= 0
+            && isset($oBestellung->oLieferschein_arr[$nLS]->oVersand_arr)) {
+            if (($nV = count($oBestellung->oLieferschein_arr[$nLS]->oVersand_arr) - 1) >= 0) {
+                /** @var Versand $oVersand */
+                $oVersand = $oBestellung->oLieferschein_arr[$nLS]->oVersand_arr[$nV];
+                $tracking = new stdClass();
+                $tracking->carrier = trim($oVersand->getLogistik());
+                $tracking->code = trim($oVersand->getIdentCode());
+                $tracking->url = trim($oVersand->getLogistikURL()) ?: null;
+                if ($tracking->code && $tracking->carrier) {
+                    $options['tracking'] = $tracking;
+                }
+            }
+        }
+
+        switch ($oBestellung->cStatus) {
+            case BESTELLUNG_STATUS_VERSANDT:
+                //    $options['lines'] = [];
+                //    break;
+            case BESTELLUNG_STATUS_TEILVERSANDT:
+
+                $options['lines'] = [];
+                foreach ($mollie->lines as $line) {
+                    if (($x = $getSentQuantity($line, $oBestellung)) > 0) {
+                        if (($quantity = min($x - $line->quantityShipped, $line->shippableQuantity)) > 0) {
+                            $options['lines'][] = (object)[
+                                'id' => $line->id,
+                                'quantity' => $quantity
+                            ];
+                        }
+                    }
+                }
+                break;
+        }
+        return $options;
+    }
+
 
     /**
      * @param Bestellung $oBestellung
@@ -98,6 +189,10 @@ class Order implements JsonSerializable
             $data->payment = (object)$paymentOptions;
         }
 
+        // TODO: Einstellung?
+        if (strpos($_SERVER['PHP_SELF'], 'bestellab_again.php') !== false) {
+            unset($data->method);
+        }
 
         $order = $api->orders->create($data->toArray());
         //$payments = $order->payments();
@@ -160,7 +255,7 @@ class Order implements JsonSerializable
             $data->metadata['tmpOrderNumber'] = $oBestellung->cBestellNr;
         }
         $data->redirectUrl = $oPaymentMethod->getReturnURL($oBestellung);
-        $data->webhookUrl = $oPaymentMethod->getNotificationURL($hash);
+        $data->webhookUrl = Shop::getURL(true) . '/?mollie=1'; //$oPaymentMethod->getNotificationURL($hash);
 
         /** @var PaymentMethod $oPaymentMethod */
         /** @noinspection NotOptimalIfConditionsInspection */
@@ -183,14 +278,14 @@ class Order implements JsonSerializable
 
         $data->lines = [];
         foreach ($oBestellung->Positionen as $oPosition) {
-            $data->lines[] = OrderLine::factory($oPosition, $oBestellung->Waehrung);
+            $data->lines[] = WSOrderLine::factory($oPosition, $oBestellung->Waehrung);
         }
 
         if ($oBestellung->GuthabenNutzen && $oBestellung->fGuthaben > 0) {
-            $data->lines[] = OrderLine::getCredit($oBestellung);
+            $data->lines[] = WSOrderLine::getCredit($oBestellung);
         }
 
-        if ($comp = OrderLine::getRoundingCompensation($data->lines, $data->amount, $oBestellung->Waehrung)) {
+        if ($comp = WSOrderLine::getRoundingCompensation($data->lines, $data->amount, $oBestellung->Waehrung)) {
             $data->lines[] = $comp;
         }
 
