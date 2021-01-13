@@ -60,7 +60,7 @@ pack:
     - tags
     - master
   script:
-    - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/
+    - rm -rf .gitlab-ci.yml .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/
     - rm -f adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md
     - cd ..
     - compiler $CI_PROJECT_DIR $CI_PROJECT_DIR
