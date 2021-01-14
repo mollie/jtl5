@@ -4,3 +4,6 @@
 
 @import 'tailwindcss/utilities';
 
+form .form-group .text-sm-right {
+    text-align: left !important;
+}

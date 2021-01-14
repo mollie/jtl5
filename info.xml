@@ -25,12 +25,12 @@
                     <ValueName>h0</ValueName>
                 </Setting>
                 <Setting type="password" initialValue="" sort="10" conf="Y">
-                    <Name>Live Key:</Name>
+                    <Name>Live Key</Name>
                     <Description>Füge hier deinen mollie API Key ein</Description>
                     <ValueName>apiKey</ValueName>
                 </Setting>
                 <Setting type="text" initialValue="" sort="15" conf="Y">
-                    <Name>Test Key:</Name>
+                    <Name>Test Key</Name>
                     <Description>Füge hier deinen mollie API Key ein</Description>
                     <ValueName>test_apiKey</ValueName>
                 </Setting>
@@ -40,7 +40,7 @@
                     <ValueName>profileId</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="on" sort="25" conf="Y">
-                    <Name>Test API als Admin:</Name>
+                    <Name>Test API als Admin</Name>
                     <Description>Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet, wenn man als Admin im Backend eingeloggt ist.</Description>
                     <ValueName>testAsAdmin</ValueName>
                 </Setting>
