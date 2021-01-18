@@ -50,8 +50,12 @@ class Queue
                     }
                 }
             } catch (Exception $e) {
-                // TODO: LOGGING!
-                throw $e;
+                Shop::Container()->getLogService()->error($e->getMessage() . " ({$type}, {$id})");
+
+                $todo->setResult($e->getMessage());
+                $todo->setDone(date('Y-m-d H:i:s'));
+                $todo->save();
+
             }
         }
     }

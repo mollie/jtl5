@@ -163,16 +163,16 @@ class Order implements JsonSerializable
     {
 
         $api = null;
-
+        $orderModel = null;
         // PayAgain, order already existing?
         if ($oBestellung->kBestellung > 0) {
             try {
-                $order = OrderModel::loadByAttributes(
+                $orderModel = OrderModel::loadByAttributes(
                     ['bestellung' => $oBestellung->kBestellung],
                     Shop::Container()->getDB(),
                     DataModel::ON_NOTEXISTS_FAIL);
-                $api = MollieAPI::API($order->test);
-                $order = $api->orders->get($order->getOrderId(), ['embed' => 'payments']);
+                $api = MollieAPI::API($orderModel->test);
+                $order = $api->orders->get($orderModel->getOrderId(), ['embed' => 'payments']);
                 if ($order->status === OrderStatus::STATUS_CREATED) {
                     return $order;
                 }
@@ -196,10 +196,11 @@ class Order implements JsonSerializable
 
         $order = $api->orders->create($data->toArray());
         //$payments = $order->payments();
-
-        $orderModel = OrderModel::loadByAttributes([
-            'orderId' => $order->id,
-        ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
+        if (!$orderModel) {
+            $orderModel = OrderModel::loadByAttributes([
+                'orderId' => $order->id,
+            ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
+        }
 
         $orderModel->setBestellung($oBestellung->kBestellung);
         $orderModel->setBestellNr($oBestellung->cBestellNr);
@@ -207,7 +208,7 @@ class Order implements JsonSerializable
         $orderModel->setAmount($order->amount->value);
         $orderModel->setMethod($order->method);
         $orderModel->setCurrency($order->amount->currency);
-        //$orderModel->setOrderId($order->id);
+        $orderModel->setOrderId($order->id);
         //$orderModel->setTransactionId($payments && $payments->count() === 1 && $payments->hasNext() ? $payments->next()->id : '');
         $orderModel->setStatus($order->status);
         $orderModel->setHash($hash);

@@ -10,10 +10,10 @@
     <CreateDate>2020-07-08</CreateDate>
     <Version>1.0.0</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
-    <Hooks>
-        <Hook nr="131">hooks/131.php</Hook>
-    </Hooks>
     <Install>
+        <Hooks>
+            <Hook nr="131">hooks/131.php</Hook>
+        </Hooks>
         <Adminmenu>
             <Customlink sort="1">
                 <Name>Dashboard</Name>
@@ -41,7 +41,9 @@
                 </Setting>
                 <Setting type="checkbox" initialValue="on" sort="25" conf="Y">
                     <Name>Test API als Admin</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet, wenn man als Admin im Backend eingeloggt ist.</Description>
+                    <Description>Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet,
+                        wenn man als Admin im Backend eingeloggt ist.
+                    </Description>
                     <ValueName>testAsAdmin</ValueName>
                 </Setting>
             </Settingslink>
@@ -89,7 +91,9 @@
                 </MethodLanguage>
                 <Setting type="selectbox" initialValue="S" sort="30" conf="Y">
                     <Name>mollie Components</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, werden die Kreditkarten ggf. bereits im Shop abgefragt.</Description>
+                    <Description>Wenn diese Einstellung aktiviert ist, werden die Kreditkarten ggf. bereits im Shop
+                        abgefragt.
+                    </Description>
                     <ValueName>components</ValueName>
                     <SelectboxOptions>
                         <Option value="S" sort="1">Ja, optional</Option>
@@ -533,9 +537,12 @@
             <Variable>
                 <Name>clearDescr</Name>
                 <Description>Kreditkarte: Token bereits vorhanden</Description>
-                <VariableLocalized iso="GER"><![CDATA[Sie haben bereits Daten hinterlegt. Möchten Sie diese ändern?]]></VariableLocalized>
-                <VariableLocalized iso="ENG"><![CDATA[You have already entered data. Would you like to change this?]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[Vous avez déjà saisi des données. Souhaitez-vous changer cela?]]></VariableLocalized>
+                <VariableLocalized iso="GER">
+                    <![CDATA[Sie haben bereits Daten hinterlegt. Möchten Sie diese ändern?]]></VariableLocalized>
+                <VariableLocalized iso="ENG">
+                    <![CDATA[You have already entered data. Would you like to change this?]]></VariableLocalized>
+                <VariableLocalized iso="FRE">
+                    <![CDATA[Vous avez déjà saisi des données. Souhaitez-vous changer cela?]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>clearButton</Name>
