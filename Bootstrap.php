@@ -11,6 +11,7 @@ use JTL\Plugin\Bootstrapper;
 use JTL\Plugin\Helper;
 use JTL\Shop;
 use JTL\Smarty\JTLSmarty;
+use Plugin\ws5_mollie\lib\Hook\ApplePay;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\Order;
 
@@ -35,6 +36,8 @@ class Bootstrap extends Bootstrapper
             $mQueue->setCreated(date('Y-m-d H:i:s'));
             return $mQueue->save();
         };
+
+        $this->listen(HOOK_SMARTY_OUTPUTFILTER, [ApplePay::class, 'execute']);
 
         $this->listen(HOOK_BESTELLABSCHLUSS_INC_BESTELLUNGINDB, function ($args_arr) {
             if (array_key_exists('oBestellung', $args_arr)) {
