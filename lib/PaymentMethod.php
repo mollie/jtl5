@@ -203,7 +203,9 @@ class PaymentMethod extends Method
 
             $mOrder = MollieAPI::API($orderModel->getTest())->orders->get($orderId, ['embed' => 'payments']);
 
-            if ((null === $order->dBezahltDatum) && (list($payValue, $payment) = $this->updateOrder($order->kBestellung, $orderModel, $mOrder))) {
+            Order::update($mOrder);
+
+            if ((null === $order->dBezahltDatum) && (list($payValue, $payment) = $this->updateOrder($order->kBestellung, $orderModel, $mOrder)) && $payment) {
 
                 $this->addIncomingPayment($order, (object)[
                     'fBetrag' => $payment->amount->value,

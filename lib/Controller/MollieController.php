@@ -5,6 +5,7 @@ namespace Plugin\ws5_mollie\lib\Controller;
 
 
 use JTL\Plugin\Helper;
+use JTL\Shop;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Response;
 
@@ -16,9 +17,14 @@ class MollieController extends AbstractController
 
         $_methods = MollieAPI::API()->methods->allActive(['includeWallets' => 'applepay']);
         $methods = [];
+
         foreach ($_methods as $method) {
             $id = 'kPlugin_' . Helper::getIDByPluginID("ws5_mollie") . '_' . $method->id;
+            $oZahlungsart = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tzahlungsart WHERE cModulId = :cModulID;", [
+                ':cModulID' => $id
+            ], 1);
             $methods[$method->id] = (object)[
+                'settings' => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart={$oZahlungsart->kZahlungsart}&token={$_SESSION['jtl_token']}",
                 'mollie' => $method,
                 'shipping' => \Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tversandart v
 JOIN tversandartzahlungsart vz ON v.kVersandart = vz.kVersandart

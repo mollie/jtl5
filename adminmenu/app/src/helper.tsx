@@ -95,6 +95,7 @@ export const molliePaymentStatusLabel = (status: string) => {
             break;
         case 'open':
         case 'shipping':
+        case 'refunded':
             color = 'blue';
             break;
         case 'canceled':

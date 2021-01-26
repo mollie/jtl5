@@ -14,6 +14,10 @@ const Orders = () => {
     const [openTabs, setOpenTabs] = useState<Record<string, string>>({});
     const api = useApi();
 
+//    const reWebhook = (id: string) => {
+//        console.log(id);
+//    }
+
     const template = {
         cBestellNr: {
             header: () => 'BestellNr',
@@ -63,7 +67,14 @@ const Orders = () => {
             header: () => 'Erstellt',
             data: row => row.dCreated,
             align: "right"
-        }
+        },
+        /*actions: {
+            header: () => '',
+            data: row => !parseInt(row.bSynced) &&
+                <FontAwesomeIcon onClick={() => reWebhook(row.cOrderId)} className="cursor-pointer"
+                                 icon={faBolt}/>,
+            align: 'right'
+        }*/
     } as Record<string, ItemTemplate<MollieOrder>>;
 
     const handleCloseTab = (id: string) => {
@@ -81,13 +92,16 @@ const Orders = () => {
         setLoading(true);
 
         return new Promise<MollieOrder[]>((resolve, reject) => {
-            api.selectAll("SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung ORDER BY b.dErstellt DESC;", {
-                ':limit': itemsPerPage,
-                ':offset': page * itemsPerPage
+            api.run("orders", "all", {
+                query: "SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung ORDER BY b.dErstellt DESC;",
+                params: {
+                    ':limit': itemsPerPage,
+                    ':offset': page * itemsPerPage
+                }
             })
                 .then((response: Record<string, any>) => {
-                    setMaxItems(response.maxItems);
-                    resolve(response.items)
+                    setMaxItems(response.data.maxItems);
+                    resolve(response.data.items)
                 })
                 .catch(reject)
                 .finally(() => setLoading(false));

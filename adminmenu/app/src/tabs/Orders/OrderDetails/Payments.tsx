@@ -3,6 +3,8 @@ import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/T
 import TextLink from "@webstollen/react-jtl-plugin/lib/components/TextLink";
 import {formatAmount} from "@webstollen/react-jtl-plugin/lib";
 import {molliePaymentStatusLabel} from "../../../helper";
+import {faEdit} from "@fortawesome/pro-regular-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export type PaymentsProps = {
     mollie: Record<string, any>
@@ -47,12 +49,15 @@ const Payments = ({mollie}: PaymentsProps) => {
         },
         actions: {
             header: () => ' ',
-            data: row => row._links.changePaymentState ? <TextLink href={row._links.changePaymentState.href} target="_blank">E</TextLink> : ''
+            data: row => row._links.changePaymentState ?
+                <TextLink href={row._links.changePaymentState.href} target="_blank">
+                    <FontAwesomeIcon icon={faEdit}/>
+                </TextLink> : ''
         }
     } as Record<string, ItemTemplate<Record<string, any>>>
 
     return <Table striped
-        template={template} items={mollie._embedded.payments}/>;
+                  template={template} items={mollie._embedded.payments}/>;
 }
 
 export default Payments;

@@ -2,12 +2,16 @@ import React, {useEffect, useState} from "react";
 import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
 import Alert from "@webstollen/react-jtl-plugin/lib/components/Alert";
 import {faExclamation} from "@fortawesome/pro-solid-svg-icons";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {Loading} from "@webstollen/react-jtl-plugin/lib";
 import {ApiError} from "../../../helper";
 import Payments from "./Payments";
 import Details from "./Details";
 import OrderLines from "./OrderLines";
 import Shipments from "./Shipments";
+import {faChevronDoubleDown, faChevronDoubleLeft, faTimes} from "@fortawesome/pro-regular-svg-icons";
+import Logs from "./Logs";
+import Refunds from "./Refunds";
 
 export type OrderDetailsProps = {
     id: string
@@ -18,6 +22,11 @@ const OrderDetails = (props: OrderDetailsProps) => {
     const [data, setData] = useState<null | Record<string, any>>(null);
     const [error, setError] = useState<ApiError | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showLogs, setShowLogs] = useState(false);
+    const [showShipments, setShowShipments] = useState(false);
+    const [showPayments, setShowPayments] = useState(false);
+    const [showRefunds, setShowRefunds] = useState(false);
+
     const api = useApi();
 
     useEffect(() => {
@@ -39,8 +48,20 @@ const OrderDetails = (props: OrderDetailsProps) => {
     }, [api, props.id]);
 
     if (error !== null) {
-        return <Alert variant={"error"} icon={{icon: faExclamation}}>Fehler beim laden der Bestellung
-            "{props.id}": {error.message}</Alert>;
+        return <div className="relative flex-col mb-3 rounded-md w-full">
+            <div className="flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
+                <div className="flex-grow">
+                    Bestellung: {data?.order.cBestellNr} (
+                    <pre className="inline text-ws_gray-light">{props.id}</pre>
+                    )
+                </div>
+                <div onClick={props.onClose} className="cursor-pointer">
+                    <FontAwesomeIcon icon={faTimes}/>
+                </div>
+            </div>
+            <Alert variant={"error"} icon={{icon: faExclamation}}>Fehler beim laden der Bestellung
+                "{props.id}": {error.message}</Alert>
+        </div>;
     }
 
     return <div className="relative flex-col mb-3 rounded-md w-full">
@@ -51,25 +72,57 @@ const OrderDetails = (props: OrderDetailsProps) => {
                     <pre className="inline text-ws_gray-light">{props.id}</pre>
                     )
                 </div>
-                <div onClick={props.onClose}>X</div>
+                <div onClick={props.onClose} className="cursor-pointer">
+                    <FontAwesomeIcon icon={faTimes}/>
+                </div>
             </div>
             <div className=" rounded-md">
 
                 {data && data.mollie && <Details mollie={data.mollie}/>}
 
-                {data && data.mollie && <div>
-                    <h3 className="font-bold text-2xl mb-1">Zahlungen</h3>
-                    <Payments mollie={data.mollie}/>
-                </div>}
-
-                {data && data.mollie && <div>
+                {data && data.mollie && <div className="mt-4">
                     <h3 className="font-bold text-2xl mb-1">Positionen</h3>
                     <OrderLines mollie={data.mollie}/>
                 </div>}
 
-                {data && data.mollie && <div>
-                    <h3 className="font-bold text-2xl mb-1">Lieferungen</h3>
-                    <Shipments mollie={data.mollie}/>
+                {data && data.mollie && <div className="mt-4">
+                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                        onClick={() => setShowPayments(prev => !prev)}>
+                        Zahlungen ({data.mollie._embedded?.payments?.length})
+                        <FontAwesomeIcon className=" float-right"
+                                         icon={showPayments ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                    </h3>
+                    {showPayments ? <Payments mollie={data.mollie}/> : null}
+                </div>}
+
+                {data && data.mollie && <div className="mt-4">
+                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                        onClick={() => setShowRefunds(prev => !prev)}>
+                        Refunds ({data.mollie._embedded?.refunds?.length})
+                        <FontAwesomeIcon className=" float-right"
+                                         icon={showRefunds ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                    </h3>
+                    {showRefunds ? <Refunds mollie={data.mollie}/> : null}
+                </div>}
+
+                {data && data.mollie && <div className="mt-4">
+                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                        onClick={() => setShowShipments(prev => !prev)}>
+                        Lieferungen ({data.mollie._embedded?.shipments?.length})
+                        <FontAwesomeIcon className=" float-right"
+                                         icon={showShipments ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                    </h3>
+                    {showShipments ? <Shipments mollie={data.mollie}/> : null}
+                </div>}
+
+                {data && data.logs && <div className="mt-4">
+                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                        onClick={() => setShowLogs(prev => !prev)}>
+                        Log ({data.logs.length})
+                        <FontAwesomeIcon className=" float-right"
+                                         icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                    </h3>
+                    {showLogs ? <Logs data={data.logs}/> : null}
                 </div>}
 
                 {/*<pre style={{overflow: "scroll", maxHeight: "500px"}}>{JSON.stringify(data, null, 2)}</pre>*/}

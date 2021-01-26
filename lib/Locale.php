@@ -6,8 +6,12 @@
 
 namespace Plugin\ws5_mollie\lib;
 
+use Plugin\ws5_mollie\lib\Traits\Plugin;
+
 class Locale
 {
+
+    use Plugin;
 
     protected static $langs = [
         'ger' => ['lang' => 'de', 'country' => ['AT', 'DE', 'CH']],
@@ -37,7 +41,7 @@ class Locale
             }
             return $locale;
         }
-        // @todo: Einstellung für fallback?
-        return "de_DE";
+
+        return self::Plugin()->getConfig()->getValue('fallbackLocale');
     }
 }
