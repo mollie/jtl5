@@ -24,9 +24,9 @@
      style="top:0;left:0;right:0;bottom:0;position:absolute;z-index:1;background:white url('https://cdn.webstollen.com/plugin/img/ws_bg.jpg'); background-size: cover"></div>
 <script>{literal}!function (e) {
         function r(r) {
-            for (var n, a, i = r[0], c = r[1], l = r[2], f = 0, s = []; f < i.length; f++) a = i[f], Object.prototype.hasOwnProperty.call(o, a) && o[a] && s.push(o[a][0]), o[a] = 0;
+            for (var n, a, i = r[0], c = r[1], l = r[2], p = 0, s = []; p < i.length; p++) a = i[p], Object.prototype.hasOwnProperty.call(o, a) && o[a] && s.push(o[a][0]), o[a] = 0;
             for (n in c) Object.prototype.hasOwnProperty.call(c, n) && (e[n] = c[n]);
-            for (p && p(r); s.length;) s.shift()();
+            for (f && f(r); s.length;) s.shift()();
             return u.push.apply(u, l || []), t()
         }
 
@@ -58,7 +58,7 @@
                 r.push(t[2] = n);
                 var u, i = document.createElement("script");
                 i.charset = "utf-8", i.timeout = 120, a.nc && i.setAttribute("nonce", a.nc), i.src = function (e) {
-                    return a.p + "static/js/" + ({}[e] || e) + "." + {3: "3a209429"}[e] + ".chunk.js"
+                    return a.p + "static/js/" + ({}[e] || e) + "." + {3: "e219452f"}[e] + ".chunk.js"
                 }(e);
                 var c = new Error;
                 u = function (r) {
@@ -108,7 +108,7 @@
         var i = this.webpackJsonpapp = this.webpackJsonpapp || [], c = i.push.bind(i);
         i.push = r, i = i.slice();
         for (var l = 0; l < i.length; l++) r(i[l]);
-        var p = c;
+        var f = c;
         t()
     }([]){/literal}</script>
 {foreach from=$js item=file}
