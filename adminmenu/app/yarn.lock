@@ -2154,7 +2154,7 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@webstollen/react-jtl-plugin@^2.0.2":
+"@webstollen/react-jtl-plugin@^2.0.14":
   version "2.0.14"
   resolved "https://gitlab.webstollen.com/api/v4/projects/444/packages/npm/@webstollen/react-jtl-plugin/-/@webstollen/react-jtl-plugin-2.0.14.tgz#c2e7171db14811d1dd23cec86c686a87d1eba4f0"
   integrity sha1-wucXHbFIEdHdI87IbGhqh9HrpPA=
