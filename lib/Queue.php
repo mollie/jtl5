@@ -18,27 +18,26 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
 use RuntimeException;
-use stdClass;
 
 class Queue
 {
 
     use Plugin;
 
+
     /**
      * @param int $limit
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
-     * @throws ApiException
-     * @throws IncompatiblePlatform
      */
     public static function run($limit = 10): void
     {
 
         /** @var QueueModel $todo */
         foreach (self::getOpen($limit) as $todo) {
-            try {
-                if ((list($type, $id) = explode(':', $todo->getType()))) {
+
+            if ((list($type, $id) = explode(':', $todo->getType()))) {
+                try {
                     switch ($type) {
                         case 'webhook':
                             self::handleWebhook($id, $todo);
@@ -48,14 +47,15 @@ class Queue
                             self::handleHook((int)$id, $todo);
                             break;
                     }
+
+                } catch (Exception $e) {
+                    Shop::Container()->getLogService()->error($e->getMessage() . " ({$type}, {$id})");
+
+                    $todo->setResult($e->getMessage());
+                    $todo->setDone(date('Y-m-d H:i:s'));
+                    $todo->save();
+
                 }
-            } catch (Exception $e) {
-                Shop::Container()->getLogService()->error($e->getMessage() . " ({$type}, {$id})");
-
-                $todo->setResult($e->getMessage());
-                $todo->setDone(date('Y-m-d H:i:s'));
-                $todo->save();
-
             }
         }
     }
@@ -124,12 +124,12 @@ class Queue
      */
     protected static function handleHook(int $hook, QueueModel $todo): bool
     {
-        $data = unserialize($todo->getData(), [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
-        if (array_key_exists('oBestellung', $data)) {
+        $data = unserialize($todo->getData()); //, [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
+        if (array_key_exists('kBestellung', $data)) {
             switch ($hook) {
                 case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
                     /** @var Bestellung $oBestellung */
-                    $oBestellung = new Bestellung($data['oBestellung']->kBestellung, true);
+                    $oBestellung = new Bestellung($data['kBestellung'], true);
 
                     /** @var $method PaymentMethod */
                     if ($oBestellung->kBestellung
@@ -148,7 +148,7 @@ class Queue
                             $options = Order::getShipmentOptions($oBestellung, $mollie, $status !== (int)$data['oBestellung']->cStatus);
                             if ($options && array_key_exists('lines', $options) && is_array($options['lines'])) {
                                 $shipment = MollieAPI::API($order->getTest())->shipments->createFor($mollie, $options);
-                                // TODO: LOG
+                                self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order shipped: \n" . print_r($shipment, 1));
                             }
                         }
 
@@ -159,16 +159,30 @@ class Queue
 
                     break;
                 case HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO:
+
                     /** @var Bestellung $oBestellung */
-                    //$oBestellung = $data['oBestellung'];
-                    //echo "<pre>";
-                    //print_r($data);
-                    //echo "</pre>";
+                    $oBestellung = new Bestellung($data['kBestellung']);
+                    $order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
+                    $mollie = MollieAPI::API($order->getTest())->orders->get($order->getOrderId(), ['embed' => 'payments']);
+
+                    if (self::Plugin()->getConfig()->getValue('autoRefund') !== 'on') {
+                        throw new RuntimeException('Auto-Refund disabled');
+                    }
+
+                    if ((int)$oBestellung->cStatus === BESTELLUNG_STATUS_STORNO) {
+                        if ($mollie->isCancelable) {
+                            $res = $mollie->cancel();
+                            self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order cancelled: \n" . print_r($res, 1));
+                        } else {
+                            $res = $mollie->refundAll();
+                            self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order refunded: \n" . print_r($res, 1));
+                        }
+                        $todo->setDone(date('Y-m-d H:i:s'));
+                        return $todo->save();
+                    }
                     break;
             }
-
         }
         return false;
     }
-
 }

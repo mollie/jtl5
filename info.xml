@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <jtlshopplugin>
-    <Name>mollie</Name>
-    <Description>mollie Payment Plugin</Description>
+    <Name>Mollie</Name>
+    <Description>Mollie Payment Plugin</Description>
     <Author>WebStollen GmbH</Author>
     <URL>https://www.webstollen.de</URL>
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2020-07-08</CreateDate>
-    <Version>1.0.0</Version>
+    <CreateDate>2021-01-26</CreateDate>
+    <Version>1.0.0-beta</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
-            <Hook nr="131">hooks/131.php</Hook>
+            <Hook id="131">hooks/131.php</Hook>
         </Hooks>
         <Adminmenu>
             <Customlink sort="1">
@@ -21,22 +21,22 @@
             <Settingslink sort="900">
                 <Name>Einstellung</Name>
                 <Setting type="text" conf="N" initialValue="Y" sort="0">
-                    <Name>mollie API</Name>
+                    <Name>Mollie API</Name>
                     <ValueName>h0</ValueName>
                 </Setting>
                 <Setting type="password" initialValue="" sort="10" conf="Y">
                     <Name>Live Key</Name>
-                    <Description>Füge hier deinen mollie API Key ein</Description>
+                    <Description>Füge hier deinen Mollie API Key ein</Description>
                     <ValueName>apiKey</ValueName>
                 </Setting>
                 <Setting type="text" initialValue="" sort="15" conf="Y">
                     <Name>Test Key</Name>
-                    <Description>Füge hier deinen mollie API Key ein</Description>
+                    <Description>Füge hier deinen Mollie API Key ein</Description>
                     <ValueName>test_apiKey</ValueName>
                 </Setting>
                 <Setting type="text" initialValue="" sort="20" conf="Y">
                     <Name>Profil ID</Name>
-                    <Description>Die ProfilID wird benötigt, um mollie Components zu verwenden</Description>
+                    <Description>Die ProfilID wird benötigt, um Mollie Components zu verwenden</Description>
                     <ValueName>profileId</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="on" sort="25" conf="Y">
@@ -46,15 +46,64 @@
                     </Description>
                     <ValueName>testAsAdmin</ValueName>
                 </Setting>
+                <Setting type="checkbox" initialValue="off" sort="30" conf="Y">
+                    <Name>Abgeschlossene Bestellungen ausblenden</Name>
+                    <Description>Wenn diese Einstellung aktiviert ist, werden versendete, bezahlte Bestellungen nicht in
+                        der Tabelle angezeigt.
+                    </Description>
+                    <ValueName>hideCompleted</ValueName>
+                </Setting>
+                <Setting type="checkbox" initialValue="off" sort="40" conf="Y">
+                    <Name>Bestellungen automatisch stornieren</Name>
+                    <Description>Wenn diese Einstellung aktiviert ist, werden komplett Stornierte Bestellungen auch bei
+                        Mollie storniert oder rückerstattet.
+                    </Description>
+                    <ValueName>autoRefund</ValueName>
+                </Setting>
+                <!--Setting type="checkbox" initialValue="off" sort="50" conf="Y">
+                    <Name>Zahl-Methode bei erneutem Zahlvorgang zurücksetzen</Name>
+                    <Description>Wenn diese Einstellung aktiviert ist, die im Bestellvorgang ausgewählte Zahlungsart
+                        zurückgesetzt, somit hat der Kunde die Möglichkeit diese bei Mollie zu ändern.
+                    </Description>
+                    <ValueName>resetMethod</ValueName>
+                </Setting-->
+                <Setting type="selectbox" initialValue="de_DE" sort="60" conf="Y">
+                    <Name>Fallback-Locale</Name>
+                    <Description>Fallback, falls Locale nicht erkannt oder nicht vorhanden.</Description>
+                    <ValueName>fallbackLocale</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="en_US">en_US</Option>
+                        <Option sort="2" value="nl_NL">nl_NL</Option>
+                        <Option sort="3" value="nl_BE">nl_BE</Option>
+                        <Option sort="4" value="fr_FR">fr_FR</Option>
+                        <Option sort="5" value="fr_BE">fr_BE</Option>
+                        <Option sort="6" value="de_DE">de_DE</Option>
+                        <Option sort="7" value="de_AT">de_AT</Option>
+                        <Option sort="8" value="de_CH">de_CH</Option>
+                        <Option sort="9" value="es_ES">es_ES</Option>
+                        <Option sort="10" value="ca_ES">ca_ES</Option>
+                        <Option sort="11" value="pt_PT">pt_PT</Option>
+                        <Option sort="12" value="it_IT">it_IT</Option>
+                        <Option sort="13" value="nb_NO">nb_NO</Option>
+                        <Option sort="14" value="sv_SE">sv_SE</Option>
+                        <Option sort="15" value="fi_FI">fi_FI</Option>
+                        <Option sort="16" value="da_DK">da_DK</Option>
+                        <Option sort="17" value="is_IS">is_IS</Option>
+                        <Option sort="18" value="hu_HU">hu_HU</Option>
+                        <Option sort="19" value="pl_PL">pl_PL</Option>
+                        <Option sort="20" value="lv_LV">lv_LV</Option>
+                        <Option sort="21" value="lt_LT">lt_LT</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Settingslink>
         </Adminmenu>
         <PaymentMethod>
             <Method>
-                <Name>mollie</Name>
+                <Name>Mollie</Name>
                 <PictureURL>images/logo/Mollie_logo_dark.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -64,8 +113,8 @@
                 <ClassName>Universal</ClassName>
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
-                    <Name>mollie</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <Name>Mollie</Name>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Wähle eine aus vielen Zahlungsmöglichkeiten.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -74,7 +123,7 @@
                 <PictureURL>images/Payment_methods/creditcard@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>CREDIT_CARD</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -86,11 +135,11 @@
                 <AdditionalTemplateFile>template/creditcard.tpl</AdditionalTemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Kreditkarte</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Kreditkarte.</InfoText>
                 </MethodLanguage>
                 <Setting type="selectbox" initialValue="S" sort="30" conf="Y">
-                    <Name>mollie Components</Name>
+                    <Name>Mollie Components</Name>
                     <Description>Wenn diese Einstellung aktiviert ist, werden die Kreditkarten ggf. bereits im Shop
                         abgefragt.
                     </Description>
@@ -107,7 +156,7 @@
                 <PictureURL>images/Payment_methods/applepay@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -118,7 +167,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Apple Pay</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Apple Pay.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -127,7 +176,7 @@
                 <PictureURL>images/Payment_methods/paypal@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>PAYPAL</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -138,7 +187,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>PayPal</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit PayPal.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -147,7 +196,7 @@
                 <PictureURL>images/Payment_methods/klarna@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>INVOICE</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -158,7 +207,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Klarna Pay Later.</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem auf Rechnung mit Klarna.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -167,7 +216,7 @@
                 <PictureURL>images/Payment_methods/klarna@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>FINANCING</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -178,7 +227,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Klarna Slice It.</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem in Raten mit Klarna.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -187,7 +236,7 @@
                 <PictureURL>images/Payment_methods/sofort@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -198,7 +247,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>SOFORT</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit SOFORT.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -207,7 +256,7 @@
                 <PictureURL>images/Payment_methods/Przelewy24@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -218,7 +267,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Przelewy24</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -227,7 +276,7 @@
                 <PictureURL>images/Payment_methods/giropay@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>GIROPAY</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -238,7 +287,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>giropay</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -247,7 +296,7 @@
                 <PictureURL>images/Payment_methods/ideal@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -258,7 +307,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>iDeal</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit iDeal.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -267,7 +316,7 @@
                 <PictureURL>images/Payment_methods/eps@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -278,7 +327,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>eps</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit eps.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -287,7 +336,7 @@
                 <PictureURL>images/Payment_methods/bancontact@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -298,7 +347,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Bancontact</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Bancontact.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -307,7 +356,7 @@
                 <PictureURL>images/Payment_methods/banktransfer@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -318,7 +367,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Banktransfer</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Banktransfer.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -327,7 +376,7 @@
                 <PictureURL>images/Payment_methods/belfius@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -338,7 +387,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Belfius</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Belfius.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -347,7 +396,7 @@
                 <PictureURL>images/Payment_methods/inghomepay@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -358,7 +407,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>ING HomePay</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit ING HomePay.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -367,7 +416,7 @@
                 <PictureURL>images/Payment_methods/kbc@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -378,7 +427,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>KBC</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit KBC.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -387,7 +436,7 @@
                 <PictureURL>images/Payment_methods/mybank@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -398,7 +447,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>MyBank</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit MyBank.</InfoText>
                 </MethodLanguage>
             </Method>
@@ -407,7 +456,7 @@
                 <PictureURL>images/Payment_methods/paysafecard@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
-                <Provider>mollie</Provider>
+                <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
                 <PreOrder>0</PreOrder>
                 <Soap>0</Soap>
@@ -418,7 +467,7 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>paysafe card</Name>
-                    <ChargeName>mollie</ChargeName>
+                    <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit paysafe card.</InfoText>
                 </MethodLanguage>
             </Method>

@@ -189,10 +189,10 @@ class Order implements JsonSerializable
             $data->payment = (object)$paymentOptions;
         }
 
-        // TODO: Einstellung?
-        if (strpos($_SERVER['PHP_SELF'], 'bestellab_again.php') !== false) {
+        /*if ((self::Plugin()->getConfig()->getValue('resetMethod') === 'on')
+            && strpos($_SERVER['PHP_SELF'], 'bestellab_again.php') !== false) {
             unset($data->method);
-        }
+        }*/
 
         $order = $api->orders->create($data->toArray());
         //$payments = $order->payments();
@@ -291,5 +291,23 @@ class Order implements JsonSerializable
         }
 
         return [$data, $hash];
+    }
+
+    public static function update(\Mollie\Api\Resources\Order $order): bool
+    {
+        $orderModel = OrderModel::loadByAttributes(
+            ['orderId' => $order->id],
+            Shop::Container()->getDB(),
+            DataModel::ON_NOTEXISTS_FAIL);
+
+        $orderModel->setLocale($order->locale);
+        $orderModel->setAmount($order->amount->value);
+        $orderModel->setMethod($order->method);
+        $orderModel->setCurrency($order->amount->currency);
+        $orderModel->setOrderId($order->id);
+        $orderModel->setStatus($order->status);
+
+        return $orderModel->save();
+
     }
 }

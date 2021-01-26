@@ -81,7 +81,9 @@ class OrderLine implements \JsonSerializable
         $orderLine->totalAmount = new Amount($totalAmount, $currency, false);
         $orderLine->vatRate = (string)$oPosition->fMwSt;
         $orderLine->vatAmount = new Amount($vatAmount, $currency, false);
-        $orderLine->sku = $oPosition->Artikel->cArtNr;
+        if ($oPosition->Artikel) {
+            $orderLine->sku = $oPosition->Artikel->cArtNr;
+        }
         if (is_array($oPosition->WarenkorbPosEigenschaftArr) && count($oPosition->WarenkorbPosEigenschaftArr)) {
             $metadata = ['properties' => []];
             /** @var CartItemProperty $eigenschaft */
