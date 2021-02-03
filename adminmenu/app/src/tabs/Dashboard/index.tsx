@@ -63,7 +63,13 @@ const Dashboard = () => {
                 <FontAwesomeIcon icon={faCog} size={"lg"}/>
             </a>
 
-            {setup ? <img src={prefix + setupImg} alt="Setup Assistant" className="mx-auto"/> :
+            {setup ? <>
+                    <img src={prefix + setupImg} alt="Setup Assistant" className="mx-auto"/>
+                    <Button onClick={() => window.location.href = "https://ws-url.de/mollie-pay"} color="green"
+                            className="mx-auto block my-6">
+                        Jetzt bei Mollie anmelden!
+                    </Button>
+                </> :
                 <div className="flex items-center my-3">
                     <img src="https://cdn.webstollen.de/plugins/ws_mollie_ws.svg"
                          alt="Plugin Icon"
