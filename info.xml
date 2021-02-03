@@ -392,26 +392,6 @@
                 </MethodLanguage>
             </Method>
             <Method>
-                <Name>ING HomePay</Name>
-                <PictureURL>images/Payment_methods/inghomepay@2x.png</PictureURL>
-                <Sort>1</Sort>
-                <SendMail>1</SendMail>
-                <Provider>Mollie</Provider>
-                <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
-                <Soap>0</Soap>
-                <Curl>1</Curl>
-                <Sockets>0</Sockets>
-                <ClassFile>INGHomePay.php</ClassFile>
-                <ClassName>INGHomePay</ClassName>
-                <TemplateFile>template/index.tpl</TemplateFile>
-                <MethodLanguage iso="GER">
-                    <Name>ING HomePay</Name>
-                    <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem mit ING HomePay.</InfoText>
-                </MethodLanguage>
-            </Method>
-            <Method>
                 <Name>KBC</Name>
                 <PictureURL>images/Payment_methods/kbc@2x.png</PictureURL>
                 <Sort>1</Sort>
