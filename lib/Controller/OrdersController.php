@@ -5,14 +5,30 @@ namespace Plugin\ws5_mollie\lib\Controller;
 
 
 use JTL\Checkout\Bestellung;
+use JTL\Model\DataModel;
 use JTL\Shop;
+use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order;
+use Plugin\ws5_mollie\lib\PaymentMethod;
 use Plugin\ws5_mollie\lib\Response;
 use stdClass;
 
 class OrdersController extends AbstractController
 {
+
+    public static function fetchable(stdClass $data): Response
+    {
+
+        $orderModel = OrderModel::loadByAttributes(
+            ['orderId' => $data->id],
+            Shop::Container()->getDB(),
+            DataModel::ON_NOTEXISTS_FAIL);
+
+        $oBestellung = new Bestellung($orderModel->bestellung);
+
+        return new Response(PaymentMethod::makeFetchable($oBestellung, $orderModel));
+    }
 
     public static function all(stdClass $data): Response
     {

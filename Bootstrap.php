@@ -60,6 +60,8 @@ class Bootstrap extends Bootstrapper
                 if ($oPlugin) {
                     $info = (object)[
                         'id' => $oPlugin->getID(),
+                        'shopURL'  => Shop::getURL(),
+                        'adminURL' => Shop::getAdminURL(),
                         'token' => $_SESSION['jtl_token'],
                         'endpoint' => $oPlugin->getPaths()->getAdminURL() . 'api.php',
                         'pluginID' => $oPlugin->getPluginID(),

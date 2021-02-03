@@ -121,7 +121,11 @@ class PaymentMethod extends Method
 
     public function isSelectable(): bool
     {
-        $selectable = true;
+        if(MollieAPI::getMode()){
+            $selectable = trim(self::Plugin()->getConfig()->getValue('test_apiKey')) !== '';
+        }else{
+            $selectable = trim(self::Plugin()->getConfig()->getValue('apiKey')) !== '';
+        }
         return $selectable && parent::isSelectable();
     }
 
