@@ -1,10 +1,13 @@
 import React, {useState} from "react";
 import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/Table";
-import {formatAmount, Label, TabInfo, Tabs} from "@webstollen/react-jtl-plugin/lib";
+import {formatAmount, Label, TabInfo, Tabs, usePluginInfo} from "@webstollen/react-jtl-plugin/lib";
 import {jtlStatus2label, MollieOrder, molliePaymentStatusLabel, PaymentMethod2img} from "../../helper";
 import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
 import OrderDetails from "./OrderDetails";
 import TextLink from "@webstollen/react-jtl-plugin/lib/components/TextLink";
+import {faBolt, faUnlock} from "@fortawesome/pro-regular-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Button from "@webstollen/react-jtl-plugin/lib/components/Button";
 
 
 const Orders = () => {
@@ -13,10 +16,27 @@ const Orders = () => {
     const [loading, setLoading] = useState(false);
     const [openTabs, setOpenTabs] = useState<Record<string, string>>({});
     const api = useApi();
+    const pluginInfo = usePluginInfo();
 
-//    const reWebhook = (id: string) => {
-//        console.log(id);
-//    }
+    const reWebhook = (id: string) => {
+        setLoading(true);
+        fetch(pluginInfo.shopURL + `?mollie=1&id=${id}`, {
+            mode: 'no-cors',
+            method: 'GET'
+        })
+            .then(() => fetch(pluginInfo.shopURL, {mode: 'no-cors'})
+                .then(() => alert('Bitte Tabelle aktualisieren!')))
+            .finally(() => setLoading(false))
+    }
+
+    const makeFetchable = (id: string) => {
+        setLoading(true)
+        api.run('orders', 'fetchable', {
+            id: id
+        })
+            .then(() => alert('Bitte Tabelle aktualisieren!'))
+            .finally(() => setLoading(false))
+    }
 
     const template = {
         cBestellNr: {
@@ -25,7 +45,8 @@ const Orders = () => {
                 <TextLink color={"blue"}
                           onClick={() => setOpenTabs(prevState => prevState[row.cOrderId] ? {...prevState} : {[row.cOrderId]: row.cBestellNr, ...prevState})}>
                     {row.cBestellNr}
-                </TextLink>{!parseInt(row.bSynced) ? '*' : null}
+                </TextLink>
+                {!parseInt(row.bSynced) ? <abbr className="cursor-help" title="Nicht abholbar.">*</abbr> : null}
             </>
         },
         cOrderId: {
@@ -68,13 +89,19 @@ const Orders = () => {
             data: row => row.dCreated,
             align: "right"
         },
-        /*actions: {
+        actions: {
             header: () => '',
-            data: row => !parseInt(row.bSynced) &&
-                <FontAwesomeIcon onClick={() => reWebhook(row.cOrderId)} className="cursor-pointer"
-                                 icon={faBolt}/>,
+            data: row => <>
+                {!parseInt(row.bSynced) && <Button onClick={() => makeFetchable(row.cOrderId)}
+                                                   title="Abholbar machen" className={"mr-1"}>
+                    <FontAwesomeIcon icon={faUnlock}/>
+                </Button>}
+                <Button onClick={() => reWebhook(row.cOrderId)} title="Simulate Webhook">
+                    <FontAwesomeIcon icon={faBolt}/>
+                </Button>
+            </>,
             align: 'right'
-        }*/
+        }
     } as Record<string, ItemTemplate<MollieOrder>>;
 
     const handleCloseTab = (id: string) => {

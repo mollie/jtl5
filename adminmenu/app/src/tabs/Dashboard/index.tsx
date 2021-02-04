@@ -58,12 +58,16 @@ const Dashboard = () => {
         <div className="mb-4 w-full bg-white rounded-md p-4 relative">
 
             <FontAwesomeIcon onClick={loadMethods} spin={loading.methods} icon={faSync} size={"lg"}
-                             className="float-right cursor-pointer"/>
-            <a className="mx-2 float-right" href="versandarten.php">
-                <FontAwesomeIcon icon={faCog} size={"lg"}/>
-            </a>
+                             className="float-right cursor-pointer"
+                             title="aktualisiert"/>
 
-            {setup ? <img src={prefix + setupImg} alt="Setup Assistant" className="mx-auto"/> :
+            {setup ? <>
+                    <img src={prefix + setupImg} alt="Setup Assistant" className="mx-auto"/>
+                    <Button onClick={() => window.location.href = "https://ws-url.de/mollie-pay"} color="green"
+                            className="mx-auto block my-6">
+                        Jetzt kostenlos Mollie Account anlegen!
+                    </Button>
+                </> :
                 <div className="flex items-center my-3">
                     <img src="https://cdn.webstollen.de/plugins/ws_mollie_ws.svg"
                          alt="Plugin Icon"
@@ -104,7 +108,7 @@ const Dashboard = () => {
         <div className="flex flex-row mb-3">
             <div className="bg-white rounded-md flex-1 p-4 mr-2 relative">
                 <FontAwesomeIcon onClick={loadStatistics} spin={loading.statistics} icon={faSync} size={"lg"}
-                                 className="float-right cursor-pointer"/>
+                                 className="float-right cursor-pointer" title="aktualisieren"/>
                 <b>Mollie Umsätze:</b>
                 <Loading loading={loading.statistics}>
                     <div className="flex flex-row justify-around items-baseline place-items-center my-5">
@@ -131,7 +135,7 @@ const Dashboard = () => {
             </div>
             <div className="bg-white rounded-md flex-1 p-4 ml-2 relative">
                 <FontAwesomeIcon onClick={loadStatistics} spin={loading.statistics} icon={faSync} size={"lg"}
-                                 className="float-right cursor-pointer"/>
+                                 className="float-right cursor-pointer" title="aktualisieren"/>
                 <b>Mollie Transaktionen:</b>
                 <Loading loading={loading.statistics}>
                     <div className="flex flex-row justify-around items-baseline place-items-center my-5">
