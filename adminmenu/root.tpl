@@ -114,5 +114,5 @@
     }([]){/literal}</script>
 {*foreach from=$js item=file*}
     <script src="{$root}app/build/static/js/2.035edc5a.chunk.js"></script>
-    <script src="{$root}app/build/static/js/ain.41361e11.chunk.js"></script>
+    <script src="{$root}app/build/static/js/main.41361e11.chunk.js"></script>
 {*/foreach*}
