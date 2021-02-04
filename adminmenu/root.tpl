@@ -14,9 +14,10 @@
             head.appendChild(link);
         }
     };
-    {foreach from=$css item=file}
-    addCss('{$root}app/build/static/css/{$file}');
-    {/foreach}
+    {*foreach from=$css item=file*}
+    addCss('{$root}app/build/static/css/2.14a8aa98.chunk.css');
+    addCss('{$root}app/build/static/css/main.e95ef23c.chunk.css');
+    {*/foreach*}
 </script>
 
 <script type='application/json' id='pluginInfo'>{$infoJSON}</script>
@@ -111,6 +112,7 @@
         var f = c;
         t()
     }([]){/literal}</script>
-{foreach from=$js item=file}
-    <script src="{$root}app/build/static/js/{$file}"></script>
-{/foreach}
+{*foreach from=$js item=file*}
+    <script src="{$root}app/build/static/js/2.035edc5a.chunk.js"></script>
+    <script src="{$root}app/build/static/js/ain.41361e11.chunk.js"></script>
+{*/foreach*}
