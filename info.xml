@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2021-01-26</CreateDate>
-    <Version>1.0.0-beta</Version>
+    <Version>1.0.0-beta.1</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -509,6 +509,15 @@
                     The payment process failed. Please try again or choose a different paymentmethod.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Une erreur s'est produite lors du paiement. Veuillez ressayer ou choisir un autre mode de paiement.]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>error_create</Name>
+                <Description></Description>
+                <VariableLocalized iso="GER"><![CDATA[Bei der Zahlung ist ein Fehler aufgetreten. Bitte nehmen Sie mit uns Kontakt auf.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[
+                    The payment process failed. Please contact us.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[
+                    Une erreur s'est produite lors du paiement. Contactez nous s'il vous plait.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_cardHolder</Name>

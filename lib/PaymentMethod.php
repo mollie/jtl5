@@ -121,10 +121,13 @@ class PaymentMethod extends Method
 
     public function isSelectable(): bool
     {
-        if(MollieAPI::getMode()){
+        if (MollieAPI::getMode()) {
             $selectable = trim(self::Plugin()->getConfig()->getValue('test_apiKey')) !== '';
-        }else{
+        } else {
             $selectable = trim(self::Plugin()->getConfig()->getValue('apiKey')) !== '';
+            if (!$selectable) {
+                $this->doLog("Live API Key missing!", LOGLEVEL_ERROR);
+            }
         }
         return $selectable && parent::isSelectable();
     }
@@ -136,11 +139,12 @@ class PaymentMethod extends Method
     {
 
         parent::preparePaymentProcess($order);
+
         try {
             $payable = (float)$order->fGesamtsumme > 0;
             if (!$payable) {
                 if ($this->duringCheckout) {
-                    // TODO: Derzeit deaktiviert
+                    $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
                 } else {
                     return;
                 }
@@ -159,27 +163,28 @@ class PaymentMethod extends Method
             }
 
             if ($this->duringCheckout) {
-                // TODO: derzeit deaktiviert
-            } else {
-                $mollieOrder = Order::createOrder($order, $paymentOptions);
+                $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
+            } else if ($mollieOrder = Order::createOrder($order, $paymentOptions)) {
 
-                if ($mollieOrder) {
+                $this->handleNotification($order, $mollieOrder->metadata->cHash, ['id' => $mollieOrder->id]);
 
-                    $this->handleNotification($order, $mollieOrder->metadata->cHash, ['id' => $mollieOrder->id]);
-
-                    if (!headers_sent()) {
-                        header('Location: ' . $mollieOrder->getCheckoutUrl());
-                    }
-                    Shop::Smarty()->assign('redirect', $mollieOrder->getCheckoutUrl());
-                } else {
-                    throw new RuntimeException('Order konnte bei mollie nicht erstellt werden!');
+                if (!headers_sent()) {
+                    header('Location: ' . $mollieOrder->getCheckoutUrl());
                 }
+                Shop::Smarty()->assign('redirect', $mollieOrder->getCheckoutUrl());
+
+            } else {
+
+                throw new RuntimeException('Order konnte bei mollie nicht erstellt werden! ' . print_r([$order->cBestellNr, $paymentOptions], 1));
 
             }
         } catch (Exception $e) {
+
+            $this->doLog($e->getMessage(), LOGLEVEL_ERROR);
+
             Shop::Container()->getAlertService()->addAlert(
                 Alert::TYPE_ERROR,
-                $e->getMessage(),
+                self::Plugin()->getLocalization()->getTranslation("error_create"),
                 'paymentFailed'
             );
         }
@@ -223,10 +228,15 @@ class PaymentMethod extends Method
                     $this->setOrderStatusToPaid($order);
                     self::makeFetchable($order, $orderModel);
                     $this->deletePaymentHash($hash);
+                }else{
+                    $this->doLog("Bestellung '{$order->cBestellNr}': Betrag zu niedrig {$payValue}", LOGLEVEL_NOTICE);
                 }
+            }else{
+                $this->doLog("Bestellung '{$order->cBestellNr}' bereits als bezahlt markiert.");
             }
 
         } catch (Exception $e) {
+            $this->doLog("Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
             Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
     }
