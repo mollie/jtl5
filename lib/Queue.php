@@ -50,11 +50,9 @@ class Queue
 
                 } catch (Exception $e) {
                     Shop::Container()->getLogService()->error($e->getMessage() . " ({$type}, {$id})");
-
                     $todo->setResult($e->getMessage());
                     $todo->setDone(date('Y-m-d H:i:s'));
                     $todo->save();
-
                 }
             }
         }
@@ -88,12 +86,12 @@ class Queue
     {
         $order = OrderModel::loadByAttributes(['orderId' => $id], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
         $oBestellung = new Bestellung($order->getBestellung());
-        if ($method = self::paymentMethod((int)$oBestellung->kZahlungsart)) {
+        if ($oBestellung->kBestellung && $method = self::paymentMethod((int)$oBestellung->kZahlungsart)) {
             $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
             $todo->setDone(date('Y-m-d H:i:s'));
             return $todo->save();
         }
-        return false;
+        throw new RuntimeException(`Bestellung oder Zahlungsart konnte nicht geladen werden: ${id}`);
     }
 
     /**

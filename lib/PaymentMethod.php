@@ -40,6 +40,69 @@ class PaymentMethod extends Method
     use Plugin;
 
     /**
+     * @param int $nAgainCheckout
+     * @return $this|Method|MethodInterface|PaymentMethod
+     */
+    public function init($nAgainCheckout = 0)
+    {
+        parent::init($nAgainCheckout);
+
+        $this->pluginID = PluginHelper::getIDByModuleID($this->moduleID);
+
+        return $this;
+    }
+
+    public function canPayAgain(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @param array $args_arr
+     * @return bool
+     */
+    public function isValidIntern(array $args_arr = []): bool
+    {
+        return $this->duringCheckout
+            ? static::ALLOW_PAYMENT_BEFORE_ORDER && parent::isValidIntern($args_arr)
+            : parent::isValidIntern($args_arr);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSelectable(): bool
+    {
+        if (MollieAPI::getMode()) {
+            $selectable = trim(self::Plugin()->getConfig()->getValue('test_apiKey')) !== '';
+        } else {
+            $selectable = trim(self::Plugin()->getConfig()->getValue('apiKey')) !== '';
+            if (!$selectable) {
+                $this->doLog("Live API Key missing!", LOGLEVEL_ERROR);
+            }
+        }
+        if ($selectable) {
+            try {
+                $locale = self::getLocale($_SESSION['cISOSprache'], $_SESSION['Kunde']->cLand);
+                $amount = Session::getCart()->gibGesamtsummeWaren(true) * $_SESSION['Waehrung']->fFaktor;
+                if ($amount <= 0) {
+                    $amount = 0.01;
+                }
+                $selectable = self::isMethodPossible(
+                    static::METHOD,
+                    $locale,
+                    Session::getCustomer()->cLand,
+                    Session::getCurrency()->getCode(),
+                    $amount
+                );
+            } catch (Exception $e) {
+                $selectable = false;
+            }
+        }
+        return $selectable && parent::isSelectable();
+    }
+
+    /**
      * @param string $cISOSprache
      * @param string|null $country
      * @return string
@@ -91,45 +154,48 @@ class PaymentMethod extends Method
     }
 
     /**
-     * @param int $nAgainCheckout
-     * @return $this|Method|MethodInterface|PaymentMethod
-     */
-    public function init($nAgainCheckout = 0)
-    {
-        parent::init($nAgainCheckout);
-
-        $this->pluginID = PluginHelper::getIDByModuleID($this->moduleID);
-
-        return $this;
-    }
-
-    public function canPayAgain(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param array $args_arr
+     * @param $method
+     * @param $locale
+     * @param $billingCountry
+     * @param $currency
+     * @param $amount
      * @return bool
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
      */
-    public function isValidIntern(array $args_arr = []): bool
+    protected static function isMethodPossible($method, $locale, $billingCountry, $currency, $amount): bool
     {
-        return $this->duringCheckout
-            ? static::ALLOW_PAYMENT_BEFORE_ORDER && parent::isValidIntern($args_arr)
-            : parent::isValidIntern($args_arr);
-    }
 
-    public function isSelectable(): bool
-    {
-        if (MollieAPI::getMode()) {
-            $selectable = trim(self::Plugin()->getConfig()->getValue('test_apiKey')) !== '';
-        } else {
-            $selectable = trim(self::Plugin()->getConfig()->getValue('apiKey')) !== '';
-            if (!$selectable) {
-                $this->doLog("Live API Key missing!", LOGLEVEL_ERROR);
-            }
+        if (!array_key_exists('mollie_possibleMethods', $_SESSION)) {
+            $_SESSION['mollie_possibleMethods'] = [];
         }
-        return $selectable && parent::isSelectable();
+
+        $key = md5(serialize([$locale, $billingCountry, $currency, $amount]));
+        if (!array_key_exists($key, $_SESSION['mollie_possibleMethods'])) {
+            $_SESSION['mollie_possibleMethods'][$key] = MollieAPI::API(MollieAPI::getMode())->methods->allActive([
+                'locale' => $locale,
+                'amount' => [
+                    'currency' => $currency,
+                    'value' => $amount
+                ],
+                'billingCountry' => $billingCountry,
+                'resource' => 'orders',
+                'includeWallets' => 'applepay',
+            ]);
+        }
+
+        if ($method !== '') {
+            foreach ($_SESSION['mollie_possibleMethods'][$key] as $m) {
+                if ($m->id === $method) {
+                    return true;
+                }
+            }
+        } else {
+            return true;
+        }
+
+        return false;
+
     }
 
     /**
@@ -214,7 +280,7 @@ class PaymentMethod extends Method
 
             Order::update($mOrder);
 
-            if ((null === $order->dBezahltDatum) && (list($payValue, $payment) = $this->updateOrder($order->kBestellung, $orderModel, $mOrder)) && $payment) {
+            if ((null === $order->dBezahltDatum) && (list($payValue, $payment) = $this->updateOrder((int)$order->kBestellung, $orderModel, $mOrder)) && $payment) {
 
                 $this->addIncomingPayment($order, (object)[
                     'fBetrag' => $payment->amount->value,
@@ -228,10 +294,10 @@ class PaymentMethod extends Method
                     $this->setOrderStatusToPaid($order);
                     self::makeFetchable($order, $orderModel);
                     $this->deletePaymentHash($hash);
-                }else{
+                } else {
                     $this->doLog("Bestellung '{$order->cBestellNr}': Betrag zu niedrig {$payValue}", LOGLEVEL_NOTICE);
                 }
-            }else{
+            } else {
                 $this->doLog("Bestellung '{$order->cBestellNr}' bereits als bezahlt markiert.");
             }
 

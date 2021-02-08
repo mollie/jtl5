@@ -86,13 +86,16 @@ class MollieAPI
      * false = LIVE
      *
      * @return bool
-     * @throws Exception
      */
     public static function getMode(): bool
     {
-        if (self::Plugin()->getConfig()->getValue("testAsAdmin") === 'on') {
-            $_GET['fromAdmin'] = 'yes';
-            return Shop::isAdmin(true);
+        try {
+            if (self::Plugin()->getConfig()->getValue("testAsAdmin") === 'on') {
+                $_GET['fromAdmin'] = 'yes';
+                return Shop::isAdmin(true);
+            }
+        } catch (Exception $e) {
+            return false;
         }
         return false;
     }
