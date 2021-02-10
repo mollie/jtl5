@@ -18,7 +18,7 @@ class Queue extends AbstractHook
         if (array_key_exists('oBestellung', $args_arr)) {
             /** @var Bestellung $oBestellung */
             $oBestellung = $args_arr['oBestellung'];
-            if (Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart)) {
+            if (Order::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
                 $oBestellung->cAbgeholt = 'Y';
                 $args_arr['oBestellung']->cAbgeholt = 'Y';
                 Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr, 1));
@@ -28,7 +28,7 @@ class Queue extends AbstractHook
 
     public static function xmlBestellStatus(array $args_arr): void
     {
-        if (Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart)) {
+        if (Order::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
             self::saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS, [
                 'kBestellung' => $args_arr['oBestellung']->kBestellung,
                 'status' => (int)$args_arr['status']
@@ -45,14 +45,16 @@ class Queue extends AbstractHook
         try {
             return $mQueue->save();
         } catch (\Exception $e) {
-            Shop::Container()->getLogService()->error($e->getMessage() . '\n' . print_r($args_arr, 1));
+            Shop::Container()->getLogService()->error('mollie::saveToQueue: ' . $e->getMessage() . ' - ' . print_r($args_arr, 1));
             return false;
         }
     }
 
     public static function xmlBearbeiteStorno(array $args_arr): void
     {
-        self::saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, ['kBestellung' => $args_arr['oBestellung']->kBestellung]);
+        if (Order::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
+            self::saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, ['kBestellung' => $args_arr['oBestellung']->kBestellung]);
+        }
     }
 
     public static function headPostGet(array $args_arr): void

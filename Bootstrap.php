@@ -60,7 +60,7 @@ class Bootstrap extends Bootstrapper
                 if ($oPlugin) {
                     $info = (object)[
                         'id' => $oPlugin->getID(),
-                        'shopURL'  => Shop::getURL(),
+                        'shopURL' => Shop::getURL(),
                         'adminURL' => Shop::getAdminURL(),
                         'token' => $_SESSION['jtl_token'],
                         'endpoint' => $oPlugin->getPaths()->getAdminURL() . 'api.php',
@@ -82,18 +82,24 @@ class Bootstrap extends Bootstrapper
                     ];
                 }
 
-                $js = array_filter(($dirJS = scandir(__DIR__ . '/adminmenu/app/build/static/js')) ? array_map(function ($file) {
-                    return preg_match('/^(2|main)\.[a-f0-9]{8}\.chunk\.js$/i', $file) ? $file : null;
-                }, $dirJS) : []);
+                $css = [];
+                if (file_exists(__DIR__ . '/adminmenu/app/build/index.html')) {
+                    $build = \phpQuery::newDocumentFileHTML(__DIR__ . '/adminmenu/app/build/index.html');
 
-                $css = array_filter(($dirCSS = scandir(__DIR__ . '/adminmenu/app/build/static/css')) ? array_map(function ($file) {
-                    return preg_match('/^(2|main)\.[a-f0-9]{8}\.chunk\.css$/i', $file) ? $file : null;
-                }, $dirCSS) : []);
+                    pq('#pluginInfo', $build)->text(json_encode($info));
+                    $pqCSSs = pq('head link', $build);
+                    /** @var \DOMElement $pqCSS */
+                    foreach ($pqCSSs as $pqCSS) {
+                        $css[] = $oPlugin->getPaths()->getAdminURL() . 'app/build' . $pqCSS->getAttribute('href');
+                    }
+                    $body = str_replace('/static/', $oPlugin->getPaths()->getAdminURL() . 'app/build/static/', (string)pq('body', $build)->contents());
+                } else {
+                    throw new \Exception('Backend-Build is missing!');
+                }
 
                 Shop::Smarty()
+                    ->assign('body', $body)
                     ->assign('css', $css)
-                    ->assign('js', $js)
-                    ->assign("infoJSON", json_encode($info))
                     ->assign('root', $oPlugin->getPaths()->getAdminURL());
                 return Shop::Smarty()->fetch($oPlugin->getPaths()->getAdminPath() . '/root.tpl');
             default:

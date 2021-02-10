@@ -246,7 +246,7 @@ class PaymentMethod extends Method
             }
         } catch (Exception $e) {
 
-            $this->doLog($e->getMessage(), LOGLEVEL_ERROR);
+            $this->doLog('mollie::preparePaymentProcess: ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_ERROR);
 
             Shop::Container()->getAlertService()->addAlert(
                 Alert::TYPE_ERROR,
@@ -302,7 +302,7 @@ class PaymentMethod extends Method
             }
 
         } catch (Exception $e) {
-            $this->doLog("Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
+            $this->doLog("mollie::handleNotification: Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
             Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
     }

@@ -67,12 +67,15 @@ class Order implements JsonSerializable
 
     }
 
-    public static function isMollie(int $kZahlungsart): bool
+    /**
+     * @param int $kBestellung
+     * @return bool
+     */
+    public static function isMollie(int $kBestellung): bool
     {
-        return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT cModulId FROM tzahlungsart WHERE kZahlungsart = :kZahlungsart AND cModulId LIKE :cModulId;', [
-                ':kZahlungsart' => $kZahlungsart,
-                ':cModulId' => sprintf('kPlugin_%d_%%', self::Plugin()->getID())
-            ], 1)) && $res->cModulId;
+        return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
+                ':kBestellung' => $kBestellung,
+            ], 1)) && $res->kId;
     }
 
     /**
@@ -131,8 +134,8 @@ class Order implements JsonSerializable
 
         switch ($oBestellung->cStatus) {
             case BESTELLUNG_STATUS_VERSANDT:
-                //    $options['lines'] = [];
-                //    break;
+                    $options['lines'] = [];
+                    break;
             case BESTELLUNG_STATUS_TEILVERSANDT:
 
                 $options['lines'] = [];

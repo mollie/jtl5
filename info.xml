@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2021-01-26</CreateDate>
-    <Version>1.0.0-beta.2</Version>
+    <Version>1.0.0-beta.3</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -192,7 +192,7 @@
                 </MethodLanguage>
             </Method>
             <Method>
-                <Name>Klarna Pay Later.</Name>
+                <Name>Klarna Pay Later</Name>
                 <PictureURL>images/Payment_methods/klarna@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>
@@ -212,7 +212,7 @@
                 </MethodLanguage>
             </Method>
             <Method>
-                <Name>Klarna Slice It.</Name>
+                <Name>Klarna Slice It</Name>
                 <PictureURL>images/Payment_methods/klarna@2x.png</PictureURL>
                 <Sort>1</Sort>
                 <SendMail>1</SendMail>

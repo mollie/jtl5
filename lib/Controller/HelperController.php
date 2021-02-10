@@ -304,7 +304,7 @@ class HelperController extends AbstractController
         $response = null;
         if ($data->query ?? false) {
 
-            if (isset($data->query) && array_key_exists(':limit', $data->params) && array_key_exists(':offset', $data->params) && strpos($data->query, 'LIMIT') === false) {
+            if (isset($data->query) && property_exists($data->params, ':limit') && property_exists($data->params, ':offset') && strpos($data->query, 'LIMIT') === false) {
                 $query = rtrim($data->query, ';') . ' LIMIT :offset, :limit;';
                 $response = (object)[
                     'items' => Shop::Container()->getDB()->executeQueryPrepared($query, (array)($data->params ?? []), 2),
