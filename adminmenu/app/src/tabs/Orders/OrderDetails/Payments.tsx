@@ -45,7 +45,7 @@ const Payments = ({mollie}: PaymentsProps) => {
         },
         details: {
             header: () => 'Details',
-            data: row => <pre>{JSON.stringify(row.details, null, 2)}</pre>
+            data: row => <pre style={{fontSize: '9px'}}>{JSON.stringify(row.details, null, 2)}</pre>
         },
         actions: {
             header: () => ' ',

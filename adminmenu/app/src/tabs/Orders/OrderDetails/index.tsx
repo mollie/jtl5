@@ -68,7 +68,7 @@ const OrderDetails = (props: OrderDetailsProps) => {
         <Loading loading={loading} className="rounded-md">
             <div className="flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
                 <div className="flex-grow">
-                    Bestellung: {data?.order.cBestellNr} (
+                    Bestellung: <span title={data?.order.kBestellung}>{data?.order.cBestellNr}</span> (
                     <pre className="inline text-ws_gray-light">{props.id}</pre>
                     )
                 </div>
