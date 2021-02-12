@@ -8,6 +8,7 @@ use JTL\Checkout\Bestellung;
 use JTL\Model\DataModel;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order;
 use Plugin\ws5_mollie\lib\PaymentMethod;
@@ -28,6 +29,38 @@ class OrdersController extends AbstractController
         $oBestellung = new Bestellung($orderModel->bestellung);
 
         return new Response(PaymentMethod::makeFetchable($oBestellung, $orderModel));
+    }
+
+    public static function shipments(stdClass $data): Response
+    {
+
+
+        $response = [];
+        if ($data->kBestellung) {
+            $lieferschien_arr = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tlieferschein WHERE kInetBestellung = :kBestellung", [
+                ':kBestellung' => (int)$data->kBestellung
+            ], 2);
+
+            foreach ($lieferschien_arr as $lieferschien) {
+
+                $shipmentsModel = ShipmentsModel::loadByAttributes(
+                    ['orderId' => $data->id],
+                    Shop::Container()->getDB(),
+                    DataModel::ON_NOTEXISTS_NEW);
+
+                $response[] = (object)[
+                    'kLieferschein' => $lieferschien->kLieferschein,
+                    'cLieferscheinNr' => $lieferschien->cLieferscheinNr,
+                    'cHinweis' => $lieferschien->cHinweis,
+                    'dErstellt' => date('Y-m-d H:i:s', $lieferschien->dErstellt),
+                    'shipment' => $shipmentsModel->getLieferschien() ? $shipmentsModel : null,
+                ];
+            }
+        }
+
+
+        return new Response($response);
+
     }
 
     public static function all(stdClass $data): Response

@@ -143,11 +143,12 @@ class Queue
                         if ($mollie->isCreated() || $mollie->isPaid() || $mollie->isAuthorized() || $mollie->isShipping() || $mollie->isPending()) {
                             // TODO #9
 
-                            $options = Order::getShipmentOptions($oBestellung, $mollie, $status !== (int)$data['oBestellung']->cStatus);
+                            /*$options = Order::getShipmentOptions($oBestellung, $mollie, $status !== (int)$data['oBestellung']->cStatus);
                             if ($options && array_key_exists('lines', $options) && is_array($options['lines'])) {
                                 $shipment = MollieAPI::API($order->getTest())->shipments->createFor($mollie, $options);
                                 self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order shipped: \n" . print_r($shipment, 1));
-                            }
+                            }*/
+
                         }
 
                         $todo->setDone(date('Y-m-d H:i:s'));

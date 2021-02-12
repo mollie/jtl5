@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2021-02-10</CreateDate>
-    <Version>1.0.0-beta.3</Version>
+    <Version>1.0.0-beta.4</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -67,6 +67,15 @@
                     </Description>
                     <ValueName>resetMethod</ValueName>
                 </Setting-->
+                <Setting type="selectbox" initialValue="B" sort="50" conf="Y">
+                    <Name>Teilversand Verhalten</Name>
+                    <Description>Bei Gastbestellungen und Teilversand.</Description>
+                    <ValueName>shippingMode</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="A">Direkt alles versenden</Option>
+                        <Option sort="2" value="B">Erst bei komplett Versand versenden</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="selectbox" initialValue="de_DE" sort="60" conf="Y">
                     <Name>Fallback-Locale</Name>
                     <Description>Fallback, falls Locale nicht erkannt oder nicht vorhanden.</Description>

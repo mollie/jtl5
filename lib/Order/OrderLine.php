@@ -81,11 +81,19 @@ class OrderLine implements \JsonSerializable
         $orderLine->totalAmount = new Amount($totalAmount, $currency, false);
         $orderLine->vatRate = (string)$oPosition->fMwSt;
         $orderLine->vatAmount = new Amount($vatAmount, $currency, false);
+
+        $metadata = [];
+
         if (isset($oPosition->Artikel)) {
             $orderLine->sku = $oPosition->Artikel->cArtNr;
+            $metadata['kArtikel'] = $oPosition->kArtikel;
+            if ($oPosition->cUnique !== '') {
+                $metadata['cUnique'] = $oPosition->cUnique;
+            }
         }
+
         if (isset($oPosition->WarenkorbPosEigenschaftArr) && is_array($oPosition->WarenkorbPosEigenschaftArr) && count($oPosition->WarenkorbPosEigenschaftArr)) {
-            $metadata = ['properties' => []];
+            $metadata['properties'] = [];
             /** @var CartItemProperty $eigenschaft */
             foreach ($oPosition->WarenkorbPosEigenschaftArr as $eigenschaft) {
                 $metadata['properties'][] = [
@@ -95,9 +103,9 @@ class OrderLine implements \JsonSerializable
                     'value' => $eigenschaft->cEigenschaftWertName,
                 ];
             }
-            $orderLine->metadata = $metadata;
-        }
 
+        }
+        $orderLine->metadata = $metadata;
         return $orderLine;
     }
 
