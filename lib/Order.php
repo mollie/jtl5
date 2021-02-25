@@ -71,8 +71,16 @@ class Order implements JsonSerializable
      * @param int $kBestellung
      * @return bool
      */
-    public static function isMollie(int $kBestellung): bool
+    public static function isMollie(int $kBestellung, bool $checkZA = false): bool
     {
+        if ($checkZA) {
+            $res = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId LIKE :cModulId AND kZahlungsart = :kZahlungsart', [
+                ':kZahlungsart' => $kBestellung,
+                ':cModulId' => 'kPlugin_' . self::Plugin()->getID() . '%'
+            ], 1);
+            return $res ? true : false;
+        }
+
         return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
                 ':kBestellung' => $kBestellung,
             ], 1)) && $res->kId;
@@ -134,8 +142,8 @@ class Order implements JsonSerializable
 
         switch ($oBestellung->cStatus) {
             case BESTELLUNG_STATUS_VERSANDT:
-                    $options['lines'] = [];
-                    break;
+                $options['lines'] = [];
+                break;
             case BESTELLUNG_STATUS_TEILVERSANDT:
 
                 $options['lines'] = [];
@@ -269,7 +277,7 @@ class Order implements JsonSerializable
 
         $data->billingAddress = Address::factory($oBestellung->oRechnungsadresse);
         if ($oBestellung->Lieferadresse !== null) {
-            if(!$oBestellung->Lieferadresse->cMail){
+            if (!$oBestellung->Lieferadresse->cMail) {
                 $oBestellung->Lieferadresse->cMail = $oBestellung->oRechnungsadresse->cMail;
             }
             $data->shippingAddress = Address::factory($oBestellung->Lieferadresse);
