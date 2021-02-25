@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2021-02-10</CreateDate>
-    <Version>1.0.0-beta.3</Version>
+    <Version>1.0.0-beta.4</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -60,6 +60,13 @@
                     </Description>
                     <ValueName>autoRefund</ValueName>
                 </Setting>
+
+                <Setting type="checkbox" initialValue="on" sort="50" conf="Y">
+                    <Name>Nur bezahlte Bestellungen in die WAWI übertragen</Name>
+                    <Description>Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden. </Description>
+                    <ValueName>onlyPaid</ValueName>
+                </Setting>
+
                 <!--Setting type="checkbox" initialValue="off" sort="50" conf="Y">
                     <Name>Zahl-Methode bei erneutem Zahlvorgang zurücksetzen</Name>
                     <Description>Wenn diese Einstellung aktiviert ist, die im Bestellvorgang ausgewählte Zahlungsart
