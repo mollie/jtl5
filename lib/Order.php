@@ -269,6 +269,9 @@ class Order implements JsonSerializable
 
         $data->billingAddress = Address::factory($oBestellung->oRechnungsadresse);
         if ($oBestellung->Lieferadresse !== null) {
+            if(!$oBestellung->Lieferadresse->cMail){
+                $oBestellung->Lieferadresse->cMail = $oBestellung->oRechnungsadresse->cMail;
+            }
             $data->shippingAddress = Address::factory($oBestellung->Lieferadresse);
         }
 
