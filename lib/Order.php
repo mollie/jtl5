@@ -224,7 +224,7 @@ class Order implements JsonSerializable
         $orderModel->setStatus($order->status);
         $orderModel->setHash($hash);
         $orderModel->setTest(MollieAPI::getMode());
-        $orderModel->setSynced(false);
+        $orderModel->setSynced(self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
 
         if (!$orderModel->save()) {
             throw new RuntimeException('Could not save OrderModel.');

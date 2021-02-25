@@ -14,7 +14,11 @@ class Queue extends AbstractHook
 
     public static function bestellungInDB(array $args_arr): void
     {
-        if (array_key_exists('oBestellung', $args_arr) && Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)) {
+
+        if (self::Plugin()->getConfig()->getValue('onlyPaid') === 'on'
+            && array_key_exists('oBestellung', $args_arr)
+            && Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)) {
+
             $args_arr['oBestellung']->cAbgeholt = 'Y';
             Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr['oBestellung']->kBestellung, 1));
         }
