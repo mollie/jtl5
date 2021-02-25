@@ -4,7 +4,6 @@
 namespace Plugin\ws5_mollie\lib\Hook;
 
 
-use JTL\Checkout\Bestellung;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\Order;
@@ -15,14 +14,13 @@ class Queue extends AbstractHook
 
     public static function bestellungInDB(array $args_arr): void
     {
-        if (array_key_exists('oBestellung', $args_arr)) {
-            /** @var Bestellung $oBestellung */
-            $oBestellung = $args_arr['oBestellung'];
-            if (Order::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
-                $oBestellung->cAbgeholt = 'Y';
-                $args_arr['oBestellung']->cAbgeholt = 'Y';
-                Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr, 1));
-            }
+
+        if (self::Plugin()->getConfig()->getValue('onlyPaid') === 'on'
+            && array_key_exists('oBestellung', $args_arr)
+            && Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)) {
+
+            $args_arr['oBestellung']->cAbgeholt = 'Y';
+            Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr['oBestellung']->kBestellung, 1));
         }
     }
 

@@ -8,6 +8,7 @@ namespace Plugin\ws5_mollie\lib;
 
 use Exception;
 use JTL\Alert\Alert;
+use JTL\Catalog\Currency;
 use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
@@ -84,7 +85,7 @@ class PaymentMethod extends Method
         if ($selectable) {
             try {
                 $locale = self::getLocale($_SESSION['cISOSprache'], $_SESSION['Kunde']->cLand);
-                $amount = Session::getCart()->gibGesamtsummeWaren(true) * $_SESSION['Waehrung']->fFaktor;
+                $amount = Session::getCart()->gibGesamtsummeWaren(true) * Session::getCurrency()->getConversionFactor();
                 if ($amount <= 0) {
                     $amount = 0.01;
                 }

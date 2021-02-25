@@ -102,6 +102,10 @@ class OrderLine implements \JsonSerializable
                     'name' => $eigenschaft->cEigenschaftName,
                     'value' => $eigenschaft->cEigenschaftWertName,
                 ];
+                if (strlen(json_encode($metadata)) > 1000) {
+                    array_pop($metadata['properties']);
+                    break;
+                }
             }
 
         }

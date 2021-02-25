@@ -60,6 +60,13 @@
                     </Description>
                     <ValueName>autoRefund</ValueName>
                 </Setting>
+
+                <Setting type="checkbox" initialValue="on" sort="50" conf="Y">
+                    <Name>Nur bezahlte Bestellungen in die WAWI übertragen</Name>
+                    <Description>Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden. </Description>
+                    <ValueName>onlyPaid</ValueName>
+                </Setting>
+
                 <!--Setting type="checkbox" initialValue="off" sort="50" conf="Y">
                     <Name>Zahl-Methode bei erneutem Zahlvorgang zurücksetzen</Name>
                     <Description>Wenn diese Einstellung aktiviert ist, die im Bestellvorgang ausgewählte Zahlungsart
