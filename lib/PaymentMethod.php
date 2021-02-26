@@ -177,7 +177,7 @@ class PaymentMethod extends Method
                 'locale' => $locale,
                 'amount' => [
                     'currency' => $currency,
-                    'value' => $amount
+                    'value' => number_format($amount, 2, ".", "")
                 ],
                 'billingCountry' => $billingCountry,
                 'resource' => 'orders',
