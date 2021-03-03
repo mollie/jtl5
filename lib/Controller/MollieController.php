@@ -12,6 +12,12 @@ use Plugin\ws5_mollie\lib\Response;
 class MollieController extends AbstractController
 {
 
+    /**
+     * @param \stdClass $data
+     * @return Response
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     */
     public static function methods(\stdClass $data)
     {
 
@@ -36,6 +42,10 @@ WHERE z.cModulId = :cModulID", [':cModulID' => $id], 2),
         return new Response($methods);
     }
 
+    /**
+     * @param \stdClass $data
+     * @return Response
+     */
     public static function statistics(\stdClass $data)
     {
 

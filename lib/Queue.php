@@ -126,34 +126,40 @@ class Queue
         if (array_key_exists('kBestellung', $data)) {
             switch ($hook) {
                 case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
-                    /** @var Bestellung $oBestellung */
-                    $oBestellung = new Bestellung($data['kBestellung'], true);
+                    if ((int)$data['kBestellung']) {
+                        /** @var Bestellung $oBestellung */
+                        $oBestellung = new Bestellung($data['kBestellung'], true);
 
-                    /** @var $method PaymentMethod */
-                    if ($oBestellung->kBestellung
-                        && array_key_exists('status', $data)
-                        && ($status = (int)$data['status'])
-                        && ($method = self::paymentMethod((int)$oBestellung->kZahlungsart))
-                        && ($order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL))
-                        && ($mollie = MollieAPI::API($order->getTest())->orders->get($order->getOrderId(), ['embed' => 'payments']))) {
+                        /** @var $method PaymentMethod */
+                        if ($oBestellung->kBestellung
+                            && array_key_exists('status', $data)
+                            && ($status = (int)$data['status'])
+                            && ($method = self::paymentMethod((int)$oBestellung->kZahlungsart))
+                            && ($order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL))
+                            && ($mollie = MollieAPI::API($order->getTest())->orders->get($order->getOrderId(), ['embed' => 'payments']))) {
 
 
-                        $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
+                            $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
 
-                        if ($mollie->isCreated() || $mollie->isPaid() || $mollie->isAuthorized() || $mollie->isShipping() || $mollie->isPending()) {
-                            // TODO #9
+                            if ($mollie->isCreated() || $mollie->isPaid() || $mollie->isAuthorized() || $mollie->isShipping() || $mollie->isPending()) {
+                                // TODO #9
 
-                            /*$options = Order::getShipmentOptions($oBestellung, $mollie, $status !== (int)$data['oBestellung']->cStatus);
-                            if ($options && array_key_exists('lines', $options) && is_array($options['lines'])) {
-                                $shipment = MollieAPI::API($order->getTest())->shipments->createFor($mollie, $options);
-                                self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order shipped: \n" . print_r($shipment, 1));
-                            }*/
+                                /*$options = Order::getShipmentOptions($oBestellung, $mollie, $status !== (int)$data['oBestellung']->cStatus);
+                                if ($options && array_key_exists('lines', $options) && is_array($options['lines'])) {
+                                    $shipment = MollieAPI::API($order->getTest())->shipments->createFor($mollie, $options);
+                                    self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order shipped: \n" . print_r($shipment, 1));
+                                }*/
+
+                            }
+
+                            $todo->setDone(date('Y-m-d H:i:s'));
+                            return $todo->save();
 
                         }
-
+                    } else {
+                        $todo->setResult("kBestellung missing");
                         $todo->setDone(date('Y-m-d H:i:s'));
                         return $todo->save();
-
                     }
 
                     break;
