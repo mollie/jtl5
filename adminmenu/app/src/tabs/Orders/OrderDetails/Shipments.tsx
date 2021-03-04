@@ -34,8 +34,16 @@ const Shipments = ({mollie, kBestellung}: ShipmentsProps) => {
             orderId: mollie.id,
             kBestellung: kBestellung,
         })
-            .then(console.log)
-            .catch(console.error)
+            .then(resp => {
+                if (resp.data.error) {
+                    alert(resp.data.error.message)
+                } else {
+                    console.log(resp)
+                }
+            })
+            .catch(err => {
+                alert(err.message);
+            })
     }
 
     if (!shipments.length) {

@@ -25,10 +25,10 @@ class API
                 if (method_exists($class, $action)) {
                     return $class::$action($data->data ?? new stdClass());
                 }
-                throw new Exception('Controller-Action not found.', 404);
+                throw new \RuntimeException('Controller-Action not found.', 404);
             }
-            throw new Exception('Controller-Class not found.', 404);
+            throw new \RuntimeException('Controller-Class not found.', 404);
         }
-        throw new Exception('Controller or Action missing.', 400);
+        throw new \RuntimeException('Controller or Action missing.', 400);
     }
 }

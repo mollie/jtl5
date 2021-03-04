@@ -8,7 +8,6 @@ namespace Plugin\ws5_mollie\lib;
 
 use Exception;
 use JTL\Alert\Alert;
-use JTL\Catalog\Currency;
 use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
@@ -16,6 +15,8 @@ use JTL\Model\DataModel;
 use JTL\Plugin\Helper as PluginHelper;
 use JTL\Plugin\Payment\Method;
 use JTL\Plugin\Payment\MethodInterface;
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
@@ -161,8 +162,8 @@ class PaymentMethod extends Method
      * @param $currency
      * @param $amount
      * @return bool
-     * @throws \Mollie\Api\Exceptions\ApiException
-     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @throws ApiException
+     * @throws IncompatiblePlatform
      */
     protected static function isMethodPossible($method, $locale, $billingCountry, $currency, $amount): bool
     {
@@ -177,7 +178,7 @@ class PaymentMethod extends Method
                 'locale' => $locale,
                 'amount' => [
                     'currency' => $currency,
-                    'value' => $amount
+                    'value' => number_format($amount, 2, ".", "")
                 ],
                 'billingCountry' => $billingCountry,
                 'resource' => 'orders',
