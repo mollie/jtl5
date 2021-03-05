@@ -34,7 +34,6 @@ class OrdersController extends AbstractController
     public static function shipments(stdClass $data): Response
     {
 
-
         $response = [];
         if ($data->kBestellung) {
             $lieferschien_arr = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tlieferschein WHERE kInetBestellung = :kBestellung", [
@@ -44,7 +43,7 @@ class OrdersController extends AbstractController
             foreach ($lieferschien_arr as $lieferschien) {
 
                 $shipmentsModel = ShipmentsModel::loadByAttributes(
-                    ['orderId' => $data->id],
+                    ['lieferschein' => (int)$lieferschien->kLieferschein],
                     Shop::Container()->getDB(),
                     DataModel::ON_NOTEXISTS_NEW);
 
@@ -53,7 +52,7 @@ class OrdersController extends AbstractController
                     'cLieferscheinNr' => $lieferschien->cLieferscheinNr,
                     'cHinweis' => $lieferschien->cHinweis,
                     'dErstellt' => date('Y-m-d H:i:s', $lieferschien->dErstellt),
-                    'shipment' => $shipmentsModel->getLieferschien() ? $shipmentsModel : null,
+                    'shipment' => $shipmentsModel->getBestellung() ? $shipmentsModel : null,
                 ];
             }
         }
@@ -71,7 +70,7 @@ class OrdersController extends AbstractController
             $query = "SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme "
                 . "FROM xplugin_ws5_mollie_orders o "
                 . "JOIN tbestellung b ON b.kbestellung = o.kBestellung "
-                . "WHERE !(o.cStatus = 'completed' AND b.cSTatus = '4')"
+                . "WHERE !(o.cStatus = 'completed' AND b.cStatus = '4')"
                 . "ORDER BY b.dErstellt DESC;";
             $data->query = $query;
         }

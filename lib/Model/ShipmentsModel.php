@@ -24,7 +24,7 @@ use RuntimeException;
  * @property DateTime $modified
  * @property DateTime $created
  *
- * @method void setLieferschien(int $lieferschien)
+ * @method void setLieferschein(int $lieferschien)
  * @method void setBestellung(int $bestellung)
  * @method void setOrderId(string $orderId)
  * @method void setShipmentId(string $shipmentId)
@@ -34,7 +34,7 @@ use RuntimeException;
  * @method void setModified(string $modified)
  * @method void setCreated(string $created)
  *
- * @method int getLieferschien()
+ * @method int getLieferschein()
  * @method int getBestellung()
  * @method string getOrderId()
  * @method string getShipmentId()
@@ -65,7 +65,7 @@ final class ShipmentsModel extends DataModel implements JsonSerializable
 
         if ($attr === null) {
             $attr = [];
-            $attr['lieferschien'] = DataAttribute::create('kLieferschien', 'int', null, false, true);
+            $attr['lieferschein'] = DataAttribute::create('kLieferschein', 'int', null, false, true);
             $attr['bestellung'] = DataAttribute::create('kBestellung', 'int', null, false);
             $attr['orderId'] = DataAttribute::create('cOrderId', 'string', '', false, false);
             $attr['shipmentId'] = DataAttribute::create('cShipmentId', 'string', '', false, false);

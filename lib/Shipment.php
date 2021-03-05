@@ -13,6 +13,7 @@ use JTL\Checkout\Versand;
 use JTL\Model\DataModel;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
@@ -71,22 +72,30 @@ class Shipment implements JsonSerializable
             Shop::Container()->getDB(),
             DataModel::ON_NOTEXISTS_FAIL);
 
+        $shipmentsModel = ShipmentsModel::loadByAttributes(
+            ['lieferschein' => (int)$kLieferschein],
+            \JTL\Shop::Container()->getDB(),
+            DataModel::ON_NOTEXISTS_NEW);
+        if ($shipmentsModel->getOrderId()) {
+            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschien bereits an Mollie übertragen!');
+        }
+
         $mOrder = MollieAPI::API($orderModel->getTest())->orders->get($orderId);
 
         if ($mOrder->status === OrderStatus::STATUS_COMPLETED) {
-            throw new Exception\APIException('Bestellung bei Mollie bereits abgeschlossen!');
+            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung bei Mollie bereits abgeschlossen!');
         }
 
         $oLieferschein = new Lieferschein($kLieferschein);
 
 
         if (!$oLieferschein->getLieferschein()) {
-            throw new Exception\APIException('Lieferschein konnte nicht geladen werden');
+            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschein konnte nicht geladen werden');
         }
 
 
         if (!count($oLieferschein->oVersand_arr)) {
-            throw new Exception\APIException('Kein Versand gefunden!');
+            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Kein Versand gefunden!');
         }
 
 
@@ -126,18 +135,37 @@ class Shipment implements JsonSerializable
     {
         $lines = [];
 
-        if (!count($oLieferschein->oPosition_arr)) {
+        if (!count($oLieferschein->oLieferscheinPos_arr)) {
             return $lines;
         }
 
-        foreach ($mOrder->lines as $orderLine) {
-            /** @var Lieferscheinpos $oLieferschienPos */
-            foreach ($oLieferschein->oPosition_arr as $oPosition) {
+        // Bei Stücklisten, sonst gibt es mehrere OrderLines für die selbe ID
+        $shippedOrderLines = [];
 
-                var_dump($oPosition);
+        /** @var Lieferscheinpos $oLieferschienPos */
+        foreach ($oLieferschein->oLieferscheinPos_arr as $oLieferschienPos) {
+
+            $wkpos = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM twarenkorbpos WHERE kBestellpos = :kBestellpos', [
+                ':kBestellpos' => $oLieferschienPos->getBestellPos()
+            ], 1);
+
+            /** @var OrderLine $orderLine */
+            foreach ($mOrder->lines as $orderLine) {
+
+                if (!in_array($orderLine->id, $shippedOrderLines, true) && $wkpos->cArtNr === $orderLine->sku) {
+
+                    $quantity = min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity);
+                    if ($quantity) {
+                        $lines[] = [
+                            'id' => $orderLine->id,
+                            'quantity' => min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity)
+                        ];
+                    }
+                    $shippedOrderLines[] = $orderLine->id;
+                    break;
+                }
 
             }
-
         }
 
 
@@ -155,7 +183,7 @@ class Shipment implements JsonSerializable
 
         $oShipmentModel = new ShipmentsModel(Shop::Container()->getDB());
         $oShipmentModel->setBestellung($this->kBestellung);
-        $oShipmentModel->setLieferschien($this->kLieferschein);
+        $oShipmentModel->setLieferschein($this->kLieferschein);
         $oShipmentModel->setOrderId($this->cOrderId);
         $oShipmentModel->setCarrier($this->tracking['carrier'] ?? null);
         $oShipmentModel->setCode($this->tracking['code'] ?? null);
@@ -166,6 +194,8 @@ class Shipment implements JsonSerializable
         $this->cOrderId = null;
         $this->kLieferschein = null;
         $this->kBestellung = null;
+
+        //return true;
 
         $mShipping = $api->shipments->createForId($oShipmentModel->orderId, $this->toArray());
 
