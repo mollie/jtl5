@@ -8,8 +8,8 @@ namespace Plugin\ws5_mollie\lib;
 
 use Exception;
 use JTL\Alert\Alert;
-use JTL\Catalog\Currency;
 use JTL\Checkout\Bestellung;
+use JTL\Checkout\Zahlungsart;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Model\DataModel;
@@ -295,6 +295,12 @@ class PaymentMethod extends Method
                     $this->setOrderStatusToPaid($order);
                     self::makeFetchable($order, $orderModel);
                     $this->deletePaymentHash($hash);
+
+                    $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->moduleID);
+                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
+                        $this->sendConfirmationMail($order);
+                    }
+
                 } else {
                     $this->doLog("Bestellung '{$order->cBestellNr}': Betrag zu niedrig {$payValue}", LOGLEVEL_NOTICE);
                 }
