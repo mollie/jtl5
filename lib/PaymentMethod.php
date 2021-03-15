@@ -282,22 +282,31 @@ class PaymentMethod extends Method
 
             Order::update($mOrder);
 
-            if ((null === $order->dBezahltDatum) && (list($payValue, $payment) = $this->updateOrder((int)$order->kBestellung, $orderModel, $mOrder)) && $payment) {
+            if ((null === $order->dBezahltDatum)) {
 
-                $this->addIncomingPayment($order, (object)[
-                    'fBetrag' => $payment->amount->value,
-                    'cISO' => $payment->amount->currency,
-                    'cZahler' => $payment->details->paypalPayerId ?? $payment->customerId,
-                    'cHinweis' => $payment->details->paypalReference ?? $mOrder->id,
-                ]);
+                if ((list($payValue, $payment) = $this->updateOrder((int)$order->kBestellung, $orderModel, $mOrder)) && $payment) {
+                    $this->addIncomingPayment($order, (object)[
+                        'fBetrag' => $payment->amount->value,
+                        'cISO' => $payment->amount->currency,
+                        'cZahler' => $payment->details->paypalPayerId ?? $payment->customerId,
+                        'cHinweis' => $payment->details->paypalReference ?? $mOrder->id,
+                    ]);
 
-                // If totally paid, mark as paid, make fetchable by WAWI and delete Hash
-                if ($payValue >= $order->fGesamtsumme) {
-                    $this->setOrderStatusToPaid($order);
-                    self::makeFetchable($order, $orderModel);
-                    $this->deletePaymentHash($hash);
-                } else {
-                    $this->doLog("Bestellung '{$order->cBestellNr}': Betrag zu niedrig {$payValue}", LOGLEVEL_NOTICE);
+                    // If totally paid, mark as paid, make fetchable by WAWI and delete Hash
+                    if ($payValue >= $order->fGesamtsumme) {
+                        $this->setOrderStatusToPaid($order);
+                        self::makeFetchable($order, $orderModel);
+                        $this->deletePaymentHash($hash);
+
+                        $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->moduleID);
+                        if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
+                            $this->sendConfirmationMail($order);
+                        }
+                        $this->doLog("Bestellung '{$order->cBestellNr}' als bezahlt markiert: {$payValue}", LOGLEVEL_DEBUG);
+
+                    } else {
+                        $this->doLog("Bestellung '{$order->cBestellNr}': Betrag zu niedrig {$payValue}", LOGLEVEL_NOTICE);
+                    }
                 }
             } else {
                 $this->doLog("Bestellung '{$order->cBestellNr}' bereits als bezahlt markiert.");
