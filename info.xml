@@ -63,7 +63,9 @@
 
                 <Setting type="checkbox" initialValue="on" sort="50" conf="Y">
                     <Name>Nur bezahlte Bestellungen in die WAWI übertragen</Name>
-                    <Description>Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden. </Description>
+                    <Description>Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI
+                        abgerufen werden.
+                    </Description>
                     <ValueName>onlyPaid</ValueName>
                 </Setting>
 
@@ -466,6 +468,7 @@
                 <VariableLocalized iso="GER"><![CDATA[überspringen]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[skip]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Ignorer]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[salta]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>cctitle</Name>
@@ -473,6 +476,7 @@
                 <VariableLocalized iso="GER"><![CDATA[Kreditkarten-Informationen]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Enter your credit card information]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Informations de paiement]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Informazioni sulla Carta di Credito]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_canceled</Name>
@@ -484,6 +488,7 @@
                     You canceled the payment. Please select a different payment method if necessary.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Votre paiement a t annul. Veuillez slectionner un autre mode de paiement si ncessaire.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Hai annullato il pagamento. Se necessario, scegli un metodo di pagamento diverso.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_expired</Name>
@@ -494,6 +499,7 @@
                     Your payment session has expired, please try again.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Votre session de paiement a expir, s'il vous plat essayer  nouveau.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[La tua sessione di pagamento è scaduta, riprovi.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_open</Name>
@@ -505,6 +511,7 @@
                     The payment process failed. Please try again or choose a different payment method.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Une erreur s'est produite lors du paiement. Veuillez ressayer ou choisir un autre mode de paiement.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Si è verificato un errore con il pagamento. Riprovi o scegli un metodo di pagamento diverso.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_failed</Name>
@@ -516,15 +523,18 @@
                     The payment process failed. Please try again or choose a different paymentmethod.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Une erreur s'est produite lors du paiement. Veuillez ressayer ou choisir un autre mode de paiement.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Si è verificato un errore con il pagamento. Riprovi o scegli un metodo di pagamento diverso.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_create</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Bei der Zahlung ist ein Fehler aufgetreten. Bitte nehmen Sie mit uns Kontakt auf.]]></VariableLocalized>
+                <VariableLocalized iso="GER">
+                    <![CDATA[Bei der Zahlung ist ein Fehler aufgetreten. Bitte nehmen Sie mit uns Kontakt auf.]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[
                     The payment process failed. Please contact us.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Une erreur s'est produite lors du paiement. Contactez nous s'il vous plait.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Si è verificato un errore con il pagamento. Ci contatti per favore.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_cardHolder</Name>
@@ -532,6 +542,7 @@
                 <VariableLocalized iso="GER"><![CDATA[Karteninhaber:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Card holder:]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Titulaire de la carte:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Titolare della Carta:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_cardNumber</Name>
@@ -539,6 +550,7 @@
                 <VariableLocalized iso="GER"><![CDATA[Kartennummer:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Card number:]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Numro de carte:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Numero Carta:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_expiryDate</Name>
@@ -546,6 +558,7 @@
                 <VariableLocalized iso="GER"><![CDATA[Ablaufdatum:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Expiry date:]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Date d'expiration:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Data scadenza:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_varificationCode</Name>
@@ -553,6 +566,7 @@
                 <VariableLocalized iso="GER"><![CDATA[CVC/CVV:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[CVC/CVV:]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[CVC/CVV:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[CVC/CVV:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>cvchint_1</Name>
@@ -560,6 +574,7 @@
                 <VariableLocalized iso="GER"><![CDATA[So findet man die CVV/CVC Nummer]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[How to find the CVV/CVC number]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Comment trouver le numro CVC/CVV]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Cosi trovi il numero CVV/CVC]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>cvchint_2</Name>
@@ -571,6 +586,7 @@
                     The three-digit CVV/CVC number is shown on the reverse for Visa and Mastercard, and on the front of the card for American Express.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Le numro CVC/CVV  trois chiffres est indiqu au dos de Visa et Mastercard et au recto de la carte American Express.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Il numero CVV/CVC trovi nelle Carte VISA e MASTERCARD sul Retro, nella Carta American Express trovi sulla parte anteriore.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>mcErrorMessage</Name>
@@ -578,6 +594,7 @@
                 <VariableLocalized iso="GER"><![CDATA[Ein oder mehrere Felder sind ungültig.]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[One or more fields are invalid.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Un ou plusieurs champs ne sont pas valides.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Uno o più Campi non sono validi.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>clearDescr</Name>
@@ -588,6 +605,7 @@
                     <![CDATA[You have already entered data. Would you like to change this?]]></VariableLocalized>
                 <VariableLocalized iso="FRE">
                     <![CDATA[Vous avez déjà saisi des données. Souhaitez-vous changer cela?]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Hai già inserito i dati. Vuoi cambiarli?]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>clearButton</Name>
@@ -595,6 +613,7 @@
                 <VariableLocalized iso="GER"><![CDATA[Daten ändern]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Edit Data]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[changer les données]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Cambiare Dati]]></VariableLocalized>
             </Variable>
         </Locales>
     </Install>
