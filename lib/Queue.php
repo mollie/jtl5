@@ -127,7 +127,6 @@ class Queue
             switch ($hook) {
                 case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
                     if ((int)$data['kBestellung']) {
-                        /** @var Bestellung $oBestellung */
                         $oBestellung = new Bestellung($data['kBestellung'], true);
 
                         /** @var $method PaymentMethod */
@@ -142,14 +141,16 @@ class Queue
                             $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
 
                             if ($mollie->isCreated() || $mollie->isPaid() || $mollie->isAuthorized() || $mollie->isShipping() || $mollie->isPending()) {
-                                // TODO #9
-
-                                /*$options = Order::getShipmentOptions($oBestellung, $mollie, $status !== (int)$data['oBestellung']->cStatus);
-                                if ($options && array_key_exists('lines', $options) && is_array($options['lines'])) {
-                                    $shipment = MollieAPI::API($order->getTest())->shipments->createFor($mollie, $options);
-                                    self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order shipped: \n" . print_r($shipment, 1));
-                                }*/
-
+                                // TODO #9 - testen
+                                try {
+                                    if ($shipments = Shipment::syncBestellung($oBestellung->kBestellung)) {
+                                        foreach ($shipments as $shipment) {
+                                            self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order shipped: \n" . print_r($shipment, 1));
+                                        }
+                                    }
+                                } catch (Exception $e) {
+                                    $todo->setResult($e->getMessage() . "\n" . $e->getFile() . ":" . $e->getLine() . "\n" . $e->getTraceAsString());
+                                }
                             }
 
                             $todo->setDone(date('Y-m-d H:i:s'));

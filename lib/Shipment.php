@@ -18,6 +18,7 @@ use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Shop;
 
 class Shipment implements JsonSerializable
@@ -37,23 +38,101 @@ class Shipment implements JsonSerializable
      * @var bool
      */
     public $bTestmode;
-
     /**
-     * @var int
+     * @var \Mollie\Api\Resources\Shipment
+     */
+    public $result;
+    /**
+     * @var int|null
      */
     protected $kBestellung;
-
     /**
-     * @var int
+     * @var int|null
+     *
      */
     protected $kLieferschein;
-
     /**
-     * @var string
+     * @var string|null
      */
     protected $cOrderId;
 
     use Jsonable;
+
+    use Plugin;
+
+    /**
+     * @param int $kBestellung
+     * @return array
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     * @throws \JTL\Exceptions\CircularReferenceException
+     * @throws \JTL\Exceptions\ServiceNotFoundException
+     */
+    public static function syncBestellung(int $kBestellung): array
+    {
+
+        $shipments = [];
+
+        $orderModel = OrderModel::loadByAttributes(
+            ['bestellung' => $kBestellung],
+            Shop::Container()->getDB(),
+            DataModel::ON_NOTEXISTS_FAIL);
+
+        $oBestellung = new Bestellung($kBestellung, true);
+        if ($oBestellung->kBestellung) {
+
+            $oKunde = new \Kunde($oBestellung->kKunde);
+
+            /** @var Lieferschein $oLieferschein */
+            foreach ($oBestellung->oLieferschein_arr as $oLieferschein) {
+
+                try {
+
+
+                    $shipmentModel = ShipmentsModel::loadByAttributes(
+                        ['lieferschein' => $oLieferschein->getLieferschein()],
+                        \JTL\Shop::Container()->getDB(),
+                        DataModel::ON_NOTEXISTS_NEW);
+                    if ($shipmentModel->getOrderId() && $shipmentModel->getShipmentId()) {
+                        continue;
+                    }
+
+                    $shipment = self::factory($oLieferschein->getLieferschein(), $orderModel->getOrderId());
+
+                    $mode = self::Plugin()->getConfig()->getValue('shippingMode');
+                    switch ($mode) {
+                        case 'A':
+                            // ship directly
+                            if (!$shipment->send()) {
+                                throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
+                            }
+                            $shipments[] = $shipment->result;
+                            break;
+
+                        case 'B':
+                            // only ship if complete shipping
+                            if ($oKunde->nRegistriert || (int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
+                                if (!$shipment->send()) {
+                                    throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
+                                }
+                                $shipments[] = $shipment->result;
+                                break;
+                            }
+                            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Gastbestellung noch nicht komplett versendet!');
+                    }
+
+                } catch (Exception $e) {
+                    Shop::Container()->getLogService()->addError("mollie: Shipment::syncBestellung - " . $e->getMessage());
+                    throw $e;
+                }
+
+            }
+
+        }
+        return $shipments;
+
+    }
+
 
     /**
      * @param int $kLieferschein
@@ -197,9 +276,9 @@ class Shipment implements JsonSerializable
 
         //return true;
 
-        $mShipping = $api->shipments->createForId($oShipmentModel->orderId, $this->toArray());
+        $this->result = $api->shipments->createForId($oShipmentModel->orderId, $this->toArray());
 
-        $oShipmentModel->setShipmentId($mShipping->id);
+        $oShipmentModel->setShipmentId($this->result->id);
 
         return $oShipmentModel->save();
 
