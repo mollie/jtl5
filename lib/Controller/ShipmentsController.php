@@ -38,7 +38,7 @@ class ShipmentsController extends AbstractController
             switch ($mode) {
                 case 'A':
                     // ship directly
-                    if (!$shipment->send()) {
+                    if (!$shipment->send() && !$shipment->result) {
                         throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                     }
                     return new Response(true);
@@ -46,7 +46,7 @@ class ShipmentsController extends AbstractController
                 case 'B':
                     // only ship if complete shipping
                     if ($oKunde->nRegistriert || (int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-                        if (!$shipment->send()) {
+                        if (!$shipment->send() && !$shipment->result) {
                             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                         }
                         return new Response(true);

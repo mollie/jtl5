@@ -102,7 +102,7 @@ class Shipment implements JsonSerializable
                     switch ($mode) {
                         case 'A':
                             // ship directly
-                            if (!$shipment->send()) {
+                            if (!$shipment->send() && !$shipment->result) {
                                 throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                             }
                             $shipments[] = $shipment->result;
@@ -111,7 +111,7 @@ class Shipment implements JsonSerializable
                         case 'B':
                             // only ship if complete shipping
                             if ($oKunde->nRegistriert || (int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-                                if (!$shipment->send()) {
+                                if (!$shipment->send() && !$shipment->result) {
                                     throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                                 }
                                 $shipments[] = $shipment->result;
