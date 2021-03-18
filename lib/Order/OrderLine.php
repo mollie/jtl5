@@ -91,6 +91,7 @@ class OrderLine implements \JsonSerializable
                 $metadata['cUnique'] = $oPosition->cUnique;
             }
         }
+
         if (isset($oPosition->WarenkorbPosEigenschaftArr) && is_array($oPosition->WarenkorbPosEigenschaftArr) && count($oPosition->WarenkorbPosEigenschaftArr)) {
             $metadata['properties'] = [];
             /** @var CartItemProperty $eigenschaft */
@@ -106,9 +107,9 @@ class OrderLine implements \JsonSerializable
                     break;
                 }
             }
-            $orderLine->metadata = $metadata;
-        }
 
+        }
+        $orderLine->metadata = $metadata;
         return $orderLine;
     }
 

@@ -112,7 +112,7 @@ const OrderDetails = (props: OrderDetailsProps) => {
                         <FontAwesomeIcon className=" float-right"
                                          icon={showShipments ? faChevronDoubleDown : faChevronDoubleLeft}/>
                     </h3>
-                    {showShipments ? <Shipments mollie={data.mollie}/> : null}
+                    {showShipments && data.bestellung ? <Shipments kBestellung={data.bestellung.kBestellung} mollie={data.mollie}/> : null}
                 </div>}
 
                 {data && data.logs && <div className="mt-4">

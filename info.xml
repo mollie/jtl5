@@ -76,6 +76,15 @@
                     </Description>
                     <ValueName>resetMethod</ValueName>
                 </Setting-->
+                <Setting type="selectbox" initialValue="B" sort="50" conf="Y">
+                    <Name>Teilversand Verhalten</Name>
+                    <Description>Bei Gastbestellungen und Teilversand.</Description>
+                    <ValueName>shippingMode</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="A">Direkt alles versenden</Option>
+                        <Option sort="2" value="B">Erst bei komplett Versand versenden</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="selectbox" initialValue="de_DE" sort="60" conf="Y">
                     <Name>Fallback-Locale</Name>
                     <Description>Fallback, falls Locale nicht erkannt oder nicht vorhanden.</Description>

@@ -166,7 +166,7 @@ class Order implements JsonSerializable
     /**
      * @param Bestellung $oBestellung
      * @param array $paymentOptions
-     * @return MollieOrder
+     * @return MollieOrder|null
      * @throws ApiException
      * @throws IncompatiblePlatform
      */

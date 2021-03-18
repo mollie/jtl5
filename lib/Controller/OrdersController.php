@@ -8,6 +8,7 @@ use JTL\Checkout\Bestellung;
 use JTL\Model\DataModel;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order;
 use Plugin\ws5_mollie\lib\PaymentMethod;
@@ -30,6 +31,37 @@ class OrdersController extends AbstractController
         return new Response(PaymentMethod::makeFetchable($oBestellung, $orderModel));
     }
 
+    public static function shipments(stdClass $data): Response
+    {
+
+        $response = [];
+        if ($data->kBestellung) {
+            $lieferschien_arr = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tlieferschein WHERE kInetBestellung = :kBestellung", [
+                ':kBestellung' => (int)$data->kBestellung
+            ], 2);
+
+            foreach ($lieferschien_arr as $lieferschien) {
+
+                $shipmentsModel = ShipmentsModel::loadByAttributes(
+                    ['lieferschein' => (int)$lieferschien->kLieferschein],
+                    Shop::Container()->getDB(),
+                    DataModel::ON_NOTEXISTS_NEW);
+
+                $response[] = (object)[
+                    'kLieferschein' => $lieferschien->kLieferschein,
+                    'cLieferscheinNr' => $lieferschien->cLieferscheinNr,
+                    'cHinweis' => $lieferschien->cHinweis,
+                    'dErstellt' => date('Y-m-d H:i:s', $lieferschien->dErstellt),
+                    'shipment' => $shipmentsModel->getBestellung() ? $shipmentsModel : null,
+                ];
+            }
+        }
+
+
+        return new Response($response);
+
+    }
+
     public static function all(stdClass $data): Response
     {
 
@@ -38,7 +70,7 @@ class OrdersController extends AbstractController
             $query = "SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme "
                 . "FROM xplugin_ws5_mollie_orders o "
                 . "JOIN tbestellung b ON b.kbestellung = o.kBestellung "
-                . "WHERE !(o.cStatus = 'completed' AND b.cSTatus = '4')"
+                . "WHERE !(o.cStatus = 'completed' AND b.cStatus = '4')"
                 . "ORDER BY b.dErstellt DESC;";
             $data->query = $query;
         }
