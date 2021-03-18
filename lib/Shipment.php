@@ -88,7 +88,6 @@ class Shipment implements JsonSerializable
 
                 try {
 
-
                     $shipmentModel = ShipmentsModel::loadByAttributes(
                         ['lieferschein' => $oLieferschein->getLieferschein()],
                         \JTL\Shop::Container()->getDB(),
@@ -125,12 +124,9 @@ class Shipment implements JsonSerializable
                     Shop::Container()->getLogService()->addError("mollie: Shipment::syncBestellung - " . $e->getMessage());
                     throw $e;
                 }
-
             }
-
         }
         return $shipments;
-
     }
 
 

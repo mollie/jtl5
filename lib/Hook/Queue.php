@@ -4,6 +4,7 @@
 namespace Plugin\ws5_mollie\lib\Hook;
 
 
+use Exception;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\Order;
@@ -14,7 +15,6 @@ class Queue extends AbstractHook
 
     public static function bestellungInDB(array $args_arr): void
     {
-
         if (self::Plugin()->getConfig()->getValue('onlyPaid') === 'on'
             && array_key_exists('oBestellung', $args_arr)
             && Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)) {
@@ -42,7 +42,7 @@ class Queue extends AbstractHook
         $mQueue->setCreated(date('Y-m-d H:i:s'));
         try {
             return $mQueue->save();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Shop::Container()->getLogService()->error('mollie::saveToQueue: ' . $e->getMessage() . ' - ' . print_r($args_arr, 1));
             return false;
         }
@@ -55,7 +55,7 @@ class Queue extends AbstractHook
         }
     }
 
-    public static function headPostGet(array $args_arr): void
+    public static function headPostGet(): void
     {
         if (array_key_exists('mollie', $_REQUEST) && (int)$_REQUEST['mollie'] === 1 && array_key_exists('id', $_REQUEST)) {
             self::saveToQueue($_REQUEST['id'], $_REQUEST['id'], 'webhook');
