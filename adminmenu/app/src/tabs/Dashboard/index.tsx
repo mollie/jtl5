@@ -3,7 +3,7 @@ import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
 import {PaymentMethod2img} from "../../helper";
 import {formatAmount, Loading, usePluginInfo} from "@webstollen/react-jtl-plugin/lib";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCog, faSync} from "@fortawesome/pro-regular-svg-icons";
+import {faCog, faCreditCard, faMoneyBill, faSync} from "@fortawesome/pro-regular-svg-icons";
 import setupImg from '../../assets/img/mollie-dashboard.png';
 import Button from "@webstollen/react-jtl-plugin/lib/components/Button";
 
@@ -87,10 +87,29 @@ const Dashboard = () => {
                             <div key={id} style={{flexBasis: '33%'}}>
                                 <div className="m-2 p-2 border-b">
                                     <PaymentMethod2img method={id}/> {methods[id].mollie.description}
-                                    <a className="float-right" title="Einstellungen" href={methods[id].settings}
-                                       target="_blank" rel="noreferrer">
-                                        <FontAwesomeIcon icon={faCog}/>
-                                    </a>
+
+                                    <div className="float-right">
+                                        {methods[id].components ? <>
+                                            {methods[id].components === 'S' || methods[id].components === 'Y' ?
+                                                <FontAwesomeIcon className={"ml-1 cursor-help"} icon={faCreditCard}
+                                                                 title={"Mollie Components enabled." + (methods[id].components === 'S' ? ' (optional)' : ' (obligatorisch)')}
+                                                                 color={methods[id].components === 'S' ? 'green' : 'blue'}/>
+                                                : <FontAwesomeIcon className={"ml-1 cursor-help"} icon={faCreditCard}
+                                                                   color={'red'}
+                                                                   title={'Mollie Components disabled'}/>
+                                            }
+                                        </> : null}
+                                        {methods[id].api ? (
+                                            methods[id].api === 'payment' ?
+                                                <FontAwesomeIcon className={"cursor-help ml-1"} icon={faMoneyBill}
+                                                                 title={'Payment API'} color={"green"}/> : null
+                                        ) : null}
+                                        <a title="Einstellungen" href={methods[id].settings}
+                                           className={"ml-1"}
+                                           target="_blank" rel="noreferrer">
+                                            <FontAwesomeIcon icon={faCog}/>
+                                        </a>
+                                    </div>
                                 </div>
                             </div> : null)}
                     </div>

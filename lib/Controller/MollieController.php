@@ -20,23 +20,37 @@ class MollieController extends AbstractController
      */
     public static function methods(\stdClass $data)
     {
-
-        $_methods = MollieAPI::API()->methods->allActive(['includeWallets' => 'applepay']);
+        $test = false;
+        if (self::Plugin()->getConfig()->getValue('apiKey') === '' && self::Plugin()->getConfig()->getValue('test_apiKey') !== '') {
+            $test = true;
+        }
+        $_methods = MollieAPI::API($test)->methods->allActive(['includeWallets' => 'applepay']);
         $methods = [];
+        $oPlugin = self::Plugin();
 
         foreach ($_methods as $method) {
             $id = 'kPlugin_' . Helper::getIDByPluginID("ws5_mollie") . '_' . $method->id;
             $oZahlungsart = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tzahlungsart WHERE cModulId = :cModulID;", [
                 ':cModulID' => $id
             ], 1);
+
             $methods[$method->id] = (object)[
                 'settings' => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart={$oZahlungsart->kZahlungsart}&token={$_SESSION['jtl_token']}",
                 'mollie' => $method,
+                'duringCheckout' => (int)$oZahlungsart->nWaehrendBestellung === 1,
                 'shipping' => \Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tversandart v
 JOIN tversandartzahlungsart vz ON v.kVersandart = vz.kVersandart
 JOIN tzahlungsart z ON vz.kZahlungsart = z.kZahlungsart
 WHERE z.cModulId = :cModulID", [':cModulID' => $id], 2),
             ];
+
+            if ($api = $oPlugin->getConfig()->getValue($id . '_api')) {
+                $methods[$method->id]->api = $api;
+            }
+            if ($api = $oPlugin->getConfig()->getValue($id . '_components')) {
+                $methods[$method->id]->components = $api;
+            }
+
         }
 
         return new Response($methods);

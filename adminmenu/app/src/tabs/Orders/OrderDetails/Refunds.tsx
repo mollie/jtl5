@@ -34,8 +34,7 @@ const Refunds = ({mollie}: RefundsProps) => {
         }
     } as Record<string, ItemTemplate<Record<string, any>>>;
 
-    return <Table striped
-                  template={template} items={mollie._embedded.refunds}/>;
+    return mollie._embedded?.refunds ? <Table striped template={template} items={mollie._embedded.refunds}/> : <>No Data!</>;
 }
 
 export default Refunds;

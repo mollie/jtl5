@@ -85,8 +85,16 @@ class OrdersController extends AbstractController
                 [':cOrderId' => $data->id],
                 1);
 
-        $mOrder = MollieAPI::API((bool)$order->bTest)->orders
-            ->get($order->cOrderId, ['embed' => 'payments,shipments,refunds']);
+        $mOrder = null;
+        if(strpos($order->cOrderId, 'tr_') === 0){
+            $mOrder = MollieAPI::API((bool)$order->bTest)->payments
+                ->get($order->cOrderId, ['embed' => 'refunds']);
+        }else{
+            $mOrder = MollieAPI::API((bool)$order->bTest)->orders
+                ->get($order->cOrderId, ['embed' => 'payments,shipments,refunds']);
+        }
+
+
         Order::update($mOrder);
 
         $result = (object)[

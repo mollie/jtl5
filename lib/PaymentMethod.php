@@ -209,13 +209,15 @@ class PaymentMethod extends Method
         parent::preparePaymentProcess($order);
 
         try {
+
             $payable = (float)$order->fGesamtsumme > 0;
             if (!$payable) {
-                if ($this->duringCheckout) {
-                    $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
-                } else {
-                    return;
-                }
+                $this->doLog("Gesamtsumme 0, keine Zahlung notwendig!", LOGLEVEL_NOTICE);
+                return;
+            }
+            if ($this->duringCheckout) {
+                $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
+                return;
             }
 
             $paymentOptions = [];
@@ -223,29 +225,37 @@ class PaymentMethod extends Method
             if ((int)Session::getCustomer()->nRegistriert) {
                 $paymentOptions['customerId'] = Customer::createOrUpdate(Session::getCustomer());
             }
-
             if (static::METHOD === \Mollie\Api\Types\PaymentMethod::CREDITCARD) {
                 if ((int)$this->getCache(CreditCard::CACHE_TOKEN_TIMESTAMP) > time() && ($token = trim($this->getCache(CreditCard::CACHE_TOKEN)))) {
                     $paymentOptions['cardToken'] = $token;
                 }
             }
 
-            if ($this->duringCheckout) {
-                $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
-            } else if ($mollieOrder = Order::createOrder($order, $paymentOptions)) {
+            $api = self::Plugin()->getConfig()->getValue($this->moduleID . '_api');
 
-                $this->handleNotification($order, $mollieOrder->metadata->cHash, ['id' => $mollieOrder->id]);
-
-                if (!headers_sent()) {
-                    header('Location: ' . $mollieOrder->getCheckoutUrl());
+            if ($api === 'payment') {
+                if ($molliePayment = Order::createPayment($order, $paymentOptions)) {
+                    $this->handleNotification($order, $molliePayment->metadata->cHash, ['id' => $molliePayment->id]);
+                    if (!headers_sent()) {
+                        header('Location: ' . $molliePayment->getCheckoutUrl());
+                    }
+                    Shop::Smarty()->assign('redirect', $molliePayment->getCheckoutUrl());
+                } else {
+                    throw new RuntimeException('Payment konnte bei mollie nicht erstellt werden! ' . print_r([$order->cBestellNr, $paymentOptions], 1));
                 }
-                Shop::Smarty()->assign('redirect', $mollieOrder->getCheckoutUrl());
-
             } else {
-
-                throw new RuntimeException('Order konnte bei mollie nicht erstellt werden! ' . print_r([$order->cBestellNr, $paymentOptions], 1));
-
+                if ($mollieOrder = Order::createOrder($order, $paymentOptions)) {
+                    $this->handleNotification($order, $mollieOrder->metadata->cHash, ['id' => $mollieOrder->id]);
+                    if (!headers_sent()) {
+                        header('Location: ' . $mollieOrder->getCheckoutUrl());
+                    }
+                    Shop::Smarty()->assign('redirect', $mollieOrder->getCheckoutUrl());
+                } else {
+                    throw new RuntimeException('Order konnte bei mollie nicht erstellt werden! ' . print_r([$order->cBestellNr, $paymentOptions], 1));
+                }
             }
+
+
         } catch (Exception $e) {
 
             $this->doLog('mollie::preparePaymentProcess: ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_ERROR);
@@ -278,34 +288,43 @@ class PaymentMethod extends Method
                 Shop::Container()->getDB(),
                 DataModel::ON_NOTEXISTS_NEW);
 
-            $mOrder = MollieAPI::API($orderModel->getTest())->orders->get($orderId, ['embed' => 'payments']);
-
+            $mOrder = null;
+            if (strpos($orderId, 'tr_') === 0) {
+                $mOrder = MollieAPI::API($orderModel->getTest())->payments->get($orderId);
+            } else {
+                $mOrder = MollieAPI::API($orderModel->getTest())->orders->get($orderId, ['embed' => 'payments']);
+            }
             Order::update($mOrder);
+
 
             if ((null === $order->dBezahltDatum)) {
 
+                /** @var Payment $payment */
                 if ((list($payValue, $payment) = $this->updateOrder((int)$order->kBestellung, $orderModel, $mOrder)) && $payment) {
-                    $this->addIncomingPayment($order, (object)[
-                        'fBetrag' => $payment->amount->value,
-                        'cISO' => $payment->amount->currency,
-                        'cZahler' => $payment->details->paypalPayerId ?? $payment->customerId,
-                        'cHinweis' => $payment->details->paypalReference ?? $mOrder->id,
-                    ]);
 
-                    // If totally paid, mark as paid, make fetchable by WAWI and delete Hash
-                    if ($payValue >= $order->fGesamtsumme) {
-                        $this->setOrderStatusToPaid($order);
-                        self::makeFetchable($order, $orderModel);
-                        $this->deletePaymentHash($hash);
+                    if ($payValue > 0) {
+                        $this->addIncomingPayment($order, (object)[
+                            'fBetrag' => $payment->amount->value,
+                            'cISO' => $payment->amount->currency,
+                            'cZahler' => $payment->details->paypalPayerId ?? $payment->customerId,
+                            'cHinweis' => $payment->details->paypalReference ?? $mOrder->id,
+                        ]);
 
-                        $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->moduleID);
-                        if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
-                            $this->sendConfirmationMail($order);
+                        // If totally paid, mark as paid, make fetchable by WAWI and delete Hash
+                        if ($payValue >= $order->fGesamtsumme) {
+                            $this->setOrderStatusToPaid($order);
+                            self::makeFetchable($order, $orderModel);
+                            $this->deletePaymentHash($hash);
+
+                            $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->moduleID);
+                            if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
+                                $this->sendConfirmationMail($order);
+                            }
+                            $this->doLog("Bestellung '{$order->cBestellNr}' als bezahlt markiert: {$payValue}", LOGLEVEL_DEBUG);
+
+                        } else {
+                            $this->doLog("Bestellung '{$order->cBestellNr}': Betrag zu niedrig {$payValue}", LOGLEVEL_NOTICE);
                         }
-                        $this->doLog("Bestellung '{$order->cBestellNr}' als bezahlt markiert: {$payValue}", LOGLEVEL_DEBUG);
-
-                    } else {
-                        $this->doLog("Bestellung '{$order->cBestellNr}': Betrag zu niedrig {$payValue}", LOGLEVEL_NOTICE);
                     }
                 }
             } else {
@@ -321,23 +340,32 @@ class PaymentMethod extends Method
     /**
      * @param int $kBestellung
      * @param OrderModel $order
-     * @param \Mollie\Api\Resources\Order $mollie
+     * @param \Mollie\Api\Resources\Order|Payment $mollie
      * @return array|null
      * @throws Exception
      */
-    public function updateOrder(int $kBestellung, OrderModel $order, \Mollie\Api\Resources\Order $mollie): ?array
+    public function updateOrder(int $kBestellung, OrderModel $order, $mollie): ?array
     {
-        $payment = null;
         /** @var Payment $payment */
-        /** @var Payment $_payment */
+        $payment = null;
         $payValue = 0.0;
-        foreach ($mollie->payments() as $_payment) {
-            if (in_array($_payment->status,
+        if ($mollie->resource === "payment") {
+            $payment = $mollie;
+            if (in_array($payment->status,
                 [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
-                $payment = $_payment;
-                $payValue += (float)$_payment->amount->value;
+                $payValue = (float)$payment->amount->value;
+            }
+        } else {
+            /** @var Payment $_payment */
+            foreach ($mollie->payments() as $_payment) {
+                if (in_array($_payment->status,
+                    [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
+                    $payment = $_payment;
+                    $payValue += (float)$_payment->amount->value;
+                }
             }
         }
+
         $order->setBestellung($kBestellung);
         $order->setModified(date('Y-m-d H:i:s'));
         $order->setStatus($mollie->status);
