@@ -38,6 +38,7 @@ class MollieController extends AbstractController
                 'settings' => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart={$oZahlungsart->kZahlungsart}&token={$_SESSION['jtl_token']}",
                 'mollie' => $method,
                 'duringCheckout' => (int)$oZahlungsart->nWaehrendBestellung === 1,
+                'paymentMethod' => $oZahlungsart,
                 'shipping' => \Shop::Container()->getDB()->executeQueryPrepared("SELECT v.* FROM tversandart v
 JOIN tversandartzahlungsart vz ON v.kVersandart = vz.kVersandart
 JOIN tzahlungsart z ON vz.kZahlungsart = z.kZahlungsart

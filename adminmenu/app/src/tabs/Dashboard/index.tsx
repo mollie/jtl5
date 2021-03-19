@@ -4,6 +4,7 @@ import {PaymentMethod2img} from "../../helper";
 import {formatAmount, Loading, usePluginInfo} from "@webstollen/react-jtl-plugin/lib";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCog, faCreditCard, faMoneyBill, faShippingFast, faSync} from "@fortawesome/pro-regular-svg-icons";
+import {faExclamationTriangle} from "@fortawesome/pro-solid-svg-icons"
 import setupImg from '../../assets/img/mollie-dashboard.png';
 import Button from "@webstollen/react-jtl-plugin/lib/components/Button";
 
@@ -86,13 +87,18 @@ const Dashboard = () => {
                         {Object.keys(methods).map(id => methods[id].shipping.length ?
                             <div key={id} style={{flexBasis: '33%'}}>
                                 <div className="m-2 p-2 border-b">
+
+                                    {methods[id].paymentMethod
+                                    && parseInt(methods[id].paymentMethod.nWaehrendBestellung) > 0
+                                    && <FontAwesomeIcon className={"mr-4 ml-1 cursor-help"} icon={faExclamationTriangle}
+                                                        color={"red"}
+                                                        onClick={() => alert('Zahlung vor Bestellabschluss wird nicht unterstützt. Diese Zahlungsart wird nicht zur auswahl stehen.')}
+                                                        title={"Zahlung vor Bestellabschluss nicht unterstützt."}/>}
+
                                     <PaymentMethod2img method={id}/> {methods[id].mollie.description}
+
                                     <div className="float-right">
-                                        <FontAwesomeIcon icon={faShippingFast}
-                                                         onClick={() => alert(methods[id].shipping && methods[id].shipping?.length ? "Mit folgende Versandarten verknüpft:\n\n" + methods[id].shipping.map((shipping: Record<string, any>) => ' - ' + shipping.cName).join("\n") : 'Mit keiner Versandart verknüpft!')}
-                                                         className="cursor-help"
-                                                         color={methods[id].shipping && methods[id].shipping?.length ? 'green' : 'red'}
-                                                         title={methods[id].shipping && methods[id].shipping?.length ? methods[id].shipping.map((shipping: Record<string, any>) => shipping.cName).join(', ') : 'n/a'}/>
+
                                         {methods[id].components ? <>
                                             {methods[id].components === 'S' || methods[id].components === 'Y' ?
                                                 <FontAwesomeIcon className={"ml-1 cursor-help"} icon={faCreditCard}
@@ -108,9 +114,16 @@ const Dashboard = () => {
                                         {methods[id].api ? (
                                             methods[id].api === 'payment' ?
                                                 <FontAwesomeIcon className={"cursor-help ml-1"} icon={faMoneyBill}
-                                                                 onClick={() => alert("Payment API ist deaktiviert.")}
+                                                                 onClick={() => alert("Payment API ist aktiviert.")}
                                                                  title={'Payment API'} color={"green"}/> : null
                                         ) : null}
+
+                                        <FontAwesomeIcon icon={faShippingFast}
+                                                         onClick={() => alert(methods[id].shipping && methods[id].shipping?.length ? "Mit folgende Versandarten verknüpft:\n\n" + methods[id].shipping.map((shipping: Record<string, any>) => ' - ' + shipping.cName).join("\n") : 'Mit keiner Versandart verknüpft!')}
+                                                         className="cursor-help ml-1"
+                                                         color={methods[id].shipping && methods[id].shipping?.length ? 'green' : 'red'}
+                                                         title={methods[id].shipping && methods[id].shipping?.length ? methods[id].shipping.map((shipping: Record<string, any>) => shipping.cName).join(', ') : 'n/a'}/>
+
                                         <a title="Einstellungen" href={methods[id].settings}
                                            className={"ml-1"}
                                            target="_blank" rel="noreferrer">
