@@ -1,12 +1,13 @@
 import React, {useCallback, useEffect, useState} from "react";
 import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
-import {PaymentMethod2img} from "../../helper";
 import {formatAmount, Loading, usePluginInfo} from "@webstollen/react-jtl-plugin/lib";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCog, faCreditCard, faMoneyBill, faShippingFast, faSync} from "@fortawesome/pro-regular-svg-icons";
-import {faExclamationTriangle} from "@fortawesome/pro-solid-svg-icons"
+import {faCreditCard, faMoneyBill, faShippingFast, faSync} from "@fortawesome/pro-regular-svg-icons";
+import {faExclamationTriangle, faTimesOctagon} from "@fortawesome/pro-solid-svg-icons"
 import setupImg from '../../assets/img/mollie-dashboard.png';
 import Button from "@webstollen/react-jtl-plugin/lib/components/Button";
+import TextLink from "@webstollen/react-jtl-plugin/lib/components/TextLink";
+import {Invalid, MethodProps, Valid} from "./Method";
 
 type LoadingState = {
     methods?: boolean
@@ -15,6 +16,7 @@ type LoadingState = {
 
 const Dashboard = () => {
 
+    const [legende, setLegende] = useState(false);
     const [methods, setMethods] = useState<Record<string, Record<string, any>>>({});
     const [statistics, setStatistics] = useState<Record<string, Record<string, any>>>({});
     const [loading, _setLoading] = useState<LoadingState>({methods: false, statistics: false});
@@ -55,6 +57,20 @@ const Dashboard = () => {
         loadStatistics()
     }, [loadStatistics, loadMethods]);
 
+
+    const validMethods: React.ReactNode[] = [];
+    const invalidMethods: React.ReactNode[] = [];
+
+    Object.keys(methods).forEach((id) => {
+        if (methods[id].mollie.status === 'activated'
+            && methods[id].shipping.length
+            && methods[id].paymentMethod && parseInt(methods[id].paymentMethod.nWaehrendBestellung) <= 0) {
+            validMethods.push(<Valid method={methods[id] as MethodProps}/>)
+        } else {
+            invalidMethods.push(<Invalid method={methods[id] as MethodProps}/>)
+        }
+    })
+
     return <div className="mx-2">
         <div className="mb-4 w-full bg-white rounded-md p-4 relative">
 
@@ -81,61 +97,63 @@ const Dashboard = () => {
 
             <Loading loading={loading.methods}>
 
-                {Object.keys(methods).length > 0 && <>
-                    <b>Derzeit mit Mollie angebunden:</b>
-                    <div className="flex flex-wrap content-center justify-start flex-row">
-                        {Object.keys(methods).map(id => methods[id].shipping.length ?
-                            <div key={id} style={{flexBasis: '33%'}}>
-                                <div className="m-2 p-2 border-b">
+                {invalidMethods.length > 0 && <>
+                    <b>Zahlungsarten mit Problemen:</b>
+                    <div className="flex flex-wrap content-center justify-start flex-row mb-4">
+                        {invalidMethods}
+                    </div>
+                </>}
 
-                                    {methods[id].paymentMethod
-                                    && parseInt(methods[id].paymentMethod.nWaehrendBestellung) > 0
-                                    && <FontAwesomeIcon className={"mr-4 ml-1 cursor-help"} icon={faExclamationTriangle}
-                                                        color={"red"}
-                                                        onClick={() => alert('Zahlung vor Bestellabschluss wird nicht unterstützt. Diese Zahlungsart wird nicht zur auswahl stehen.')}
-                                                        title={"Zahlung vor Bestellabschluss nicht unterstützt."}/>}
-
-                                    <PaymentMethod2img method={id}/> {methods[id].mollie.description}
-
-                                    <div className="float-right">
-
-                                        {methods[id].components ? <>
-                                            {methods[id].components === 'S' || methods[id].components === 'Y' ?
-                                                <FontAwesomeIcon className={"ml-1 cursor-help"} icon={faCreditCard}
-                                                                 onClick={() => alert("Mollie Components sind aktiviert: " + (methods[id].components === 'S' ? 'optional.' : 'obligatorisch.'))}
-                                                                 title={"Mollie Components enabled." + (methods[id].components === 'S' ? ' (optional)' : ' (obligatorisch)')}
-                                                                 color={methods[id].components === 'S' ? 'green' : 'blue'}/>
-                                                : <FontAwesomeIcon className={"ml-1 cursor-help"} icon={faCreditCard}
-                                                                   onClick={() => alert("Mollie Components sind deaktiviert.")}
-                                                                   color={'red'}
-                                                                   title={'Mollie Components disabled'}/>
-                                            }
-                                        </> : null}
-                                        {methods[id].api ? (
-                                            methods[id].api === 'payment' ?
-                                                <FontAwesomeIcon className={"cursor-help ml-1"} icon={faMoneyBill}
-                                                                 onClick={() => alert("Payment API ist aktiviert.")}
-                                                                 title={'Payment API'} color={"green"}/> : null
-                                        ) : null}
-
-                                        <FontAwesomeIcon icon={faShippingFast}
-                                                         onClick={() => alert(methods[id].shipping && methods[id].shipping?.length ? "Mit folgende Versandarten verknüpft:\n\n" + methods[id].shipping.map((shipping: Record<string, any>) => ' - ' + shipping.cName).join("\n") : 'Mit keiner Versandart verknüpft!')}
-                                                         className="cursor-help ml-1"
-                                                         color={methods[id].shipping && methods[id].shipping?.length ? 'green' : 'red'}
-                                                         title={methods[id].shipping && methods[id].shipping?.length ? methods[id].shipping.map((shipping: Record<string, any>) => shipping.cName).join(', ') : 'n/a'}/>
-
-                                        <a title="Einstellungen" href={methods[id].settings}
-                                           className={"ml-1"}
-                                           target="_blank" rel="noreferrer">
-                                            <FontAwesomeIcon icon={faCog}/>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div> : null)}
+                {validMethods.length > 0 && <>
+                    <b>Aktive Zahlungsarten:</b>
+                    <div className="flex flex-wrap content-center justify-start flex-row mb-4">
+                        {validMethods}
                     </div>
                 </>}
 
             </Loading>
+
+            <div className="text-right">
+                <TextLink className={"text-xs"}
+                          onClick={() => setLegende(prev => !prev)}>Legende {legende ? 'ausblenden' : 'anzeigen'}</TextLink>
+                {legende ? <div className={"m-2 p-2"}>
+                    <ul>
+                        <li className="text-xs"><FontAwesomeIcon color="red" icon={faTimesOctagon}
+                                                                 title={'Konfigurationsfehler bei Mollie'}/> =
+                            Konfigurationsfehler bei Mollie
+                        </li>
+                        <li className="text-xs"><FontAwesomeIcon color="red" size={"xs"} icon={faExclamationTriangle}
+                                                                 title={'Konfigurationsfehler im Shop'}/> =
+                            Konfigurationsfehler im Shop
+                        </li>
+                        <li className="text-xs"><FontAwesomeIcon color="red" size={"xs"} icon={faShippingFast}
+                                                                 title={'Keine Versandarten verbunden'}/> = Keine
+                            Versandarten verbunden
+                        </li>
+                        <li className="text-xs"><FontAwesomeIcon color="green" size={"xs"} icon={faShippingFast}
+                                                                 title={'Versandarten verbunden'}/> = Versandarten
+                            verbunden
+                        </li>
+                        <li className="text-xs"><FontAwesomeIcon color='red' size={"xs"} icon={faCreditCard}
+                                                                 title={'Mollie Components deaktiviert'}/> = Mollie
+                            Components deaktiviert
+                        </li>
+                        <li className="text-xs"><FontAwesomeIcon color='blue' size={"xs"} icon={faCreditCard}
+                                                                 title={'Mollie Components aktiviert (obligatorisch)'}/> =
+                            Mollie Components aktiviert (obligatorisch)
+                        </li>
+                        <li className="text-xs"><FontAwesomeIcon color='green' size={"xs"} icon={faCreditCard}
+                                                                 title={'Mollie Components aktiviert (optional)'}/> =
+                            Mollie Components aktiviert (optional)
+                        </li>
+                        <li className="text-xs"><FontAwesomeIcon color='green' size={"xs"} icon={faMoneyBill}
+                                                                 title={'Payment API aktiviert'}/> = Payment API
+                            aktiviert
+                        </li>
+                    </ul>
+                </div> : null}
+
+            </div>
 
             <Button onClick={() => window.location.href = "versandarten.php"} color="blue"
                     className="mx-auto block my-6">

@@ -222,6 +222,18 @@ class PaymentMethod extends Method
 
             $paymentOptions = [];
 
+            $paymentOptions['description'] = 'Order ' . $order->cBestellNr;
+
+            switch(static::METHOD){
+                case \Mollie\Api\Types\PaymentMethod::BANKTRANSFER:
+                    $paymentOptions['billingEmail'] = $order->oRechnungsadresse->cMail;
+                    $paymentOptions['locale'] = Locale::getLocale(Session::get('cISOSprache', 'ger'), $order->oRechnungsadresse->cLand);
+
+                    // TODO: SETTING!!
+                    //$paymentOptions['dueDate'] = date('Y-m-d', strtotime('+7 DAYS'));
+                    break;
+            }
+
             if ((int)Session::getCustomer()->nRegistriert) {
                 $paymentOptions['customerId'] = Customer::createOrUpdate(Session::getCustomer());
             }

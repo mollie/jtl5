@@ -233,7 +233,7 @@ class Order implements JsonSerializable
 
         $data = [];
         $data['amount'] = new Amount($oBestellung->fGesamtsumme, $oBestellung->Waehrung, true, true);
-        $data['description'] = $oBestellung->cBestellNr;
+        $data['description'] = 'Order ' . $oBestellung->cBestellNr;
         $data['redirectUrl'] = $oPaymentMethod->getReturnURL($oBestellung);
         $data['webhookUrl'] = Shop::getURL(true) . '/?mollie=1';
         $data['locale'] = Locale::getLocale(Session::get('cISOSprache', 'ger'), Session::getCustomer()->cLand);

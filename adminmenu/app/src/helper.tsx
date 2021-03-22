@@ -17,6 +17,7 @@ import paypalImg from './assets/img/paypal.svg';
 import paysafecardImg from './assets/img/paysafecard.svg';
 import przelewy24Img from './assets/img/Przelewy24.svg';
 import sofortImg from './assets/img/sofort.svg';
+import voucherImg from './assets/img/Voucher.svg'
 
 
 export type MollieOrder = {
@@ -157,6 +158,7 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
             Przelewy24: przelewy24Img,
             przelewy24: przelewy24Img,
             sofort: sofortImg,
+            voucher: voucherImg,
         }
         switch (method) {
             case 'applepay':
@@ -176,6 +178,7 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
             case 'Przelewy24':
             case 'przelewy24':
             case 'sofort':
+            case 'voucher':
                 return <img className={'inline'} src={prefix + images[method]} title={method} alt={method}/>
             case 'klarnasliceit':
             case 'klarnapaylater':

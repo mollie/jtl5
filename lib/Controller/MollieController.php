@@ -24,11 +24,14 @@ class MollieController extends AbstractController
         if (self::Plugin()->getConfig()->getValue('apiKey') === '' && self::Plugin()->getConfig()->getValue('test_apiKey') !== '') {
             $test = true;
         }
-        $_methods = MollieAPI::API($test)->methods->allActive(['includeWallets' => 'applepay']);
+        $_methods = MollieAPI::API($test)->methods->allAvailable([/*'includeWallets' => 'applepay', 'resource' => 'orders'*/]);
         $methods = [];
         $oPlugin = self::Plugin();
 
         foreach ($_methods as $method) {
+            if(in_array($method->id, ['voucher', 'directdebit', 'giftcard'], true)){
+                continue;
+            }
             $id = 'kPlugin_' . Helper::getIDByPluginID("ws5_mollie") . '_' . $method->id;
             $oZahlungsart = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tzahlungsart WHERE cModulId = :cModulID;", [
                 ':cModulID' => $id
