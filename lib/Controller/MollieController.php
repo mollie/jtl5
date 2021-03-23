@@ -6,6 +6,7 @@ namespace Plugin\ws5_mollie\lib\Controller;
 
 use JTL\Plugin\Helper;
 use JTL\Shop;
+use Mollie\Api\Types\PaymentMethod;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Response;
 
@@ -29,7 +30,7 @@ class MollieController extends AbstractController
         $oPlugin = self::Plugin();
 
         foreach ($_methods as $method) {
-            if(in_array($method->id, ['voucher', 'directdebit', 'giftcard'], true)){
+            if(in_array($method->id, ['voucher', PaymentMethod::DIRECTDEBIT, PaymentMethod::GIFTCARD], true)){
                 continue;
             }
             $id = 'kPlugin_' . Helper::getIDByPluginID("ws5_mollie") . '_' . $method->id;

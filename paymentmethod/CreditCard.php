@@ -5,10 +5,13 @@
 
 namespace Plugin\ws5_mollie\paymentmethod;
 
+use Exception;
 use JTL\Checkout\Bestellung;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\MollieAPI;
+use Plugin\ws5_mollie\lib\Payment\Address;
 use Plugin\ws5_mollie\lib\PaymentMethod;
+use Session;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -19,7 +22,6 @@ class CreditCard extends PaymentMethod
     public const CACHE_TOKEN_TIMESTAMP = self::CACHE_TOKEN . ':timestamp';
 
     public const METHOD = \Mollie\Api\Types\PaymentMethod::CREDITCARD;
-
 
     public function handleNotification(Bestellung $order, string $hash, array $args): void
     {
@@ -54,10 +56,10 @@ class CreditCard extends PaymentMethod
 
         try {
             $trustBadge = (bool)self::Plugin()->getConfig()->getValue($this->moduleID . '_trustBadge');
-            $locale = self::getLocale(\Session::getInstance()->getLanguage()->getIso(), \Session::getCustomer()->cLand ?? null);
+            $locale = self::getLocale(Session::getInstance()->getLanguage()->getIso(), Session::getCustomer()->cLand ?? null);
             $mode = MollieAPI::getMode();
             $errorMessage = json_encode(self::Plugin()->getLocalization()->getTranslation('mcErrorMessage'), JSON_THROW_ON_ERROR);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Shop::Container()->getLogService()->error($e->getMessage(), ['e' => $e]);
             return parent::handleAdditional($post);
         }
@@ -89,5 +91,24 @@ class CreditCard extends PaymentMethod
         return true;
     }
 
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
 
+        $paymentOptions = [];
+
+        if ($apiType === 'payment') {
+            if ($order->Lieferadresse !== null) {
+                if (!$order->Lieferadresse->cMail) {
+                    $order->Lieferadresse->cMail = $order->oRechnungsadresse->cMail;
+                }
+                $paymentOptions['shippingAddress'] = Address::factory($order->Lieferadresse);
+            }
+
+            $paymentOptions['billingAddress'] = Address::factory($order->oRechnungsadresse);
+        }
+        if ((int)$this->getCache(self::CACHE_TOKEN_TIMESTAMP) > time() && ($token = trim($this->getCache(self::CACHE_TOKEN)))) {
+            $paymentOptions['cardToken'] = $token;
+        }
+        return $paymentOptions;
+    }
 }

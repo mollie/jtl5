@@ -5,6 +5,7 @@
 
 namespace Plugin\ws5_mollie\paymentmethod;
 
+use JTL\Checkout\Bestellung;
 use Plugin\ws5_mollie\lib\PaymentMethod;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -12,4 +13,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 class EPS extends PaymentMethod
 {
     public const METHOD = \Mollie\Api\Types\PaymentMethod::EPS;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return [];
+    }
 }

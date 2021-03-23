@@ -118,37 +118,40 @@ const Dashboard = () => {
                           onClick={() => setLegende(prev => !prev)}>Legende {legende ? 'ausblenden' : 'anzeigen'}</TextLink>
                 {legende ? <div className={"m-2 p-2"}>
                     <ul>
-                        <li className="text-xs"><FontAwesomeIcon color="red" icon={faTimesOctagon}
-                                                                 title={'Konfigurationsfehler bei Mollie'}/> =
-                            Konfigurationsfehler bei Mollie
+                        <li className="text-xs">
+                            <FontAwesomeIcon color="red" icon={faTimesOctagon}
+                                             title={'Konfigurationsfehler bei Mollie'}/> = Konfigurationsfehler bei
+                            Mollie
                         </li>
-                        <li className="text-xs"><FontAwesomeIcon color="red" size={"xs"} icon={faExclamationTriangle}
-                                                                 title={'Konfigurationsfehler im Shop'}/> =
-                            Konfigurationsfehler im Shop
+                        <li className="text-xs">
+                            <FontAwesomeIcon color="red" size={"xs"} icon={faExclamationTriangle}
+                                             title={'Konfigurationsfehler im Shop'}/> = Konfigurationsfehler im Shop
                         </li>
-                        <li className="text-xs"><FontAwesomeIcon color="red" size={"xs"} icon={faShippingFast}
-                                                                 title={'Keine Versandarten verbunden'}/> = Keine
-                            Versandarten verbunden
+                        <li className="text-xs">
+                            <FontAwesomeIcon color="red" size={"xs"} icon={faShippingFast}
+                                             title={'Keine Versandarten verbunden'}/> = Keine Versandarten verbunden
                         </li>
-                        <li className="text-xs"><FontAwesomeIcon color="green" size={"xs"} icon={faShippingFast}
-                                                                 title={'Versandarten verbunden'}/> = Versandarten
-                            verbunden
+                        <li className="text-xs">
+                            <FontAwesomeIcon color="green" size={"xs"} icon={faShippingFast}
+                                             title={'Versandarten verbunden'}/> = Versandarten verbunden
                         </li>
-                        <li className="text-xs"><FontAwesomeIcon color='red' size={"xs"} icon={faCreditCard}
-                                                                 title={'Mollie Components deaktiviert'}/> = Mollie
-                            Components deaktiviert
+                        <li className="text-xs">
+                            <FontAwesomeIcon color='red' size={"xs"} icon={faCreditCard}
+                                             title={'Mollie Components deaktiviert'}/> = Mollie Components deaktiviert
                         </li>
-                        <li className="text-xs"><FontAwesomeIcon color='blue' size={"xs"} icon={faCreditCard}
-                                                                 title={'Mollie Components aktiviert (obligatorisch)'}/> =
-                            Mollie Components aktiviert (obligatorisch)
+                        <li className="text-xs">
+                            <FontAwesomeIcon color='blue' size={"xs"} icon={faCreditCard}
+                                             title={'Mollie Components aktiviert (obligatorisch)'}/> = Mollie Components
+                            aktiviert (obligatorisch)
                         </li>
-                        <li className="text-xs"><FontAwesomeIcon color='green' size={"xs"} icon={faCreditCard}
-                                                                 title={'Mollie Components aktiviert (optional)'}/> =
-                            Mollie Components aktiviert (optional)
+                        <li className="text-xs">
+                            <FontAwesomeIcon color='green' size={"xs"} icon={faCreditCard}
+                                             title={'Mollie Components aktiviert (optional)'}/> = Mollie Components
+                            aktiviert (optional)
                         </li>
-                        <li className="text-xs"><FontAwesomeIcon color='green' size={"xs"} icon={faMoneyBill}
-                                                                 title={'Payment API aktiviert'}/> = Payment API
-                            aktiviert
+                        <li className="text-xs">
+                            <FontAwesomeIcon color='green' size={"xs"} icon={faMoneyBill}
+                                             title={'Payment API aktiviert'}/> = Payment API aktiviert
                         </li>
                     </ul>
                 </div> : null}

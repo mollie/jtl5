@@ -4,9 +4,15 @@
 namespace Plugin\ws5_mollie\paymentmethod;
 
 
+use JTL\Checkout\Bestellung;
 use Plugin\ws5_mollie\lib\PaymentMethod;
 
 class PaysafeCard extends PaymentMethod
 {
     public const METHOD = \Mollie\Api\Types\PaymentMethod::PAYSAFECARD;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return $apiType === 'payment' ? ['customerReference' => $order->oKunde->getID()] : [];
+    }
 }

@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-02-10</CreateDate>
-    <Version>1.0.0-beta.8</Version>
+    <CreateDate>2021-03-22</CreateDate>
+    <Version>1.0.0-beta.6</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -353,7 +353,7 @@
                 <MethodLanguage iso="GER">
                     <Name>giropay</Name>
                     <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
+                    <InfoText>Bezahlen Sie bequem mit Giropay.</InfoText>
                 </MethodLanguage>
                 <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
                     <Name>API</Name>
@@ -469,7 +469,7 @@
                 <MethodLanguage iso="GER">
                     <Name>Banktransfer</Name>
                     <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem mit Banktransfer.</InfoText>
+                    <InfoText>Bezahlen Sie bequem per Überweisung.</InfoText>
                 </MethodLanguage>
                 <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
                     <Name>API</Name>
@@ -479,6 +479,11 @@
                         <Option value="order" sort="1">Order API</Option>
                         <Option value="payment" sort="2">Payment API</Option>
                     </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="100" sort="50" conf="Y">
+                    <Name>Gültigkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Überweisung zu tätigen?</Description>
+                    <ValueName>dueDays</ValueName>
                 </Setting>
             </Method>
             <Method>

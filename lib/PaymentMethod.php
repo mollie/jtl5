@@ -27,7 +27,7 @@ use Session;
 use Shop;
 use stdClass;
 
-class PaymentMethod extends Method
+abstract class PaymentMethod extends Method
 {
 
     public const ALLOW_PAYMENT_BEFORE_ORDER = false;
@@ -222,28 +222,13 @@ class PaymentMethod extends Method
 
             $paymentOptions = [];
 
-            $paymentOptions['description'] = 'Order ' . $order->cBestellNr;
-
-            switch(static::METHOD){
-                case \Mollie\Api\Types\PaymentMethod::BANKTRANSFER:
-                    $paymentOptions['billingEmail'] = $order->oRechnungsadresse->cMail;
-                    $paymentOptions['locale'] = Locale::getLocale(Session::get('cISOSprache', 'ger'), $order->oRechnungsadresse->cLand);
-
-                    // TODO: SETTING!!
-                    //$paymentOptions['dueDate'] = date('Y-m-d', strtotime('+7 DAYS'));
-                    break;
-            }
-
             if ((int)Session::getCustomer()->nRegistriert) {
                 $paymentOptions['customerId'] = Customer::createOrUpdate(Session::getCustomer());
             }
-            if (static::METHOD === \Mollie\Api\Types\PaymentMethod::CREDITCARD) {
-                if ((int)$this->getCache(CreditCard::CACHE_TOKEN_TIMESTAMP) > time() && ($token = trim($this->getCache(CreditCard::CACHE_TOKEN)))) {
-                    $paymentOptions['cardToken'] = $token;
-                }
-            }
 
             $api = self::Plugin()->getConfig()->getValue($this->moduleID . '_api');
+
+            $paymentOptions = array_merge($paymentOptions, $this->getPaymentOptions($order, $api));
 
             if ($api === 'payment') {
                 if ($molliePayment = Order::createPayment($order, $paymentOptions)) {
@@ -279,6 +264,8 @@ class PaymentMethod extends Method
             );
         }
     }
+
+    abstract public function getPaymentOptions(Bestellung $order, $apiType): array;
 
     /**
      * @param Bestellung $order
