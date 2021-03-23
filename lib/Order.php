@@ -18,7 +18,9 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\Order as MollieOrder;
 use Mollie\Api\Resources\OrderLine;
+use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\OrderStatus;
+use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Order\Address;
 use Plugin\ws5_mollie\lib\Order\Amount;
@@ -162,6 +164,93 @@ class Order implements JsonSerializable
         return $options;
     }
 
+    public static function createPayment(Bestellung $oBestellung, array $options = []): ?Payment
+    {
+
+        $api = null;
+        $orderModel = null;
+        // PayAgain, order already existing?
+        if ($oBestellung->kBestellung > 0) {
+            try {
+                $orderModel = OrderModel::loadByAttributes(
+                    ['bestellung' => $oBestellung->kBestellung],
+                    Shop::Container()->getDB(),
+                    DataModel::ON_NOTEXISTS_FAIL);
+                $api = MollieAPI::API($orderModel->test);
+                $payment = $api->payments->get($orderModel->getOrderId());
+                if ($payment->status === PaymentStatus::STATUS_OPEN) {
+                    return $payment;
+                }
+            } catch (Exception $e) {
+            }
+        }
+        if (!$api) {
+            $api = MollieAPI::API(MollieAPI::getMode());
+        }
+
+        [$data, $hash] = self::factoryPayment($oBestellung);
+        $data = array_merge($data, $options);
+
+        if (strpos($_SERVER['PHP_SELF'], 'bestellab_again') !== false
+            && self::Plugin()->getConfig()->getValue('resetMethod') === 'on') {
+            unset($data['method']);
+        }
+
+        $payment = $api->payments->create($data);
+        if (!$orderModel) {
+            $orderModel = OrderModel::loadByAttributes([
+                'orderId' => $payment->id,
+            ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
+            $orderModel->setTest(MollieAPI::getMode());
+        }
+
+        $orderModel->setBestellung($oBestellung->kBestellung);
+        $orderModel->setBestellNr($oBestellung->cBestellNr);
+        $orderModel->setLocale($payment->locale);
+        $orderModel->setAmount($payment->amount->value);
+        $orderModel->setMethod($payment->method);
+        $orderModel->setCurrency($payment->amount->currency);
+        $orderModel->setOrderId($payment->id);
+        $orderModel->setStatus($payment->status);
+        $orderModel->setHash($hash);
+        $orderModel->setSynced(self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
+
+        if (!$orderModel->save()) {
+            throw new RuntimeException('Could not save OrderModel.');
+        }
+        return $payment;
+
+
+    }
+
+    public static function factoryPayment(Bestellung $oBestellung): array
+    {
+        $oPaymentMethod = LegacyMethod::create($oBestellung->Zahlungsart->cModulId);
+        if (!$oPaymentMethod) {
+            throw new \RuntimeException('Could not load PaymentMethod!');
+        }
+        $hash = $oPaymentMethod->generateHash($oBestellung);
+
+        $data = [];
+        $data['amount'] = new Amount($oBestellung->fGesamtsumme, $oBestellung->Waehrung, true, true);
+        $data['description'] = 'Order ' . $oBestellung->cBestellNr;
+        $data['redirectUrl'] = $oPaymentMethod->getReturnURL($oBestellung);
+        $data['webhookUrl'] = Shop::getURL(true) . '/?mollie=1';
+        $data['locale'] = Locale::getLocale(Session::get('cISOSprache', 'ger'), Session::getCustomer()->cLand);
+        /** @var PaymentMethod $oPaymentMethod */
+        /** @noinspection NotOptimalIfConditionsInspection */
+        if (defined(get_class($oPaymentMethod) . '::METHOD') && $oPaymentMethod::METHOD !== '') {
+            $data['method'] = $oPaymentMethod::METHOD;
+        }
+        $data['metadata'] = [
+            'kBestellung' => $oBestellung->kBestellung,
+            'kKunde' => $oBestellung->kKunde,
+            'kKundengruppe' => Session::getCustomerGroup()->getID(),
+            'cHash' => $oPaymentMethod->generateHash($oBestellung),
+        ];
+
+        return [$data, $hash];
+    }
 
     /**
      * @param Bestellung $oBestellung
@@ -199,11 +288,6 @@ class Order implements JsonSerializable
         if (count($paymentOptions)) {
             $data->payment = (object)$paymentOptions;
         }
-
-        /*if ((self::Plugin()->getConfig()->getValue('resetMethod') === 'on')
-            && strpos($_SERVER['PHP_SELF'], 'bestellab_again.php') !== false) {
-            unset($data->method);
-        }*/
 
         $order = $api->orders->create($data->toArray());
         //$payments = $order->payments();
@@ -307,7 +391,12 @@ class Order implements JsonSerializable
         return [$data, $hash];
     }
 
-    public static function update(\Mollie\Api\Resources\Order $order): bool
+    /**
+     * @param MollieOrder|Payment $order
+     * @return bool
+     * @throws Exception
+     */
+    public static function update($order): bool
     {
         $orderModel = OrderModel::loadByAttributes(
             ['orderId' => $order->id],

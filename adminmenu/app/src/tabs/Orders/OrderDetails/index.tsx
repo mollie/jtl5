@@ -78,52 +78,81 @@ const OrderDetails = (props: OrderDetailsProps) => {
             </div>
             <div className=" rounded-md">
 
-                {data && data.mollie && <Details mollie={data.mollie}/>}
+                {data && data.mollie.resource === 'payment' ? <>
+                    {/* PAYMENT API */}
+                    {data && data.mollie && <Details mollie={data.mollie}/>}
 
-                {data && data.mollie && <div className="mt-4">
-                    <h3 className="font-bold text-2xl mb-1">Positionen</h3>
-                    <OrderLines mollie={data.mollie}/>
-                </div>}
+                    {data && data.mollie && <div className="mt-4">
+                        <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                            onClick={() => setShowRefunds(prev => !prev)}>
+                            Refunds ({data.mollie._embedded?.refunds?.length})
+                            <FontAwesomeIcon className=" float-right"
+                                             icon={showRefunds ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                        </h3>
+                        {showRefunds ? <Refunds mollie={data.mollie}/> : null}
+                    </div>}
 
-                {data && data.mollie && <div className="mt-4">
-                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
-                        onClick={() => setShowPayments(prev => !prev)}>
-                        Zahlungen ({data.mollie._embedded?.payments?.length})
-                        <FontAwesomeIcon className=" float-right"
-                                         icon={showPayments ? faChevronDoubleDown : faChevronDoubleLeft}/>
-                    </h3>
-                    {showPayments ? <Payments mollie={data.mollie}/> : null}
-                </div>}
+                    {data && data.logs && <div className="mt-4">
+                        <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                            onClick={() => setShowLogs(prev => !prev)}>
+                            Log ({data.logs.length})
+                            <FontAwesomeIcon className=" float-right"
+                                             icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                        </h3>
+                        {showLogs ? <Logs data={data.logs}/> : null}
+                    </div>}
 
-                {data && data.mollie && <div className="mt-4">
-                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
-                        onClick={() => setShowRefunds(prev => !prev)}>
-                        Refunds ({data.mollie._embedded?.refunds?.length})
-                        <FontAwesomeIcon className=" float-right"
-                                         icon={showRefunds ? faChevronDoubleDown : faChevronDoubleLeft}/>
-                    </h3>
-                    {showRefunds ? <Refunds mollie={data.mollie}/> : null}
-                </div>}
+                </> : <>
+                    {/* ORDER API */}
+                    {data && data.mollie && <Details mollie={data.mollie}/>}
 
-                {data && data.mollie && <div className="mt-4">
-                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
-                        onClick={() => setShowShipments(prev => !prev)}>
-                        Lieferungen ({data.mollie._embedded?.shipments?.length})
-                        <FontAwesomeIcon className=" float-right"
-                                         icon={showShipments ? faChevronDoubleDown : faChevronDoubleLeft}/>
-                    </h3>
-                    {showShipments && data.bestellung ? <Shipments kBestellung={data.bestellung.kBestellung} mollie={data.mollie}/> : null}
-                </div>}
+                    {data && data.mollie && <div className="mt-4">
+                        <h3 className="font-bold text-2xl mb-1">Positionen</h3>
+                        <OrderLines mollie={data.mollie}/>
+                    </div>}
 
-                {data && data.logs && <div className="mt-4">
-                    <h3 className="font-bold text-2xl mb-1 cursor-pointer"
-                        onClick={() => setShowLogs(prev => !prev)}>
-                        Log ({data.logs.length})
-                        <FontAwesomeIcon className=" float-right"
-                                         icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft}/>
-                    </h3>
-                    {showLogs ? <Logs data={data.logs}/> : null}
-                </div>}
+                    {data && data.mollie && <div className="mt-4">
+                        <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                            onClick={() => setShowPayments(prev => !prev)}>
+                            Zahlungen ({data.mollie._embedded?.payments?.length})
+                            <FontAwesomeIcon className=" float-right"
+                                             icon={showPayments ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                        </h3>
+                        {showPayments ? <Payments mollie={data.mollie}/> : null}
+                    </div>}
+
+                    {data && data.mollie && <div className="mt-4">
+                        <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                            onClick={() => setShowRefunds(prev => !prev)}>
+                            Refunds ({data.mollie._embedded?.refunds?.length})
+                            <FontAwesomeIcon className=" float-right"
+                                             icon={showRefunds ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                        </h3>
+                        {showRefunds ? <Refunds mollie={data.mollie}/> : null}
+                    </div>}
+
+                    {data && data.mollie && <div className="mt-4">
+                        <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                            onClick={() => setShowShipments(prev => !prev)}>
+                            Lieferungen ({data.mollie._embedded?.shipments?.length})
+                            <FontAwesomeIcon className=" float-right"
+                                             icon={showShipments ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                        </h3>
+                        {showShipments && data.bestellung ?
+                            <Shipments kBestellung={data.bestellung.kBestellung} mollie={data.mollie}/> : null}
+                    </div>}
+
+                    {data && data.logs && <div className="mt-4">
+                        <h3 className="font-bold text-2xl mb-1 cursor-pointer"
+                            onClick={() => setShowLogs(prev => !prev)}>
+                            Log ({data.logs.length})
+                            <FontAwesomeIcon className=" float-right"
+                                             icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft}/>
+                        </h3>
+                        {showLogs ? <Logs data={data.logs}/> : null}
+                    </div>}
+
+                </>}
 
                 {/*<pre style={{overflow: "scroll", maxHeight: "500px"}}>{JSON.stringify(data, null, 2)}</pre>*/}
             </div>

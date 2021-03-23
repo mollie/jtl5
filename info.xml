@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-02-10</CreateDate>
-    <Version>1.0.0-beta.5</Version>
+    <CreateDate>2021-03-22</CreateDate>
+    <Version>1.0.0-beta.6</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -69,13 +69,15 @@
                     <ValueName>onlyPaid</ValueName>
                 </Setting>
 
-                <!--Setting type="checkbox" initialValue="off" sort="50" conf="Y">
-                    <Name>Zahl-Methode bei erneutem Zahlvorgang zurücksetzen</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, die im Bestellvorgang ausgewählte Zahlungsart
-                        zurückgesetzt, somit hat der Kunde die Möglichkeit diese bei Mollie zu ändern.
+                <Setting type="checkbox" initialValue="off" sort="50" conf="Y">
+                    <Name>Zahl-Methode bei erneutem Zahlvorgang zurücksetzen (Payment API)</Name>
+                    <Description>Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte
+                        Mollie-Zahlungsart zurückzusetzen, somit hat der Kunde zwischen allen aktiven Mollie-zahlarten
+                        zu wählen.
                     </Description>
                     <ValueName>resetMethod</ValueName>
-                </Setting-->
+                </Setting>
+
                 <Setting type="selectbox" initialValue="B" sort="50" conf="Y">
                     <Name>Teilversand Verhalten</Name>
                     <Description>Bei Gastbestellungen und Teilversand.</Description>
@@ -168,6 +170,15 @@
                         <Option value="N" sort="3">Nein</Option>
                     </SelectboxOptions>
                 </Setting>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Apple Pay</Name>
@@ -188,6 +199,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Apple Pay.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>PayPal</Name>
@@ -208,6 +228,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit PayPal.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Klarna Pay Later</Name>
@@ -268,6 +297,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit SOFORT.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Przelewy24</Name>
@@ -288,6 +326,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Giropay</Name>
@@ -306,8 +353,17 @@
                 <MethodLanguage iso="GER">
                     <Name>giropay</Name>
                     <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
+                    <InfoText>Bezahlen Sie bequem mit Giropay.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>iDEAL</Name>
@@ -328,6 +384,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit iDeal.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>EPS</Name>
@@ -348,6 +413,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit eps.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Bancontact</Name>
@@ -368,6 +442,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Bancontact.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Banktransfer</Name>
@@ -386,8 +469,22 @@
                 <MethodLanguage iso="GER">
                     <Name>Banktransfer</Name>
                     <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem mit Banktransfer.</InfoText>
+                    <InfoText>Bezahlen Sie bequem per Überweisung.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="100" sort="50" conf="Y">
+                    <Name>Gültigkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Überweisung zu tätigen?</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
             </Method>
             <Method>
                 <Name>Belfius</Name>
@@ -408,6 +505,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Belfius.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>KBC</Name>
@@ -428,6 +534,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit KBC.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>MyBank</Name>
@@ -448,6 +563,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit MyBank.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>paysafe card</Name>
@@ -468,6 +592,15 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit paysafe card.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
         </PaymentMethod>
         <Locales>
@@ -497,7 +630,8 @@
                     You canceled the payment. Please select a different payment method if necessary.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Votre paiement a t annul. Veuillez slectionner un autre mode de paiement si ncessaire.]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Hai annullato il pagamento. Se necessario, scegli un metodo di pagamento diverso.]]></VariableLocalized>
+                <VariableLocalized iso="ITA">
+                    <![CDATA[Hai annullato il pagamento. Se necessario, scegli un metodo di pagamento diverso.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_expired</Name>
@@ -508,7 +642,8 @@
                     Your payment session has expired, please try again.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Votre session de paiement a expir, s'il vous plat essayer  nouveau.]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[La tua sessione di pagamento è scaduta, riprovi.]]></VariableLocalized>
+                <VariableLocalized iso="ITA">
+                    <![CDATA[La tua sessione di pagamento è scaduta, riprovi.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_open</Name>
@@ -520,7 +655,8 @@
                     The payment process failed. Please try again or choose a different payment method.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Une erreur s'est produite lors du paiement. Veuillez ressayer ou choisir un autre mode de paiement.]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Si è verificato un errore con il pagamento. Riprovi o scegli un metodo di pagamento diverso.]]></VariableLocalized>
+                <VariableLocalized iso="ITA">
+                    <![CDATA[Si è verificato un errore con il pagamento. Riprovi o scegli un metodo di pagamento diverso.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_failed</Name>
@@ -532,7 +668,8 @@
                     The payment process failed. Please try again or choose a different paymentmethod.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Une erreur s'est produite lors du paiement. Veuillez ressayer ou choisir un autre mode de paiement.]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Si è verificato un errore con il pagamento. Riprovi o scegli un metodo di pagamento diverso.]]></VariableLocalized>
+                <VariableLocalized iso="ITA">
+                    <![CDATA[Si è verificato un errore con il pagamento. Riprovi o scegli un metodo di pagamento diverso.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_create</Name>
@@ -543,7 +680,8 @@
                     The payment process failed. Please contact us.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Une erreur s'est produite lors du paiement. Contactez nous s'il vous plait.]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Si è verificato un errore con il pagamento. Ci contatti per favore.]]></VariableLocalized>
+                <VariableLocalized iso="ITA">
+                    <![CDATA[Si è verificato un errore con il pagamento. Ci contatti per favore.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_cardHolder</Name>
@@ -595,7 +733,8 @@
                     The three-digit CVV/CVC number is shown on the reverse for Visa and Mastercard, and on the front of the card for American Express.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[
                     Le numro CVC/CVV  trois chiffres est indiqu au dos de Visa et Mastercard et au recto de la carte American Express.]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Il numero CVV/CVC trovi nelle Carte VISA e MASTERCARD sul Retro, nella Carta American Express trovi sulla parte anteriore.]]></VariableLocalized>
+                <VariableLocalized iso="ITA">
+                    <![CDATA[Il numero CVV/CVC trovi nelle Carte VISA e MASTERCARD sul Retro, nella Carta American Express trovi sulla parte anteriore.]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>mcErrorMessage</Name>

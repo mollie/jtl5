@@ -40,8 +40,11 @@ const Details = ({mollie}: DetailsProps) => {
             <td>{moment(mollie.createdAt).format('Do MMM YYYY, HH:mm:ss')} Uhr</td>
         </tr>
         <tr>
-            <th>Kunde:</th>
-            <td>{mollie.billingAddress.title} {mollie.billingAddress.givenName} {mollie.billingAddress.familyName}</td>
+            {mollie.billingAddress ? <>
+                    <th>Kunde:</th>
+                    <td>{mollie.billingAddress.title} {mollie.billingAddress.givenName} {mollie.billingAddress.familyName}</td>
+                </>
+                : null}
             <th>Zahlungslink:</th>
             <td colSpan={3}>{mollie._links.checkout?.href ?
                 <TextLink target="_blank"
