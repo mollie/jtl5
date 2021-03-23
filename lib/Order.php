@@ -413,4 +413,14 @@ class Order implements JsonSerializable
         return $orderModel->save();
 
     }
+
+    public static function sendReminders()
+    {
+        $remindables = Shop::Container()->getDB()->executeQuery('SELECT * FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND cStatus IN ("created","open", "expired", "failed", "canceled")', 2);
+        foreach ($remindables as $remindable){
+            $repayURL = Shop::getURL() . '/?m_pay=' . $remindable->kId;
+            //var_dump($repayURL);
+        }
+    }
+
 }

@@ -9,6 +9,11 @@ try {
 
     ifndef('MOLLIE_QUEUE_MAX', 3);
     Queue::run(MOLLIE_QUEUE_MAX);
+
+    // TODO : SETTING
+    \Plugin\ws5_mollie\lib\Order::sendReminders();
+
+
 } catch (Exception $e) {
     Shop::Container()->getLogService()->error($e->getMessage() . " (Trace: {$e->getTraceAsString()})");
 }

@@ -46,6 +46,7 @@ use RuntimeException;
  * @method void setSynced(bool $synced)
  * @method void setModified(string $modified)
  * @method void setCreated(string $created)
+ * @method void setReminder(string $reminder)
  *
  * @method int getBestellung()
  * @method string getOrderId()
@@ -63,6 +64,7 @@ use RuntimeException;
  * @method bool getSynced()
  * @method string getModified()
  * @method string getCreated()
+ * @method string getReminder()
  *
  */
 final class OrderModel extends DataModel implements JsonSerializable
@@ -104,6 +106,7 @@ final class OrderModel extends DataModel implements JsonSerializable
             $attr['synced'] = DataAttribute::create('bSynced', 'bool', false, false);
             $attr['modified'] = DataAttribute::create('dModified', 'datetime', date('Y-m-d H:i:s'), false);
             $attr['created'] = DataAttribute::create('dCreated', 'datetime', date('Y-m-d H:i:s'), false);
+            $attr['reminder'] = DataAttribute::create('dReminder', 'datetime', null, true);
         }
 
         return $attr;

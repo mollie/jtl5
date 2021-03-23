@@ -5,8 +5,14 @@ namespace Plugin\ws5_mollie\lib\Hook;
 
 
 use Exception;
+use JTL\Checkout\Bestellung;
 use JTL\Shop;
+use Mollie\Api\Resources\Payment;
+use Mollie\Api\Types\OrderStatus;
+use Mollie\Api\Types\PaymentStatus;
+use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order;
 
 
@@ -60,6 +66,53 @@ class Queue extends AbstractHook
         if (array_key_exists('mollie', $_REQUEST) && (int)$_REQUEST['mollie'] === 1 && array_key_exists('id', $_REQUEST)) {
             self::saveToQueue($_REQUEST['id'], $_REQUEST['id'], 'webhook');
             exit();
+        }
+        if (array_key_exists('m_pay', $_REQUEST) && (int)$_REQUEST['m_pay']) {
+            try {
+                $orderModel = OrderModel::loadByAttributes(['id' => (int)$_REQUEST['m_pay']], Shop::Container()->getDB());
+                $oBestellung = new Bestellung($orderModel->getBestellung(), true);
+
+                if ($oBestellung->dBezahltDatum !== null || in_array($orderModel->getStatus(), ['completed', 'paid', 'authorized', 'pending'])) {
+                    // TODO TRANSLATE
+                    throw new Exception('Already paid!');
+                }
+
+                $api = MollieAPI::API($orderModel->getTest());
+
+                if (strpos($orderModel->orderId, 'tr_') === 0) {
+                    // Payment API
+
+                    $payment = Order::createPayment($oBestellung);
+                    header('Location: ' . $payment->getCheckoutUrl());
+                    exit();
+
+
+                } else {
+                    // Order API
+                    $mOrder = $api->orders->get($orderModel->getOrderId(), ['embed' => 'payments']);
+                    if (in_array($mOrder->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
+                        throw new Exception('Already paid!');
+                    }
+
+                    if ($mOrder->payments()) {
+                        /** @var Payment $payment */
+                        foreach ($mOrder->payments() as $payment) {
+                            if ($payment->status === PaymentStatus::STATUS_OPEN) {
+                                header('Location: ' . $payment->getCheckoutUrl());
+                                exit();
+                            }
+                        }
+                    }
+
+                    $newPayment = $api->orderPayments->createForId($orderModel->getOrderId(), []);
+                    header('Location: ' . $newPayment->getCheckoutUrl());
+                    exit();
+                }
+
+            } catch (Exception $e) {
+                // TODO LOG
+                throw $e;
+            }
         }
     }
 
