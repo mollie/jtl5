@@ -69,7 +69,16 @@ class Queue extends AbstractHook
         }
         if (array_key_exists('m_pay', $_REQUEST) && (int)$_REQUEST['m_pay']) {
             try {
-                $orderModel = OrderModel::loadByAttributes(['id' => (int)$_REQUEST['m_pay']], Shop::Container()->getDB());
+
+                $raw = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM `xplugin_ws5_mollie_orders` WHERE MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
+                    ':md5' => $_REQUEST['m_pay']
+                ], 1);
+
+                if (!$raw) {
+                    // TODO TRANSLATE
+                    throw new Exception('Order not found!');
+                }
+                $orderModel = OrderModel::loadByAttributes(['id' => $raw->kId], Shop::Container()->getDB());
                 $oBestellung = new Bestellung($orderModel->getBestellung(), true);
 
                 if ($oBestellung->dBezahltDatum !== null || in_array($orderModel->getStatus(), ['completed', 'paid', 'authorized', 'pending'])) {
@@ -81,7 +90,6 @@ class Queue extends AbstractHook
 
                 if (strpos($orderModel->orderId, 'tr_') === 0) {
                     // Payment API
-
                     $payment = Order::createPayment($oBestellung);
                     header('Location: ' . $payment->getCheckoutUrl());
                     exit();

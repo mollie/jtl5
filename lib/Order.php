@@ -422,30 +422,51 @@ class Order implements JsonSerializable
     {
         // TODO: Einstellung für Zeitraum
 
-        $remindables = Shop::Container()->getDB()->executeQuery('SELECT * FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND cStatus IN ("created","open", "expired", "failed", "canceled")', 2);
-        foreach ($remindables as $remindable) {
+        $reminder = (int)self::Plugin()->getConfig()->getValue('reminder');
 
-            $oBestellung = new Bestellung($remindable->kBestellung);
-            $repayURL = Shop::getURL() . '/?m_pay=' . $remindable->kId;
-
-            $data = new stdClass();
-            $data->tkunde = new \JTL\Customer\Customer($oBestellung->kKunde);
-            $data->Bestellung = $oBestellung;
-            $data->PayURL = $repayURL;
-            $data->Amount = Preise::getLocalizedPriceString($remindable->fAmount, Currency::fromISO($remindable->cCurrency), false);
-
-            $mailer = Shop::Container()->get(Mailer::class);
-            $mail = new Mail();
-            $mail->createFromTemplateID('kPlugin_' . self::Plugin()->getID() . '_zahlungserinnerung', $data);
-
-            Shop::Container()->getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET dReminder = :dReminder WHERE kId = :kId', [
-                ':kId' => $remindable->kId,
+        if (!$reminder) {
+            Shop::Container()->getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET dReminder = :dReminder WHERE dReminder IS NULL', [
                 ':dReminder' => date('Y-m-d H:i:s')
             ], 3);
+            return;
+        }
 
-            if (!$mailer->send($mail)) {
-                throw new Exception($mail->getError() . "\n" . print_r($remindable, 1));
-            }
+        $remindables = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ("created","open", "expired", "failed", "canceled")', [
+            ':d' => $reminder
+        ], 2);
+        foreach ($remindables as $remindable) {
+            self::sendReminder($remindable->kId);
+        }
+    }
+
+    /**
+     * @param $kID
+     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws \SmartyException
+     */
+    public static function sendReminder($kID)
+    {
+
+        $order = OrderModel::loadByAttributes(['id' => $kID], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
+
+        $oBestellung = new Bestellung($order->getBestellung());
+        $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->getId() . '-' . $order->getBestellung());
+
+        $data = new stdClass();
+        $data->tkunde = new \JTL\Customer\Customer($oBestellung->kKunde);
+        $data->Bestellung = $oBestellung;
+        $data->PayURL = $repayURL;
+        $data->Amount = Preise::getLocalizedPriceString($order->getAmount(), Currency::fromISO($order->getCurrency()), false);
+
+        $mailer = Shop::Container()->get(Mailer::class);
+        $mail = new Mail();
+        $mail->createFromTemplateID('kPlugin_' . self::Plugin()->getID() . '_zahlungserinnerung', $data);
+
+        $order->setReminder(date('Y-m-d H:i:s'));
+        $order->save(['reminder']);
+
+        if (!$mailer->send($mail)) {
+            throw new Exception($mail->getError() . "\n" . print_r($order->rawArray(), 1));
         }
     }
 

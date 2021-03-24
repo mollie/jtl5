@@ -48,6 +48,7 @@ use RuntimeException;
  * @method void setCreated(string $created)
  * @method void setReminder(string $reminder)
  *
+ * @method int getId();
  * @method int getBestellung()
  * @method string getOrderId()
  * @method string getBestellNr()
