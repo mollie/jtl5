@@ -1,6 +1,7 @@
 <?php
 
 use JTL\Shop;
+use Plugin\ws5_mollie\lib\Order;
 use Plugin\ws5_mollie\lib\Queue;
 
 try {
@@ -11,7 +12,7 @@ try {
     Queue::run(MOLLIE_QUEUE_MAX);
 
     // TODO : SETTING
-    \Plugin\ws5_mollie\lib\Order::sendReminders();
+    Order::sendReminders();
 
 
 } catch (Exception $e) {
