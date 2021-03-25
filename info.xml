@@ -70,7 +70,7 @@
                 </Setting>
 
                 <Setting type="checkbox" initialValue="off" sort="50" conf="Y">
-                    <Name>Zahl-Methode bei erneutem Zahlvorgang zurücksetzen (Payment API)</Name>
+                    <Name>Zahlart bei erneutem Zahlvorgang zurücksetzen (Payment API)</Name>
                     <Description>Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte
                         Mollie-Zahlungsart zurückzusetzen, somit hat der Kunde zwischen allen aktiven Mollie-Zahlarten
                         zu wählen.
@@ -772,6 +772,24 @@
                 <VariableLocalized iso="FRE"><![CDATA[changer les données]]></VariableLocalized>
                 <VariableLocalized iso="ITA"><![CDATA[Cambiare Dati]]></VariableLocalized>
             </Variable>
+
+            <Variable>
+                <Name>errAlreadyPaid</Name>
+                <Description>Wenn die Bestellung bereits bezahlt ist</Description>
+                <VariableLocalized iso="GER"><![CDATA[Diese Bestellung ist bereits bezahlt.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[This order has already been paid for.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Cette commande a déjà été payée.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Questo ordine è già stato pagato.]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>errOrderNotFound</Name>
+                <Description>Wenn Bestellung nicht gefunden wurde.</Description>
+                <VariableLocalized iso="GER"><![CDATA[Die Bestellung konnte leider nicht gefunden werden, wenden Sie sich ggf. an unseren Support.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[The order could not be found, please contact our support if necessary.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[La commande n'a pas pu être trouvée, veuillez contacter notre support si nécessaire.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Impossibile trovare l'ordine, contatta il nostro supporto se necessario.]]></VariableLocalized>
+            </Variable>
+
         </Locales>
 
         <Emailtemplate>
@@ -792,7 +810,7 @@ Guten Tag {$Kunde->cVorname} {$Kunde->cNachname},
 vielen Dank für Ihre Bestellung bei {$Einstellungen.global.global_shopname}.<br>
 <br>
 <p>Leider konnten wir für die Bestellung <b>{$oPluginMail->Bestellung->cBestellNr}</b> bisher keinen Zahlungseingang feststellen.</p>
-<p>Sollte es bei der Zahlung zu problemen gekommen sein, können Sie diese über den folgenden Link einfach erneut versuchen.</p>
+<p>Sollte es bei der Zahlung zu Problemen gekommen sein, können Sie diese über den folgenden Link einfach erneut versuchen.</p>
 <p>Zu zahlender Betrag: {$oPluginMail->Amount}</p>
 <p>Jetzt bezahlen: <a href="{$oPluginMail->PayURL}">{$oPluginMail->PayURL}</a></p>
 {includeMailTemplate template=footer type=html}]]></ContentHtml>
@@ -803,7 +821,7 @@ Guten Tag {$Kunde->cVorname} {$Kunde->cNachname},
 vielen Dank für Ihre Bestellung bei {$Einstellungen.global.global_shopname}.
 
 Leider konnten wir für die Bestellung {$oPluginMail->Bestellung->cBestellNr} bisher keinen Zahlungseingang feststellen.
-Sollte es bei der Zahlung zu problemen gekommen sein, können Sie diese über den folgenden Link einfach erneut versuchen.
+Sollte es bei der Zahlung zu Problemen gekommen sein, können Sie diese über den folgenden Link einfach erneut versuchen.
 
 Zu zahlender Betrag: {$oPluginMail->Amount}
 Jetzt bezahlen: {$oPluginMail->PayURL}

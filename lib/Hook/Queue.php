@@ -5,6 +5,7 @@ namespace Plugin\ws5_mollie\lib\Hook;
 
 
 use Exception;
+use JTL\Alert\Alert;
 use JTL\Checkout\Bestellung;
 use JTL\Shop;
 use Mollie\Api\Resources\Payment;
@@ -14,6 +15,7 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order;
+use RuntimeException;
 
 
 class Queue extends AbstractHook
@@ -69,28 +71,30 @@ class Queue extends AbstractHook
         }
         if (array_key_exists('m_pay', $_REQUEST) && (int)$_REQUEST['m_pay']) {
             try {
-
-                $raw = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM `xplugin_ws5_mollie_orders` WHERE MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
+                $raw = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM `xplugin_ws5_mollie_orders` WHERE dReminder IS NOT NULL AND MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
                     ':md5' => $_REQUEST['m_pay']
                 ], 1);
 
                 if (!$raw) {
-                    // TODO TRANSLATE
-                    throw new Exception('Order not found!');
+                    throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errOrderNotFound'));
                 }
                 $orderModel = OrderModel::loadByAttributes(['id' => $raw->kId], Shop::Container()->getDB());
                 $oBestellung = new Bestellung($orderModel->getBestellung(), true);
 
                 if ($oBestellung->dBezahltDatum !== null || in_array($orderModel->getStatus(), ['completed', 'paid', 'authorized', 'pending'])) {
-                    // TODO TRANSLATE
-                    throw new Exception('Already paid!');
+                    throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
 
                 $api = MollieAPI::API($orderModel->getTest());
 
+                $options = [];
+                if (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on') {
+                    $options['method'] = $orderModel->getMethod();
+                }
+
                 if (strpos($orderModel->orderId, 'tr_') === 0) {
                     // Payment API
-                    $payment = Order::createPayment($oBestellung);
+                    $payment = Order::createPayment($oBestellung, $options);
                     header('Location: ' . $payment->getCheckoutUrl());
                     exit();
 
@@ -99,7 +103,7 @@ class Queue extends AbstractHook
                     // Order API
                     $mOrder = $api->orders->get($orderModel->getOrderId(), ['embed' => 'payments']);
                     if (in_array($mOrder->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
-                        throw new Exception('Already paid!');
+                        throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                     }
 
                     if ($mOrder->payments()) {
@@ -112,14 +116,16 @@ class Queue extends AbstractHook
                         }
                     }
 
-                    $newPayment = $api->orderPayments->createForId($orderModel->getOrderId(), []);
+                    $newPayment = $api->orderPayments->createForId($orderModel->getOrderId(), $options);
                     header('Location: ' . $newPayment->getCheckoutUrl());
                     exit();
                 }
 
+            } catch (RuntimeException $e) {
+                $alertHelper = Shop::Container()->getAlertService();
+                $alertHelper->addAlert(Alert::TYPE_ERROR, $e->getMessage(), 'mollie_repay', ['dismissable' => true]);
             } catch (Exception $e) {
-                // TODO LOG
-                throw $e;
+                Shop::Container()->getLogService()->addError('mollie:repay:error: ' . $e->getMessage() . "\n" . print_r($_REQUEST, 1));
             }
         }
     }

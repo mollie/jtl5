@@ -86,10 +86,10 @@ class OrdersController extends AbstractController
                 1);
 
         $mOrder = null;
-        if(strpos($order->cOrderId, 'tr_') === 0){
+        if (strpos($order->cOrderId, 'tr_') === 0) {
             $mOrder = MollieAPI::API((bool)$order->bTest)->payments
                 ->get($order->cOrderId, ['embed' => 'refunds']);
-        }else{
+        } else {
             $mOrder = MollieAPI::API((bool)$order->bTest)->orders
                 ->get($order->cOrderId, ['embed' => 'payments,shipments,refunds']);
         }
@@ -108,6 +108,11 @@ class OrdersController extends AbstractController
                     ], 2)
         ];
         return new Response($result);
+    }
+
+    public static function reminder(stdClass $data): Response
+    {
+        return new Response(Order::sendReminder($data->id));
     }
 
 }

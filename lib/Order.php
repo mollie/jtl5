@@ -328,12 +328,7 @@ class Order implements JsonSerializable
      */
     public static function factory(Bestellung $oBestellung): array
     {
-        /**
-         * @todo
-         * - payment->cardToken
-         * - payment->customerId
-         */
-        //$_currFactor = Session::getCurrency()->getConversionFactor();
+
         $oPaymentMethod = LegacyMethod::create($oBestellung->Zahlungsart->cModulId);
         if (!$oPaymentMethod) {
             throw new \RuntimeException('Could not load PaymentMethod!');
@@ -407,12 +402,15 @@ class Order implements JsonSerializable
             Shop::Container()->getDB(),
             DataModel::ON_NOTEXISTS_FAIL);
 
+        $orderModel->setStatus($order->status);
         $orderModel->setLocale($order->locale);
         $orderModel->setAmount($order->amount->value);
         $orderModel->setMethod($order->method);
         $orderModel->setCurrency($order->amount->currency);
         $orderModel->setOrderId($order->id);
-        $orderModel->setStatus($order->status);
+        if ($order->amountRefunded) {
+            $orderModel->setAmountRefunded($order->amountRefunded->value);
+        }
 
         return $orderModel->save();
 
@@ -420,8 +418,6 @@ class Order implements JsonSerializable
 
     public static function sendReminders()
     {
-        // TODO: Einstellung für Zeitraum
-
         $reminder = (int)self::Plugin()->getConfig()->getValue('reminder');
 
         if (!$reminder) {
@@ -431,7 +427,7 @@ class Order implements JsonSerializable
             return;
         }
 
-        $remindables = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ("created","open", "expired", "failed", "canceled")', [
+        $remindables = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND dCreated < NOW() - INTERVAL :d HOUR AND cStatus IN ("created","open", "expired", "failed", "canceled")', [
             ':d' => $reminder
         ], 2);
         foreach ($remindables as $remindable) {
@@ -444,7 +440,7 @@ class Order implements JsonSerializable
      * @throws \PHPMailer\PHPMailer\Exception
      * @throws \SmartyException
      */
-    public static function sendReminder($kID)
+    public static function sendReminder($kID): bool
     {
 
         $order = OrderModel::loadByAttributes(['id' => $kID], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
@@ -468,6 +464,7 @@ class Order implements JsonSerializable
         if (!$mailer->send($mail)) {
             throw new Exception($mail->getError() . "\n" . print_r($order->rawArray(), 1));
         }
+        return true;
     }
 
 }

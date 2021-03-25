@@ -10,8 +10,7 @@ try {
 
     ifndef('MOLLIE_QUEUE_MAX', 3);
     Queue::run(MOLLIE_QUEUE_MAX);
-
-    // TODO : SETTING
+    
     Order::sendReminders();
 
 
