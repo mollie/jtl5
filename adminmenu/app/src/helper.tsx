@@ -33,7 +33,9 @@ export type MollieOrder = {
     cThirdId: string
     cTransactionId: string
     dCreated: string
-    fAmount: string
+    dModified: string
+    dReminder: string|null
+    fAmount: number
     fAmountRefunded: number
     kBestellung: number
     kId: number

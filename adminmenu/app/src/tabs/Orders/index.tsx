@@ -5,7 +5,8 @@ import {jtlStatus2label, MollieOrder, molliePaymentStatusLabel, PaymentMethod2im
 import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
 import OrderDetails from "./OrderDetails";
 import TextLink from "@webstollen/react-jtl-plugin/lib/components/TextLink";
-import {faBolt, faUnlock} from "@fortawesome/pro-regular-svg-icons";
+import {faBolt, faEnvelopeOpenDollar, faUnlock} from "@fortawesome/pro-regular-svg-icons";
+import {faSync} from "@fortawesome/pro-light-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Button from "@webstollen/react-jtl-plugin/lib/components/Button";
 
@@ -27,6 +28,12 @@ const Orders = () => {
             .then(() => fetch(pluginInfo.shopURL, {mode: 'no-cors'})
                 .then(() => alert('Bitte Tabelle aktualisieren!')))
             .finally(() => setLoading(false))
+    }
+
+    const sendReminder = (id: number) => {
+        api.run('orders', 'reminder', {id: id})
+            .then(() => alert('E-Mail versendet.'))
+            .catch(alert);
     }
 
     const makeFetchable = (id: string) => {
@@ -58,7 +65,7 @@ const Orders = () => {
         },
         cStatus: {
             header: () => 'mollie Status',
-            data: row => molliePaymentStatusLabel(row.cStatus),
+            data: row => molliePaymentStatusLabel(row.fAmountRefunded === row.fAmount ? 'refunded' : row.cStatus),
             align: "center"
         },
         cJTLStatus: {
@@ -92,10 +99,25 @@ const Orders = () => {
         actions: {
             header: () => '',
             data: row => <>
+
+                {/* MAKE FETCHABLE */}
                 {!parseInt(row.bSynced) && <Button onClick={() => makeFetchable(row.cOrderId)}
                                                    title="Abholbar machen" className={"mr-1"}>
                     <FontAwesomeIcon icon={faUnlock}/>
                 </Button>}
+
+                {/* PAYMENT REMINDER */}
+                {!['paid', 'authorized', 'complete', 'pending'].includes(row.cStatus) ?
+                    <Button onClick={() => sendReminder(row.kId)}
+                            title={"Zahlungserinnerung " + (row.dReminder !== null ? 'erneut ' : '') + "verschicken"}
+                            className={"mr-1"}>
+                        {row.dReminder !== null ? <span className="fa-layers fa-fw">
+                            <FontAwesomeIcon icon={faEnvelopeOpenDollar} inverse transform="shrink-7"/>
+                            <FontAwesomeIcon icon={faSync} inverse transform="grow-7"/>
+                        </span> : <FontAwesomeIcon icon={faEnvelopeOpenDollar}/>}
+                    </Button> : null}
+
+                {/* SIMULATE WEBHOOK */}
                 <Button onClick={() => reWebhook(row.cOrderId)} title="Simulate Webhook">
                     <FontAwesomeIcon icon={faBolt}/>
                 </Button>
