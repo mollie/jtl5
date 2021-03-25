@@ -790,6 +790,23 @@
                 <VariableLocalized iso="ITA"><![CDATA[Impossibile trovare l'ordine, contatta il nostro supporto se necessario.]]></VariableLocalized>
             </Variable>
 
+            <Variable>
+                <Name>checkboxText</Name>
+                <Description>Text der Checkbox, um einen Kunden bei Mollie anzulegen</Description>
+                <VariableLocalized iso="GER"><![CDATA[Zahlungsinformationen beim Anbieter speichen]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Save payment information with the provider]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Enregistrer les informations de paiement avec le fournisseur]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Salva le informazioni di pagamento con il provider]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>checkboxDescr</Name>
+                <Description>Beschreibung der Checkbox, um einen Kunden bei Mollie anzulegen</Description>
+                <VariableLocalized iso="GER"><![CDATA[Dies kann den Bestellvorgang bei der nächsten Bestellung beschleunigen.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[This can speed up the process for the next order.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Cela peut accélérer le processus pour la prochaine commande.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Questo può accelerare il processo di ordinazione per l'ordine successivo.]]></VariableLocalized>
+            </Variable>
+
         </Locales>
 
         <Emailtemplate>

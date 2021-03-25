@@ -222,8 +222,8 @@ abstract class PaymentMethod extends Method
 
             $paymentOptions = [];
 
-            if ((int)Session::getCustomer()->nRegistriert) {
-                $paymentOptions['customerId'] = Customer::createOrUpdate(Session::getCustomer());
+            if ((int)Session::getCustomer()->nRegistriert && ($customerID = Customer::createOrUpdate(Session::getCustomer()))) {
+                $paymentOptions['customerId'] = $customerID;
             }
 
             $api = self::Plugin()->getConfig()->getValue($this->moduleID . '_api');
