@@ -21,6 +21,7 @@ class Customer
 
     public static function createOrUpdate(\JTL\Customer\Customer $oKunde): ?string
     {
+
         $mCustomer = CustomerModel::loadByAttributes([
             'kunde' => $oKunde->kKunde,
         ], \Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
@@ -29,6 +30,11 @@ class Customer
         $api = MollieAPI::API(MollieAPI::getMode());
 
         if (!$mCustomer->getCustomerId()) {
+
+            if (!array_key_exists('mollie_create_customer', $_SESSION['cPost_arr']) || $_SESSION['cPost_arr']['mollie_create_customer'] !== 'on') {
+                return null;
+            }
+
             $customer = new self();
         } else {
             try {

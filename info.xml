@@ -124,6 +124,16 @@
                     <ValueName>reminder</ValueName>
                 </Setting>
 
+                <Setting type="selectbox" initialValue="C" sort="80" conf="Y">
+                    <Name>Kunden bei Mollie anlegen (Customer API)</Name>
+                    <Description>Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox, seine Kundendaten bei Mollie zu speichen. Z.B. für Single-Click Checkout benötigt.</Description>
+                    <ValueName>useCustomerAPI</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="C">Ja, Checkbox</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
+
             </Settingslink>
         </Adminmenu>
         <PaymentMethod>
@@ -788,6 +798,23 @@
                 <VariableLocalized iso="ENG"><![CDATA[The order could not be found, please contact our support if necessary.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[La commande n'a pas pu être trouvée, veuillez contacter notre support si nécessaire.]]></VariableLocalized>
                 <VariableLocalized iso="ITA"><![CDATA[Impossibile trovare l'ordine, contatta il nostro supporto se necessario.]]></VariableLocalized>
+            </Variable>
+
+            <Variable>
+                <Name>checkboxText</Name>
+                <Description>Text der Checkbox, um einen Kunden bei Mollie anzulegen</Description>
+                <VariableLocalized iso="GER"><![CDATA[Zahlungsinformationen beim Anbieter speichen]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Save payment information with the provider]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Enregistrer les informations de paiement avec le fournisseur]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Salva le informazioni di pagamento con il provider]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>checkboxDescr</Name>
+                <Description>Beschreibung der Checkbox, um einen Kunden bei Mollie anzulegen</Description>
+                <VariableLocalized iso="GER"><![CDATA[Dies kann den Bestellvorgang bei der nächsten Bestellung beschleunigen.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[This can speed up the process for the next order.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Cela peut accélérer le processus pour la prochaine commande.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Questo può accelerare il processo di ordinazione per l'ordine successivo.]]></VariableLocalized>
             </Variable>
 
         </Locales>

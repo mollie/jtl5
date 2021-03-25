@@ -69,7 +69,7 @@ class Queue extends AbstractHook
             self::saveToQueue($_REQUEST['id'], $_REQUEST['id'], 'webhook');
             exit();
         }
-        if (array_key_exists('m_pay', $_REQUEST) && (int)$_REQUEST['m_pay']) {
+        if (array_key_exists('m_pay', $_REQUEST)) {
             try {
                 $raw = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM `xplugin_ws5_mollie_orders` WHERE dReminder IS NOT NULL AND MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
                     ':md5' => $_REQUEST['m_pay']

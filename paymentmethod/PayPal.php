@@ -26,9 +26,10 @@ class PayPal extends PaymentMethod
                 }
                 $paymentOptions['shippingAddress'] = Address::factory($order->Lieferadresse);
             }
+            $paymentOptions['description'] = 'Order ' . $order->cBestellNr;
         }
 
-        $paymentOptions['description'] = 'Order ' . $order->cBestellNr;
+
         return $paymentOptions;
     }
 

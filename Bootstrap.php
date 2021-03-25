@@ -11,6 +11,7 @@ use JTL\Plugin\Helper;
 use JTL\Shop;
 use JTL\Smarty\JTLSmarty;
 use Plugin\ws5_mollie\lib\Hook\ApplePay;
+use Plugin\ws5_mollie\lib\Hook\Checkbox;
 use Plugin\ws5_mollie\lib\Hook\Queue;
 
 class Bootstrap extends Bootstrapper
@@ -36,6 +37,10 @@ class Bootstrap extends Bootstrapper
         $this->listen(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS, [Queue::class, 'xmlBestellStatus']);
 
         $this->listen(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, [Queue::class, 'xmlBearbeiteStorno']);
+
+        if ($this->getPlugin()->getConfig()->getValue('useCustomerAPI') === 'C') {
+            $this->listen(HOOK_CHECKBOX_CLASS_GETCHECKBOXFRONTEND, [Checkbox::class, 'execute']);
+        }
 
     }
 
