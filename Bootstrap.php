@@ -38,7 +38,9 @@ class Bootstrap extends Bootstrapper
 
         $this->listen(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, [Queue::class, 'xmlBearbeiteStorno']);
 
-        $this->listen(HOOK_CHECKBOX_CLASS_GETCHECKBOXFRONTEND, [Checkbox::class, 'execute']);
+        if ($this->getPlugin()->getConfig()->getValue('useCustomerAPI') === 'C') {
+            $this->listen(HOOK_CHECKBOX_CLASS_GETCHECKBOXFRONTEND, [Checkbox::class, 'execute']);
+        }
 
     }
 

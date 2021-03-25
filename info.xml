@@ -124,6 +124,16 @@
                     <ValueName>reminder</ValueName>
                 </Setting>
 
+                <Setting type="selectbox" initialValue="C" sort="80" conf="Y">
+                    <Name>Kunden bei Mollie anlegen (Customer API)</Name>
+                    <Description>Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox, seine Kundendaten bei Mollie zu speichen. Z.B. für Single-Click Checkout benötigt.</Description>
+                    <ValueName>useCustomerAPI</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="C">Ja, Checkbox</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
+
             </Settingslink>
         </Adminmenu>
         <PaymentMethod>
