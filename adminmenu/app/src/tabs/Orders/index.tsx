@@ -31,9 +31,11 @@ const Orders = () => {
     }
 
     const sendReminder = (id: number) => {
+        setLoading(true)
         api.run('orders', 'reminder', {id: id})
             .then(() => alert('E-Mail versendet.'))
-            .catch(alert);
+            .catch(alert)
+            .finally(() => setLoading(false));
     }
 
     const makeFetchable = (id: string) => {
