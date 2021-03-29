@@ -7,6 +7,7 @@ namespace Plugin\ws5_mollie\lib\Controller;
 use JTL\Checkout\Bestellung;
 use JTL\Model\DataModel;
 use JTL\Shop;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
@@ -28,7 +29,7 @@ class OrdersController extends AbstractController
 
         $oBestellung = new Bestellung($orderModel->bestellung);
 
-        return new Response(PaymentMethod::makeFetchable($oBestellung, $orderModel));
+        return new Response(AbstractCheckout::makeFetchable($oBestellung, $orderModel));
     }
 
     public static function shipments(stdClass $data): Response

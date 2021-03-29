@@ -8,9 +8,7 @@ use Exception;
 use JTL\Alert\Alert;
 use JTL\Checkout\Bestellung;
 use JTL\Shop;
-use Mollie\Api\Resources\Payment;
-use Mollie\Api\Types\OrderStatus;
-use Mollie\Api\Types\PaymentStatus;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
@@ -25,7 +23,7 @@ class Queue extends AbstractHook
     {
         if (self::Plugin()->getConfig()->getValue('onlyPaid') === 'on'
             && array_key_exists('oBestellung', $args_arr)
-            && Order::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)) {
+            && AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)) {
 
             $args_arr['oBestellung']->cAbgeholt = 'Y';
             Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr['oBestellung']->kBestellung, 1));
@@ -34,7 +32,7 @@ class Queue extends AbstractHook
 
     public static function xmlBestellStatus(array $args_arr): void
     {
-        if (Order::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
+        if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
             self::saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS, [
                 'kBestellung' => $args_arr['oBestellung']->kBestellung,
                 'status' => (int)$args_arr['status']
@@ -58,7 +56,7 @@ class Queue extends AbstractHook
 
     public static function xmlBearbeiteStorno(array $args_arr): void
     {
-        if (Order::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
+        if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
             self::saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, ['kBestellung' => $args_arr['oBestellung']->kBestellung]);
         }
     }
@@ -93,33 +91,15 @@ class Queue extends AbstractHook
                 }
 
                 if (strpos($orderModel->orderId, 'tr_') === 0) {
-                    // Payment API
                     $payment = Order::createPayment($oBestellung, $options);
-                    header('Location: ' . $payment->getCheckoutUrl());
-                    exit();
-
-
+                    $url = $payment->getCheckoutUrl();
                 } else {
-                    // Order API
-                    $mOrder = $api->orders->get($orderModel->getOrderId(), ['embed' => 'payments']);
-                    if (in_array($mOrder->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
-                        throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
-                    }
-
-                    if ($mOrder->payments()) {
-                        /** @var Payment $payment */
-                        foreach ($mOrder->payments() as $payment) {
-                            if ($payment->status === PaymentStatus::STATUS_OPEN) {
-                                header('Location: ' . $payment->getCheckoutUrl());
-                                exit();
-                            }
-                        }
-                    }
-
-                    $newPayment = $api->orderPayments->createForId($orderModel->getOrderId(), $options);
-                    header('Location: ' . $newPayment->getCheckoutUrl());
-                    exit();
+                    $order = Order::repayOrder($orderModel->getOrderId(), $options, $api);
+                    $url = $order->getCheckoutUrl();
                 }
+
+                header('Location: ' . $url);
+                exit();
 
             } catch (RuntimeException $e) {
                 $alertHelper = Shop::Container()->getAlertService();

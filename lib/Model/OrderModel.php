@@ -104,7 +104,7 @@ final class OrderModel extends DataModel implements JsonSerializable
             $attr['currency'] = DataAttribute::create('cCurrency', 'string', '', false);
 
             $attr['test'] = DataAttribute::create('bTest', 'bool', false, false);
-            $attr['synced'] = DataAttribute::create('bSynced', 'bool', false, false);
+            $attr['synced'] = DataAttribute::create('bSynced', 'bool', null, false);
             $attr['modified'] = DataAttribute::create('dModified', 'datetime', date('Y-m-d H:i:s'), false);
             $attr['created'] = DataAttribute::create('dCreated', 'datetime', date('Y-m-d H:i:s'), false);
             $attr['reminder'] = DataAttribute::create('dReminder', 'datetime', null, true);

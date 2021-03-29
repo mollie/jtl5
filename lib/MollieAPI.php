@@ -19,7 +19,7 @@ class MollieAPI
     /**
      * @var MollieApiClient
      */
-    protected static $client;
+    protected $client;
 
 
     use Plugin;
@@ -27,58 +27,13 @@ class MollieAPI
     /**
      * @var bool
      */
-    protected static $test;
+    protected $test;
 
-    private function __construct()
+
+    public function __construct($test = false)
     {
+        $this->test = $test;
     }
-
-    /**
-     * @param bool $test
-     * @return MollieApiClient
-     * @throws ApiException
-     * @throws IncompatiblePlatform
-     */
-    public static function API($test = false): MollieApiClient
-    {
-        if (self::$client === null) {
-
-            self::$test = $test;
-
-            self::$client = new MollieApiClient(
-                new Client([
-                    RequestOptions::VERIFY => CaBundle::getBundledCaBundlePath(),
-                    RequestOptions::TIMEOUT => 60,
-                ])
-            );
-            self::$client->setApiKey(self::getAPIKey(self::$test));
-            self::$client->addVersionString("JTL-Shop/" . APPLICATION_VERSION);
-            self::$client->addVersionString('ws5_mollie/' . self::Plugin()->getCurrentVersion());
-        }
-        return self::$client;
-    }
-
-    /**
-     * @param boolean $test
-     * @return string
-     */
-    protected static function getAPIKey(bool $test): string
-    {
-        if ($test) {
-            return self::Plugin()->getConfig()->getValue("test_apiKey");
-        }
-        return self::Plugin()->getConfig()->getValue("apiKey");
-    }
-
-
-    /**
-     * @return bool
-     */
-    public static function isTest(): ?bool
-    {
-        return self::$test;
-    }
-
 
     /**
      *
@@ -98,6 +53,45 @@ class MollieAPI
             return false;
         }
         return false;
+    }
+
+    /**
+     * @return MollieApiClient
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     */
+    public function getClient(): MollieApiClient
+    {
+        if (!$this->client) {
+            $this->client = new MollieApiClient(new Client([
+                RequestOptions::VERIFY => CaBundle::getBundledCaBundlePath(),
+                RequestOptions::TIMEOUT => 60,
+            ]));
+            $this->client->setApiKey(self::getAPIKey($this->test));
+            $this->client->addVersionString("JTL-Shop/" . APPLICATION_VERSION);
+            $this->client->addVersionString('ws5_mollie/' . self::Plugin()->getCurrentVersion());
+        }
+        return $this->client;
+    }
+
+    /**
+     * @param boolean $test
+     * @return string
+     */
+    protected static function getAPIKey(bool $test): string
+    {
+        if ($test) {
+            return self::Plugin()->getConfig()->getValue("test_apiKey");
+        }
+        return self::Plugin()->getConfig()->getValue("apiKey");
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTest(): bool
+    {
+        return $this->test;
     }
 
 }

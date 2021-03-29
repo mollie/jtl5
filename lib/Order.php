@@ -11,15 +11,13 @@ use Exception;
 use JsonSerializable;
 use JTL\Catalog\Currency;
 use JTL\Catalog\Product\Preise;
-use JTL\Checkout\Lieferschein;
-use JTL\Checkout\Lieferscheinpos;
-use JTL\Checkout\Versand;
 use JTL\Mail\Mail\Mail;
 use JTL\Mail\Mailer;
 use JTL\Model\DataModel;
 use JTL\Plugin\Payment\LegacyMethod;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Order as MollieOrder;
 use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Resources\Payment;
@@ -74,189 +72,6 @@ class Order implements JsonSerializable
     }
 
     /**
-     * @param int $kBestellung
-     * @return bool
-     */
-    public static function isMollie(int $kBestellung, bool $checkZA = false): bool
-    {
-        if ($checkZA) {
-            $res = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId LIKE :cModulId AND kZahlungsart = :kZahlungsart', [
-                ':kZahlungsart' => $kBestellung,
-                ':cModulId' => 'kPlugin_' . self::Plugin()->getID() . '%'
-            ], 1);
-            return $res ? true : false;
-        }
-
-        return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
-                ':kBestellung' => $kBestellung,
-            ], 1)) && $res->kId;
-    }
-
-    /**
-     * @param Bestellung $oBestellung
-     * @param MollieOrder $mollie
-     * @param bool $newStatus
-     * @return array|null
-     */
-    public static function getShipmentOptions(Bestellung $oBestellung, MollieOrder $mollie, bool $newStatus): ?array
-    {
-
-        $options = [];
-
-        if (!$newStatus && (int)$oBestellung->cStatus !== BESTELLUNG_STATUS_TEILVERSANDT) {
-            return null;
-        }
-
-        $getSentQuantity = static function (stdClass $line, Bestellung $oBestellung): int {
-            if ($line->sku === null) {
-                return 1;
-            }
-            /** @var \WarenkorbPos $oPosition */
-            foreach ($oBestellung->Positionen as $oPosition) {
-                if ($oPosition->cArtNr === $line->sku) {
-                    $sent = 0;
-                    /** @var Lieferschein $oLieferschein */
-                    foreach ($oBestellung->oLieferschein_arr as $oLieferschein) {
-                        /** @var Lieferscheinpos $oLieferscheinPos */
-                        foreach ($oLieferschein->oLieferscheinPos_arr as $oLieferscheinPos) {
-                            if ($oLieferscheinPos->getBestellPos() === $oPosition->kBestellpos) {
-                                $sent += $oLieferscheinPos->getAnzahl();
-                            }
-                        }
-                    }
-                    return $sent;
-                }
-            }
-            return 0;
-        };
-
-        if (isset($oBestellung->oLieferschein_arr)
-            && ($nLS = count($oBestellung->oLieferschein_arr) - 1) >= 0
-            && isset($oBestellung->oLieferschein_arr[$nLS]->oVersand_arr)) {
-            if (($nV = count($oBestellung->oLieferschein_arr[$nLS]->oVersand_arr) - 1) >= 0) {
-                /** @var Versand $oVersand */
-                $oVersand = $oBestellung->oLieferschein_arr[$nLS]->oVersand_arr[$nV];
-                $tracking = new stdClass();
-                $tracking->carrier = trim($oVersand->getLogistik());
-                $tracking->code = trim($oVersand->getIdentCode());
-                $tracking->url = trim($oVersand->getLogistikURL()) ?: null;
-                if ($tracking->code && $tracking->carrier) {
-                    $options['tracking'] = $tracking;
-                }
-            }
-        }
-
-        switch ($oBestellung->cStatus) {
-            case BESTELLUNG_STATUS_VERSANDT:
-                $options['lines'] = [];
-                break;
-            case BESTELLUNG_STATUS_TEILVERSANDT:
-
-                $options['lines'] = [];
-                foreach ($mollie->lines as $line) {
-                    if (($x = $getSentQuantity($line, $oBestellung)) > 0) {
-                        if (($quantity = min($x - $line->quantityShipped, $line->shippableQuantity)) > 0) {
-                            $options['lines'][] = (object)[
-                                'id' => $line->id,
-                                'quantity' => $quantity
-                            ];
-                        }
-                    }
-                }
-                break;
-        }
-        return $options;
-    }
-
-    public static function createPayment(Bestellung $oBestellung, array $options = []): ?Payment
-    {
-
-        $api = null;
-        $orderModel = null;
-        // PayAgain, order already existing?
-        if ($oBestellung->kBestellung > 0) {
-            try {
-                $orderModel = OrderModel::loadByAttributes(
-                    ['bestellung' => $oBestellung->kBestellung],
-                    Shop::Container()->getDB(),
-                    DataModel::ON_NOTEXISTS_FAIL);
-                $api = MollieAPI::API($orderModel->test);
-                $payment = $api->payments->get($orderModel->getOrderId());
-                if ($payment->status === PaymentStatus::STATUS_OPEN) {
-                    return $payment;
-                }
-            } catch (Exception $e) {
-            }
-        }
-        if (!$api) {
-            $api = MollieAPI::API(MollieAPI::getMode());
-        }
-
-        [$data, $hash] = self::factoryPayment($oBestellung);
-        $data = array_merge($data, $options);
-
-        if (strpos($_SERVER['PHP_SELF'], 'bestellab_again') !== false
-            && self::Plugin()->getConfig()->getValue('resetMethod') === 'on') {
-            unset($data['method']);
-        }
-
-        $payment = $api->payments->create($data);
-        if (!$orderModel) {
-            $orderModel = OrderModel::loadByAttributes([
-                'orderId' => $payment->id,
-            ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
-            $orderModel->setTest(MollieAPI::getMode());
-        }
-
-        $orderModel->setBestellung($oBestellung->kBestellung);
-        $orderModel->setBestellNr($oBestellung->cBestellNr);
-        $orderModel->setLocale($payment->locale);
-        $orderModel->setAmount($payment->amount->value);
-        $orderModel->setMethod($payment->method);
-        $orderModel->setCurrency($payment->amount->currency);
-        $orderModel->setOrderId($payment->id);
-        $orderModel->setStatus($payment->status);
-        $orderModel->setHash($hash);
-        $orderModel->setSynced(self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
-
-        if (!$orderModel->save()) {
-            throw new RuntimeException('Could not save OrderModel.');
-        }
-        return $payment;
-
-
-    }
-
-    public static function factoryPayment(Bestellung $oBestellung): array
-    {
-        $oPaymentMethod = LegacyMethod::create($oBestellung->Zahlungsart->cModulId);
-        if (!$oPaymentMethod) {
-            throw new \RuntimeException('Could not load PaymentMethod!');
-        }
-        $hash = $oPaymentMethod->generateHash($oBestellung);
-
-        $data = [];
-        $data['amount'] = new Amount($oBestellung->fGesamtsumme, $oBestellung->Waehrung, true, true);
-        $data['description'] = 'Order ' . $oBestellung->cBestellNr;
-        $data['redirectUrl'] = $oPaymentMethod->getReturnURL($oBestellung);
-        $data['webhookUrl'] = Shop::getURL(true) . '/?mollie=1';
-        $data['locale'] = Locale::getLocale(Session::get('cISOSprache', 'ger'), Session::getCustomer()->cLand);
-        /** @var PaymentMethod $oPaymentMethod */
-        /** @noinspection NotOptimalIfConditionsInspection */
-        if (defined(get_class($oPaymentMethod) . '::METHOD') && $oPaymentMethod::METHOD !== '') {
-            $data['method'] = $oPaymentMethod::METHOD;
-        }
-        $data['metadata'] = [
-            'kBestellung' => $oBestellung->kBestellung,
-            'kKunde' => $oBestellung->kKunde,
-            'kKundengruppe' => Session::getCustomerGroup()->getID(),
-            'cHash' => $oPaymentMethod->generateHash($oBestellung),
-        ];
-
-        return [$data, $hash];
-    }
-
-    /**
      * @param Bestellung $oBestellung
      * @param array $paymentOptions
      * @return MollieOrder|null
@@ -275,10 +90,10 @@ class Order implements JsonSerializable
                     ['bestellung' => $oBestellung->kBestellung],
                     Shop::Container()->getDB(),
                     DataModel::ON_NOTEXISTS_FAIL);
-                $api = MollieAPI::API($orderModel->test);
-                $order = $api->orders->get($orderModel->getOrderId(), ['embed' => 'payments']);
+                $api = new MollieAPI($orderModel->test);
+                $order = $api->getClient()->orders->get($orderModel->getOrderId(), ['embed' => 'payments']);
                 if ($order->status === OrderStatus::STATUS_CREATED) {
-                    return $order;
+                    return self::repayOrder($order->id, [], $api->getClient());
                 }
             } catch (Exception $e) {
             }
@@ -293,7 +108,7 @@ class Order implements JsonSerializable
             $data->payment = (object)$paymentOptions;
         }
 
-        $order = $api->orders->create($data->toArray());
+        $order = $api->getClient()->orders->create($data->toArray());
         //$payments = $order->payments();
         if (!$orderModel) {
             $orderModel = OrderModel::loadByAttributes([
@@ -319,6 +134,42 @@ class Order implements JsonSerializable
         }
 
         return $order;
+    }
+
+    /**
+     * @param $orderId
+     * @param array $options
+     * @param MollieApiClient|null $api
+     * @return MollieOrder
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     */
+    public static function repayOrder($orderId, array $options = [], MollieApiClient $api = null): MollieOrder
+    {
+        if (!$api) {
+            $api = MollieAPI::API(MollieAPI::getMode());
+        }
+        $order = $api->orders->get($orderId, ['embed' => 'payments']);
+        if (in_array($order->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
+            throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
+        }
+        if ($order->payments()) {
+            /** @var Payment $payment */
+            foreach ($order->payments() as $payment) {
+                if ($payment->status === PaymentStatus::STATUS_OPEN) {
+                    return $order;
+                }
+            }
+        }
+
+        $payment = $api->orderPayments->createForId($order->id, $options);
+
+        Shop::Container()->getDB()->executeQueryPrepared("UPDATE xplugin_ws5_mollie_orders SET cTransactionId = :paymentId WHERE cOrderId = :orderId;", [
+            ':orderId' => $payment->orderId,
+            ':paymentId' => $payment->id
+        ], 3);
+
+        return $api->orders->get($order->id, ['embed' => 'payments']);
     }
 
     /**
