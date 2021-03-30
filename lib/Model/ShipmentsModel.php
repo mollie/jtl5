@@ -24,7 +24,7 @@ use RuntimeException;
  * @property DateTime $modified
  * @property DateTime $created
  *
- * @method void setLieferschein(int $lieferschien)
+ * @method void setLieferschein(int $lieferschein)
  * @method void setBestellung(int $bestellung)
  * @method void setOrderId(string $orderId)
  * @method void setShipmentId(string $shipmentId)

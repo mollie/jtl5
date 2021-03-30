@@ -12,7 +12,6 @@ use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
-use Plugin\ws5_mollie\lib\Order;
 use Plugin\ws5_mollie\lib\Response;
 use stdClass;
 
@@ -41,18 +40,18 @@ class OrdersController extends AbstractController
                 ':kBestellung' => (int)$data->kBestellung
             ], 2);
 
-            foreach ($lieferschien_arr as $lieferschien) {
+            foreach ($lieferschien_arr as $lieferschein) {
 
                 $shipmentsModel = ShipmentsModel::loadByAttributes(
-                    ['lieferschein' => (int)$lieferschien->kLieferschein],
+                    ['lieferschein' => (int)$lieferschein->kLieferschein],
                     Shop::Container()->getDB(),
                     DataModel::ON_NOTEXISTS_NEW);
 
                 $response[] = (object)[
-                    'kLieferschein' => $lieferschien->kLieferschein,
-                    'cLieferscheinNr' => $lieferschien->cLieferscheinNr,
-                    'cHinweis' => $lieferschien->cHinweis,
-                    'dErstellt' => date('Y-m-d H:i:s', $lieferschien->dErstellt),
+                    'kLieferschein' => $lieferschein->kLieferschein,
+                    'cLieferscheinNr' => $lieferschein->cLieferscheinNr,
+                    'cHinweis' => $lieferschein->cHinweis,
+                    'dErstellt' => date('Y-m-d H:i:s', $lieferschein->dErstellt),
                     'shipment' => $shipmentsModel->getBestellung() ? $shipmentsModel : null,
                 ];
             }
@@ -94,9 +93,10 @@ class OrdersController extends AbstractController
         $result['order'] = $checkout->getModel()->rawObject();
         $result['bestellung'] = $checkout->getBestellung();
         $result['logs'] = Shop::Container()->getDB()
-            ->executeQueryPrepared("SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cType",
+            ->executeQueryPrepared("SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook",
                 [
-                    ':cType' => "%{$checkout->getModel()->getOrderId()}%"
+                    ':cTypeWebhook' => "%{$checkout->getModel()->getOrderId()}%",
+                    ':cTypeHook' => "%:{$checkout->getModel()->getBestellung()}%"
                 ], 2);
 
         return new Response($result);

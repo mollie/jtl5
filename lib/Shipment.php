@@ -16,7 +16,6 @@ use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
-use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
@@ -28,12 +27,12 @@ class Shipment implements JsonSerializable
     /**
      * @var array
      */
-    public array $lines = [];
+    public $lines = [];
 
     /**
      * @var array
      */
-    public array $tracking;
+    public $tracking;
 
     /**
      * @var bool
@@ -69,21 +68,16 @@ class Shipment implements JsonSerializable
      * @throws \JTL\Exceptions\CircularReferenceException
      * @throws \JTL\Exceptions\ServiceNotFoundException
      */
-    public static function syncBestellung(int $kBestellung): array
+    public static function syncBestellung(OrderCheckout $checkout): array
     {
 
         $shipments = [];
+        if ($checkout->getBestellung()->kBestellung) {
 
-        $oBestellung = new Bestellung($kBestellung, true);
-
-        if ($oBestellung->kBestellung) {
-
-            $checkout = OrderCheckout::factory($oBestellung);
-
-            $oKunde = new \Kunde($oBestellung->kKunde);
+            $oKunde = new \Kunde($checkout->getBestellung()->kKunde);
 
             /** @var Lieferschein $oLieferschein */
-            foreach ($oBestellung->oLieferschein_arr as $oLieferschein) {
+            foreach ($checkout->getBestellung()->oLieferschein_arr as $oLieferschein) {
 
                 try {
 
@@ -95,7 +89,7 @@ class Shipment implements JsonSerializable
                         continue;
                     }
 
-                    $shipment = self::factory($oLieferschein->getLieferschein(), $checkout->getModel()->getOrderId());
+                    $shipment = self::factory($oLieferschein->getLieferschein(), $checkout);
 
                     $mode = self::Plugin()->getConfig()->getValue('shippingMode');
                     switch ($mode) {
@@ -109,7 +103,7 @@ class Shipment implements JsonSerializable
 
                         case 'B':
                             // only ship if complete shipping
-                            if ($oKunde->nRegistriert || (int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
+                            if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
                                 if (!$shipment->send() && !$shipment->result) {
                                     throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                                 }
@@ -131,16 +125,12 @@ class Shipment implements JsonSerializable
 
     /**
      * @param int $kLieferschein
-     * @param $orderId
+     * @param OrderCheckout $checkout
      * @return Shipment
-     * @throws ApiException
-     * @throws IncompatiblePlatform
      * @throws Exception
      */
-    public static function factory(int $kLieferschein, $orderId): Shipment
+    public static function factory(int $kLieferschein, OrderCheckout $checkout): Shipment
     {
-
-        $checkout = OrderCheckout::fromID($orderId);
 
         $shipmentsModel = ShipmentsModel::loadByAttributes(
             ['lieferschein' => $kLieferschein],
@@ -168,7 +158,7 @@ class Shipment implements JsonSerializable
 
         $shipment = new self();
 
-        $shipment->cOrderId = $orderId;
+        $shipment->cOrderId = $checkout->getModel()->getOrderId();
         $shipment->kBestellung = $checkout->getModel()->getBestellung();
         $shipment->kLieferschein = $kLieferschein;
 

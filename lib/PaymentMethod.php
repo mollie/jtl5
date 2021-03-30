@@ -277,28 +277,8 @@ abstract class PaymentMethod extends Method
             } else {
                 $checkout = OrderCheckout::factory($order);
             }
+            $checkout->handleNotification($hash);
 
-            $checkout->updateModel()->saveModel();
-
-            if (null === $order->dBezahltDatum) {
-                if ($incoming = $checkout->getIncomingPayment()) {
-                    $this->addIncomingPayment($order, $incoming);
-                    if ($checkout->completlyPaid()) {
-                        $this->setOrderStatusToPaid($order);
-                        $checkout::makeFetchable($order, $checkout->getModel());
-                        $this->deletePaymentHash($hash);
-
-                        $this->doLog("Bestellung '{$order->cBestellNr}' als bezahlt markiert: {$payValue}", LOGLEVEL_DEBUG);
-
-                        $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->moduleID);
-                        if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
-                            $this->sendConfirmationMail($order);
-                        }
-                    } else {
-                        $this->doLog("Bestellung '{$order->cBestellNr}': nicht komplett bezahlt: " . print_r($incoming, 1), LOGLEVEL_NOTICE);
-                    }
-                }
-            }
         } catch (Exception $e) {
             $this->doLog("mollie::handleNotification: Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
             Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);

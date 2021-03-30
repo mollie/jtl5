@@ -186,4 +186,16 @@ class OrderCheckout extends AbstractCheckout
         return null;
     }
 
+    public function cancelOrRefund(): string
+    {
+        if ((int)$this->getBestellung()->cStatus === BESTELLUNG_STATUS_STORNO) {
+            if ($this->getMollie()->isCancelable) {
+                $res = $this->getMollie()->cancel();
+                return 'Order cancelled, Status: ' . $res->status;
+            }
+            $res = $this->getMollie()->refundAll();
+            return "Order Refund initiiert, Status: " . $res->status;
+        }
+        throw new Exception('Bestellung nicht storniert.');
+    }
 }

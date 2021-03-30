@@ -6,15 +6,13 @@ namespace Plugin\ws5_mollie\lib;
 
 use Exception;
 use Generator;
-use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
-use JTL\Plugin\Payment\Method;
-use JTL\Plugin\Payment\MethodInterface;
 use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
-use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
 use RuntimeException;
@@ -84,30 +82,15 @@ class Queue
      */
     protected static function handleWebhook(string $id, QueueModel $todo): bool
     {
-        $order = OrderModel::loadByAttributes(['orderId' => $id], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
-        $oBestellung = new Bestellung($order->getBestellung());
-        if ($oBestellung->kBestellung && $method = self::paymentMethod((int)$oBestellung->kZahlungsart)) {
-            $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
+
+        $checkout = AbstractCheckout::fromID($id);
+        if ($checkout->getBestellung()->kBestellung && $checkout->getPaymentMethod()) {
+            $checkout->handleNotification();
+            $todo->setResult('Status: ' . $checkout->getMollie()->status);
             $todo->setDone(date('Y-m-d H:i:s'));
             return $todo->save();
         }
         throw new RuntimeException(`Bestellung oder Zahlungsart konnte nicht geladen werden: ${id}`);
-    }
-
-    /**
-     * @param int $kZahlungsart
-     * @return MethodInterface
-     */
-    public static function paymentMethod(int $kZahlungsart): MethodInterface
-    {
-        if ($za = Shop::Container()->getDB()->executeQueryPrepared('SELECT cModulId from tzahlungsart WHERE kZahlungsart = :kZahlungsart AND cModulId LIKE \'kPlugin_%\'', [':kZahlungsart' => $kZahlungsart], 1)) {
-            return Method::create($za->cModulId);
-        }
-        $fallback = sprintf("kPlugin_%s_mollie", self::Plugin()->getID());
-        if ($fallbackZA = Method::create($fallback)) {
-            return $fallbackZA;
-        }
-        throw new RuntimeException('PaymentMethod not found');
     }
 
     /**
@@ -127,30 +110,30 @@ class Queue
             switch ($hook) {
                 case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
                     if ((int)$data['kBestellung']) {
-                        $oBestellung = new Bestellung($data['kBestellung'], true);
+                        $checkout = AbstractCheckout::fromBestellung($data['kBestellung']);
 
                         /** @var $method PaymentMethod */
-                        if ($oBestellung->kBestellung
+                        if ((int)$data['status']
                             && array_key_exists('status', $data)
-                            && (int)$data['status']
-                            && ($method = self::paymentMethod((int)$oBestellung->kZahlungsart))
-                            && ($order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL))
-                            && (strpos($order->orderId, 'tr_') === false)
-                            && ($mollie = (new MollieAPI($order->getTest()))->getClient()->orders->get($order->getOrderId(), ['embed' => 'payments']))) {
-
-                            $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
-
-                            if ($mollie->isCreated() || $mollie->isPaid() || $mollie->isAuthorized() || $mollie->isShipping() || $mollie->isPending()) {
+                            && $checkout->getBestellung()->kBestellung
+                            && $checkout->getPaymentMethod()
+                            && (strpos($checkout->getModel()->getOrderId(), 'tr_') === false)
+                            && $checkout->getMollie()) {
+                            /** @var OrderCheckout $checkout */
+                            $checkout->handleNotification();
+                            if ($checkout->getMollie()->isCreated() || $checkout->getMollie()->isPaid() || $checkout->getMollie()->isAuthorized() || $checkout->getMollie()->isShipping() || $checkout->getMollie()->isPending()) {
                                 try {
-                                    if ($shipments = Shipment::syncBestellung($oBestellung->kBestellung)) {
+                                    if ($shipments = Shipment::syncBestellung($checkout)) {
                                         foreach ($shipments as $shipment) {
-                                            self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order shipped: \n" . print_r($shipment, 1));
+                                            $checkout->getPaymentMethod()->doLog("Order shipped: \n" . print_r($shipment, 1));
                                         }
-                                        $todo->setResult("Shipped " . count($shipments) . " shipments");
+                                        $todo->setResult("Shipped " . count($shipments) . " shipments.");
                                     }
                                 } catch (Exception $e) {
                                     $todo->setResult($e->getMessage() . "\n" . $e->getFile() . ":" . $e->getLine() . "\n" . $e->getTraceAsString());
                                 }
+                            } else {
+                                $todo->setResult('Unexpected Mollie Status: ' . $checkout->getMollie()->status);
                             }
 
                         } else {
@@ -167,56 +150,18 @@ class Queue
                     return $todo->save();
 
                 case HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO:
-
-                    /** @var Bestellung $oBestellung */
-                    $oBestellung = new Bestellung($data['kBestellung']);
-                    $order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
-
-                    /** @var \Mollie\Api\Resources\Order|Payment $mollie */
-                    $mollie = null;
-                    if (strpos($order->orderId, 'tr_') === 0) {
-                        /** @var Payment $mollie */
-                        $mollie = MollieAPI::API($order->getTest())->payments->get($order->getOrderId());
-                    } else {
-                        /** @var \Mollie\Api\Resources\Order $mollie */
-                        $mollie = MollieAPI::API($order->getTest())->orders->get($order->getOrderId(), ['embed' => 'payments']);
-                    }
-
-
                     if (self::Plugin()->getConfig()->getValue('autoRefund') !== 'on') {
                         throw new RuntimeException('Auto-Refund disabled');
                     }
 
-                    if ((int)$oBestellung->cStatus === BESTELLUNG_STATUS_STORNO) {
-                        if ($mollie->isCancelable) {
-                            if ($mollie->resource === 'payment') {
-                                MollieAPI::API($order->getTest())->payments->cancel($mollie->id);
-                                $todo->setResult('Payment cancelled.');
-                            } else {
-                                $res = $mollie->cancel();
-                                $todo->setResult('Order cancelled.');
-                            }
-                            self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order cancelled: \n" . print_r($res, 1));
-                        } else {
+                    $checkout = AbstractCheckout::fromBestellung((int)$data['kBestellung']);
+                    $todo->setResult($checkout->cancelOrRefund());
+                    $todo->setDone(date('Y-m-d H:i:s'));
+                    return $todo->save();
 
-                            if ($mollie->resource === 'payment') {
-                                /** @noinspection PhpParamsInspection */
-                                MollieAPI::API($order->getTest())->payments->refund($mollie, ["amount" => $mollie->amount]);
-                                $todo->setResult('Payment refunded.');
-                            } else {
-                                $res = $mollie->refundAll();
-                                $todo->setResult('Order refunded.');
-                            }
-
-
-                            self::paymentMethod($oBestellung->kZahlungsart)->doLog("Order refunded: \n" . print_r($res, 1));
-                        }
-                        $todo->setDone(date('Y-m-d H:i:s'));
-                        return $todo->save();
-                    }
-                    break;
             }
         }
         return false;
     }
+
 }

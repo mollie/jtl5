@@ -113,4 +113,18 @@ class PaymentCheckout extends AbstractCheckout
         }
         return null;
     }
+
+    public function cancelOrRefund(): string
+    {
+        // TODO DEBUG
+        if ((int)$this->getBestellung()->cStatus === BESTELLUNG_STATUS_STORNO) {
+            if ($this->getMollie()->isCancelable) {
+                $res = $this->getAPI()->getClient()->payments->cancel($this->getMollie()->id);
+                return 'Payment cancelled, Status: ' . $res->status;
+            }
+            $res = $this->getAPI()->getClient()->payments->refund($this->getMollie(), ['amount' => $this->getMollie()->amount]);
+            return "Payment Refund initiiert, Status: " . $res->status;
+        }
+        throw new Exception('Bestellung nicht storniert.');
+    }
 }

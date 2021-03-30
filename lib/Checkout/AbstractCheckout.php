@@ -96,49 +96,147 @@ abstract class AbstractCheckout
      * @return AbstractCheckout
      * @throws Exception
      */
-    public static function fromID($id): AbstractCheckout
+    public static function fromID($id)
     {
         $model = OrderModel::loadByAttributes([
             'orderId' => $id,
         ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
         $oBestellung = new Bestellung($model->getBestellung(), true);
 
-        $self = new static($oBestellung, new MollieAPI($model->getTest()));
+        if (static::class !== AbstractCheckout::class) {
+            $self = new static($oBestellung, new MollieAPI($model->getTest()));
+        } else {
+            if (strpos($model->getOrderId(), 'tr_') !== false) {
+                $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
+            } else {
+                $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
+            }
+        }
+        $self->setModel($model);
+        return $self;
+    }
+
+    public static function fromBestellung($kBestellung): AbstractCheckout
+    {
+        $model = OrderModel::loadByAttributes([
+            'bestellung' => $kBestellung,
+        ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
+        $oBestellung = new Bestellung($model->getBestellung(), true);
+        if (strpos($model->getOrderId(), 'tr_') !== false) {
+            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
+        } else {
+            $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
+        }
         $self->setModel($model);
         return $self;
     }
 
     /**
-     * @param Bestellung $oBestellung
-     * @param OrderModel $model
-     * @return bool
-     * @throws \JTL\Exceptions\CircularReferenceException
-     * @throws \JTL\Exceptions\ServiceNotFoundException
+     * @throws SmartyException
+     * @throws \PHPMailer\PHPMailer\Exception
      */
-    public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
+    public static function sendReminders(): void
     {
-        if ($oBestellung->cAbgeholt === 'Y' && !$model->getSynced()) {
-            Shop::Container()->getDB()->update('tbestellung', 'kBestellung', (int)$oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
-            $model->setSynced(true);
-            try {
-                return $model->save(['synced']);
-            } catch (Exception $e) {
-                Shop::Container()->getBackendLogService()->error(sprintf("Fehler beim speichern des Models: %s / Bestellung: %s", $model->getId(), $oBestellung->cBestellNr));
-            }
+        // TODO DEBUG
+        $reminder = (int)self::Plugin()->getConfig()->getValue('reminder');
+
+        if (!$reminder) {
+            Shop::Container()->getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET dReminder = :dReminder WHERE dReminder IS NULL', [
+                ':dReminder' => date('Y-m-d H:i:s')
+            ], 3);
+            return;
         }
-        return false;
+
+        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND dCreated < NOW() - INTERVAL :d HOUR AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
+            ':d' => $reminder
+        ], 2);
+        foreach ($remindables as $remindable) {
+            self::sendReminder($remindable->kId);
+        }
     }
 
     /**
-     * @return Bestellung
+     * @param $kID
+     * @return bool
+     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws SmartyException
+     */
+    public static function sendReminder($kID): bool
+    {
+
+        $order = OrderModel::loadByAttributes(['id' => $kID], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
+
+        $oBestellung = new Bestellung($order->getBestellung());
+        $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->getId() . '-' . $order->getBestellung());
+
+        $data = new stdClass();
+        $data->tkunde = new \JTL\Customer\Customer($oBestellung->kKunde);
+        $data->Bestellung = $oBestellung;
+        $data->PayURL = $repayURL;
+        $data->Amount = Preise::getLocalizedPriceString($order->getAmount(), Currency::fromISO($order->getCurrency()), false);
+
+        $mailer = Shop::Container()->get(Mailer::class);
+        $mail = new Mail();
+        $mail->createFromTemplateID('kPlugin_' . self::Plugin()->getID() . '_zahlungserinnerung', $data);
+
+        $order->setReminder(date('Y-m-d H:i:s'));
+        $order->save(['reminder']);
+
+        if (!$mailer->send($mail)) {
+            throw new Exception($mail->getError() . "\n" . print_r($order->rawArray(), 1));
+        }
+        return true;
+    }
+
+    /**
+     * cancels oder refunds eine stornierte Bestellung
+     *
+     * @return string
+     */
+    abstract public function cancelOrRefund(): string;
+
+    /**
+     * @throws \JTL\Exceptions\CircularReferenceException
+     * @throws \JTL\Exceptions\ServiceNotFoundException
+     */
+    public function handleNotification($hash = null)
+    {
+
+        if(!$hash){
+            $hash = $this->getModel()->getHash();
+        }
+
+        $this->updateModel()->saveModel();
+        if (null === $this->getBestellung()->dBezahltDatum) {
+            if ($incoming = $this->getIncomingPayment()) {
+                $this->getPaymentMethod()->addIncomingPayment($this->getBestellung(), $incoming);
+                if ($this->completlyPaid()) {
+                    $this->getPaymentMethod()->setOrderStatusToPaid($this->getBestellung());
+                    $this::makeFetchable($this->getBestellung(), $this->getModel());
+                    $this->getPaymentMethod()->deletePaymentHash($hash);
+
+                    $this->getPaymentMethod()->doLog("Bestellung '{$this->getBestellung()->cBestellNr}' als bezahlt markiert: {$incoming->fBetrag}", LOGLEVEL_DEBUG);
+
+                    $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
+                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
+                        $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
+                    }
+                } else {
+                    $this->getPaymentMethod()->doLog("Bestellung '{$this->getBestellung()->cBestellNr}': nicht komplett bezahlt: " . print_r($incoming, 1), LOGLEVEL_NOTICE);
+                }
+            }
+        }
+    }
+
+    /**
+     * Speichert das Model
+     *
+     * @return bool
      * @throws Exception
      */
-    public function getBestellung(): Bestellung
+    public function saveModel(): bool
     {
-        if (!$this->oBestellung && $this->getModel()->getBestellung()) {
-            $this->oBestellung = new Bestellung($this->getModel()->getBestellung(), true);
-        }
-        return $this->oBestellung;
+        return $this->getModel()->save();
     }
 
     /**
@@ -179,12 +277,6 @@ abstract class AbstractCheckout
         return $this->api;
     }
 
-    /**
-     * @param array $paymentOptions
-     * @return Payment|Order
-     */
-    abstract public function create(array $paymentOptions = []);
-
     public function updateModel(): self
     {
         if ($this->getMollie()) {
@@ -205,18 +297,21 @@ abstract class AbstractCheckout
     abstract public function getMollie($force = false);
 
     /**
-     * @return string
+     * @return Bestellung
+     * @throws Exception
      */
-    public function getHash(): string
+    public function getBestellung(): Bestellung
     {
-        if ($this->getModel()->getHash()) {
-            return $this->getModel()->getHash();
+        if (!$this->oBestellung && $this->getModel()->getBestellung()) {
+            $this->oBestellung = new Bestellung($this->getModel()->getBestellung(), true);
         }
-        if (!$this->hash) {
-            $this->hash = $this->getPaymentMethod()->generateHash($this->oBestellung);
-        }
-        return $this->hash;
+        return $this->oBestellung;
     }
+
+    /**
+     * @return stdClass
+     */
+    abstract public function getIncomingPayment(): ?stdClass;
 
     /**
      * @return \Plugin\ws5_mollie\lib\PaymentMethod
@@ -232,15 +327,57 @@ abstract class AbstractCheckout
         return $this->paymentMethod;
     }
 
-    /**
-     * Speichert das Model
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function saveModel(): bool
+    public function completlyPaid(): bool
     {
-        return $this->getModel()->save();
+
+        if ($row = Shop::Container()->getDB()->executeQueryPrepared("SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung", [
+            ':kBestellung' => $this->oBestellung->kBestellung
+        ], 1)) {
+            return $row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * (float)$this->oBestellung->fWaehrungsFaktor);
+        }
+        return false;
+
+    }
+
+    /**
+     * @param Bestellung $oBestellung
+     * @param OrderModel $model
+     * @return bool
+     * @throws \JTL\Exceptions\CircularReferenceException
+     * @throws \JTL\Exceptions\ServiceNotFoundException
+     */
+    public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
+    {
+        if ($oBestellung->cAbgeholt === 'Y' && !$model->getSynced()) {
+            Shop::Container()->getDB()->update('tbestellung', 'kBestellung', (int)$oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
+            $model->setSynced(true);
+            try {
+                return $model->save(['synced']);
+            } catch (Exception $e) {
+                Shop::Container()->getBackendLogService()->error(sprintf("Fehler beim speichern des Models: %s / Bestellung: %s", $model->getId(), $oBestellung->cBestellNr));
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param array $paymentOptions
+     * @return Payment|Order
+     */
+    abstract public function create(array $paymentOptions = []);
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        if ($this->getModel()->getHash()) {
+            return $this->getModel()->getHash();
+        }
+        if (!$this->hash) {
+            $this->hash = $this->getPaymentMethod()->generateHash($this->oBestellung);
+        }
+        return $this->hash;
     }
 
     public function setRequestData(string $key, $value): self
@@ -258,78 +395,5 @@ abstract class AbstractCheckout
     }
 
     abstract public function loadRequest(array $options = []): AbstractCheckout;
-
-    /**
-     * @return stdClass
-     */
-    abstract public function getIncomingPayment(): ?stdClass;
-
-    public function completlyPaid(): bool
-    {
-
-        if ($row = Shop::Container()->getDB()->executeQueryPrepared("SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung", [
-            ':kBestellung' => $this->oBestellung->kBestellung
-        ], 1)) {
-            return $row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * (float)$this->oBestellung->fWaehrungsFaktor);
-        }
-        return false;
-
-    }
-
-    /**
-     * @throws SmartyException
-     * @throws \PHPMailer\PHPMailer\Exception
-     */
-    public static function sendReminders(): void
-    {
-        $reminder = (int)self::Plugin()->getConfig()->getValue('reminder');
-
-        if (!$reminder) {
-            Shop::Container()->getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET dReminder = :dReminder WHERE dReminder IS NULL', [
-                ':dReminder' => date('Y-m-d H:i:s')
-            ], 3);
-            return;
-        }
-
-        $remindables = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND dCreated < NOW() - INTERVAL :d HOUR AND cStatus IN ("created","open", "expired", "failed", "canceled")', [
-            ':d' => $reminder
-        ], 2);
-        foreach ($remindables as $remindable) {
-            self::sendReminder($remindable->kId);
-        }
-    }
-
-    /**
-     * @param $kID
-     * @return bool
-     * @throws \PHPMailer\PHPMailer\Exception
-     * @throws SmartyException
-     */
-    public static function sendReminder($kID): bool
-    {
-
-        $order = OrderModel::loadByAttributes(['id' => $kID], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
-
-        $oBestellung = new Bestellung($order->getBestellung());
-        $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->getId() . '-' . $order->getBestellung());
-
-        $data = new stdClass();
-        $data->tkunde = new \JTL\Customer\Customer($oBestellung->kKunde);
-        $data->Bestellung = $oBestellung;
-        $data->PayURL = $repayURL;
-        $data->Amount = Preise::getLocalizedPriceString($order->getAmount(), Currency::fromISO($order->getCurrency()), false);
-
-        $mailer = Shop::Container()->get(Mailer::class);
-        $mail = new Mail();
-        $mail->createFromTemplateID('kPlugin_' . self::Plugin()->getID() . '_zahlungserinnerung', $data);
-
-        $order->setReminder(date('Y-m-d H:i:s'));
-        $order->save(['reminder']);
-
-        if (!$mailer->send($mail)) {
-            throw new Exception($mail->getError() . "\n" . print_r($order->rawArray(), 1));
-        }
-        return true;
-    }
 
 }

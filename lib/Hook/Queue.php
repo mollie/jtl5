@@ -31,7 +31,7 @@ class Queue extends AbstractHook
     public static function xmlBestellStatus(array $args_arr): void
     {
         if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
-            self::saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS, [
+            self::saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS . ':' . (int)$args_arr['oBestellung']->kBestellung, [
                 'kBestellung' => $args_arr['oBestellung']->kBestellung,
                 'status' => (int)$args_arr['status']
             ]);
@@ -55,7 +55,7 @@ class Queue extends AbstractHook
     public static function xmlBearbeiteStorno(array $args_arr): void
     {
         if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
-            self::saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO, ['kBestellung' => $args_arr['oBestellung']->kBestellung]);
+            self::saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO . ':' . $args_arr['oBestellung']->kBestellung, ['kBestellung' => $args_arr['oBestellung']->kBestellung]);
         }
     }
 
