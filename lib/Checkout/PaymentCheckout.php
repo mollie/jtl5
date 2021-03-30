@@ -11,6 +11,7 @@ use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\Order\Amount;
+use stdClass;
 
 class PaymentCheckout extends AbstractCheckout
 {
@@ -56,25 +57,20 @@ class PaymentCheckout extends AbstractCheckout
     public function updateModel(): AbstractCheckout
     {
         parent::updateModel();
-        $this->getModel()->setLocale($this->getPayment()->locale);
-        $this->getModel()->setAmount($this->getPayment()->amount->value);
-        $this->getModel()->setMethod($this->getPayment()->method);
-        $this->getModel()->setCurrency($this->getPayment()->amount->currency);
-        $this->getModel()->setOrderId($this->getPayment()->id);
-        $this->getModel()->setStatus($this->getPayment()->status);
+        $this->getModel()->setStatus($this->getMollie()->status);
         $this->getModel()->setHash($this->getHash());
-        $this->getModel()->setAmountRefunded($this->getPayment()->amountRefunded->value ?? 0);
+        $this->getModel()->setAmountRefunded($this->getMollie()->amountRefunded->value ?? 0);
         return $this;
     }
 
     /**
      * @return Payment
      */
-    public function getPayment(): Payment
+    public function getMollie($force = false): Payment
     {
-        if (!$this->payment) {
+        if ($force || !$this->payment) {
             try {
-                $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->getOrderId());
+                $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->getOrderId(), ['embed' => 'refunds']);
             } catch (Exception $e) {
                 throw new \RuntimeException('Could not get Payment');
             }
@@ -106,14 +102,14 @@ class PaymentCheckout extends AbstractCheckout
         return $this;
     }
 
-    public function getIncomingPayment(): \stdClass
+    public function getIncomingPayment(): ?stdClass
     {
-        if (in_array($this->getPayment()->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
+        if (in_array($this->getMollie()->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
             $data = [];
-            $data['fBetrag'] = (float)$this->getPayment()->amount->value;
-            $data['cISO'] = $this->getPayment()->amount->currency;
-            $data['cZahler'] = $this->getPayment()->details->paypalPayerId ?? $this->getPayment()->customerId;
-            $data['cHinweis'] = $this->getPayment()->details->paypalReference ?? $this->getPayment()->id;
+            $data['fBetrag'] = (float)$this->getMollie()->amount->value;
+            $data['cISO'] = $this->getMollie()->amount->currency;
+            $data['cZahler'] = $this->getMollie()->details->paypalPayerId ?? $this->getMollie()->customerId;
+            $data['cHinweis'] = $this->getMollie()->details->paypalReference ?? $this->getMollie()->id;
             return (object)$data;
         }
         return null;

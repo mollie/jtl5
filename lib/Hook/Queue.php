@@ -9,10 +9,11 @@ use JTL\Alert\Alert;
 use JTL\Checkout\Bestellung;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
-use Plugin\ws5_mollie\lib\Order;
 use RuntimeException;
 
 
@@ -83,7 +84,7 @@ class Queue extends AbstractHook
                     throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
 
-                $api = MollieAPI::API($orderModel->getTest());
+                $api = new MollieAPI($orderModel->getTest());
 
                 $options = [];
                 if (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on') {
@@ -91,10 +92,12 @@ class Queue extends AbstractHook
                 }
 
                 if (strpos($orderModel->orderId, 'tr_') === 0) {
-                    $payment = Order::createPayment($oBestellung, $options);
+                    $checkout = PaymentCheckout::factory($oBestellung, $api);
+                    $payment = $checkout->create($options);
                     $url = $payment->getCheckoutUrl();
                 } else {
-                    $order = Order::repayOrder($orderModel->getOrderId(), $options, $api);
+                    $checkout = OrderCheckout::factory($oBestellung, $api);
+                    $order = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);
                     $url = $order->getCheckoutUrl();
                 }
 
