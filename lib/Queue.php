@@ -136,7 +136,7 @@ class Queue
                             && ($method = self::paymentMethod((int)$oBestellung->kZahlungsart))
                             && ($order = OrderModel::loadByAttributes(['bestellung' => $oBestellung->kBestellung], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL))
                             && (strpos($order->orderId, 'tr_') === false)
-                            && ($mollie = MollieAPI::API($order->getTest())->orders->get($order->getOrderId(), ['embed' => 'payments']))) {
+                            && ($mollie = (new MollieAPI($order->getTest()))->getClient()->orders->get($order->getOrderId(), ['embed' => 'payments']))) {
 
                             $method->handleNotification($oBestellung, $order->getHash(), ['id' => $order->getOrderId()]);
 

@@ -57,7 +57,6 @@ class PaymentCheckout extends AbstractCheckout
     public function updateModel(): AbstractCheckout
     {
         parent::updateModel();
-        $this->getModel()->setStatus($this->getMollie()->status);
         $this->getModel()->setHash($this->getHash());
         $this->getModel()->setAmountRefunded($this->getMollie()->amountRefunded->value ?? 0);
         return $this;

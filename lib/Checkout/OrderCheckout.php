@@ -21,7 +21,11 @@ use stdClass;
 class OrderCheckout extends AbstractCheckout
 {
 
+    /** @var Order */
     protected $order;
+
+    /** @var Payment */
+    protected $payment;
 
     public function create(array $paymentOptions = []): Order
     {
@@ -32,18 +36,19 @@ class OrderCheckout extends AbstractCheckout
                     throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
                 if ($this->order->status === OrderStatus::STATUS_CREATED) {
-                    // TODO REPAY
-                    if($this->order->payments()){
+                    if ($this->order->payments()) {
                         /** @var Payment $payment */
-                        foreach ($this->order->payments() as $payment){
-                            if($payment->status === PaymentStatus::STATUS_OPEN){
-                                return $this->order;
+                        foreach ($this->order->payments() as $payment) {
+                            if ($payment->status === PaymentStatus::STATUS_OPEN) {
+                                $this->payment = $payment;
+                                break;
                             }
                         }
                     }
-                    $payment = $this->getAPI()->getClient()->orderPayments->createForId($this->getModel()->getOrderId(), $paymentOptions);
-                    $this->getModel()->setTransactionId($payment->id);
-                    $this->saveModel();
+                    if (!$this->payment) {
+                        $this->payment = $this->getAPI()->getClient()->orderPayments->createForId($this->getModel()->getOrderId(), $paymentOptions);
+                    }
+                    $this->updateModel()->saveModel();
                     return $this->getMollie(true);
                 }
             } catch (Exception $e) {
@@ -59,6 +64,46 @@ class OrderCheckout extends AbstractCheckout
             $this->getPaymentMethod()->doLog(sprintf("Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
             // TODO: Translate?
             throw new \RuntimeException('Order konnte nicht angelegt werden.');
+        }
+        return $this->order;
+    }
+
+    /**
+     * @return AbstractCheckout
+     * @throws Exception
+     */
+    public function updateModel(): AbstractCheckout
+    {
+        parent::updateModel();
+        if (!$this->payment && $this->getMollie() && $this->getMollie()->payments()) {
+            /** @var Payment $payment */
+            foreach ($this->getMollie()->payments() as $payment) {
+                if (in_array($payment->status, [PaymentStatus::STATUS_OPEN, PaymentStatus::STATUS_PENDING, PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
+                    $this->payment = $payment;
+                    break;
+                }
+            }
+        }
+        if ($this->payment) {
+            $this->getModel()->setTransactionId($this->payment->id);
+        }
+        $this->getModel()->setStatus($this->getMollie()->status);
+        $this->getModel()->setHash($this->getHash());
+        $this->getModel()->setAmountRefunded($this->getMollie()->amountRefunded->value ?? 0);
+        return $this;
+    }
+
+    /**
+     * @return Order
+     */
+    public function getMollie($force = false): ?Order
+    {
+        if ($force || (!$this->order && $this->getModel()->getOrderId())) {
+            try {
+                $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->getOrderId(), ['embed' => 'payments,shipments,refunds']);
+            } catch (Exception $e) {
+                throw new \RuntimeException('Could not get Order');
+            }
         }
         return $this->order;
     }
@@ -123,40 +168,13 @@ class OrderCheckout extends AbstractCheckout
 
     }
 
-    /**
-     * @return AbstractCheckout
-     * @throws Exception
-     */
-    public function updateModel(): AbstractCheckout
-    {
-        parent::updateModel();
-        $this->getModel()->setStatus($this->getMollie()->status);
-        $this->getModel()->setHash($this->getHash());
-        $this->getModel()->setAmountRefunded($this->getMollie()->amountRefunded->value ?? 0);
-        return $this;
-    }
-
-    /**
-     * @return Order
-     */
-    public function getMollie($force = false): ?Order
-    {
-        if ($force || (!$this->order && $this->getModel()->getOrderId())) {
-            try {
-                $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->getOrderId(), ['embed' => 'payments,shipments,refunds']);
-            } catch (Exception $e) {
-                throw new \RuntimeException('Could not get Order');
-            }
-        }
-        return $this->order;
-    }
-
     public function getIncomingPayment(): ?stdClass
     {
         /** @var Payment $payment */
         foreach ($this->getMollie()->payments() as $payment) {
             if (in_array($payment->status,
                 [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
+                $this->payment = $payment;
                 return (object)[
                     'fBetrag' => (float)$payment->amount->value,
                     'cISO' => $payment->amount->currency,

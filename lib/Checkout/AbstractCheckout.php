@@ -96,14 +96,14 @@ abstract class AbstractCheckout
      * @return AbstractCheckout
      * @throws Exception
      */
-    public static function fromID($id, MollieAPI $api = null): AbstractCheckout
+    public static function fromID($id): AbstractCheckout
     {
         $model = OrderModel::loadByAttributes([
             'orderId' => $id,
         ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
         $oBestellung = new Bestellung($model->getBestellung(), true);
 
-        $self = new static($oBestellung, $api);
+        $self = new static($oBestellung, new MollieAPI($model->getTest()));
         $self->setModel($model);
         return $self;
     }
@@ -188,11 +188,13 @@ abstract class AbstractCheckout
     public function updateModel(): self
     {
         if ($this->getMollie()) {
+            $this->getModel()->setOrderId($this->getMollie()->id);
             $this->getModel()->setLocale($this->getMollie()->locale);
             $this->getModel()->setAmount($this->getMollie()->amount->value);
             $this->getModel()->setMethod($this->getMollie()->method);
             $this->getModel()->setCurrency($this->getMollie()->amount->currency);
             $this->getModel()->setOrderId($this->getMollie()->id);
+            $this->getModel()->setStatus($this->getMollie()->status);
         }
         $this->getModel()->setBestellung($this->oBestellung->kBestellung);
         $this->getModel()->setBestellNr($this->oBestellung->cBestellNr);

@@ -6,14 +6,11 @@ namespace Plugin\ws5_mollie\lib\Hook;
 
 use Exception;
 use JTL\Alert\Alert;
-use JTL\Checkout\Bestellung;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
-use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
-use Plugin\ws5_mollie\lib\MollieAPI;
 use RuntimeException;
 
 
@@ -70,36 +67,33 @@ class Queue extends AbstractHook
         }
         if (array_key_exists('m_pay', $_REQUEST)) {
             try {
-                $raw = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM `xplugin_ws5_mollie_orders` WHERE dReminder IS NOT NULL AND MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
+                $raw = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId, cOrderId FROM `xplugin_ws5_mollie_orders` WHERE dReminder IS NOT NULL AND MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
                     ':md5' => $_REQUEST['m_pay']
                 ], 1);
 
                 if (!$raw) {
                     throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errOrderNotFound'));
                 }
-                $orderModel = OrderModel::loadByAttributes(['id' => $raw->kId], Shop::Container()->getDB());
-                $oBestellung = new Bestellung($orderModel->getBestellung(), true);
 
-                if ($oBestellung->dBezahltDatum !== null || in_array($orderModel->getStatus(), ['completed', 'paid', 'authorized', 'pending'])) {
+                if (strpos($raw->cOrderId, 'tr_') === 0) {
+                    $checkout = PaymentCheckout::fromID($raw->cOrderId);
+                } else {
+                    $checkout = OrderCheckout::fromID($raw->cOrderId);
+                }
+                $checkout->getMollie(true);
+                $checkout->updateModel()->saveModel();
+
+                if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->getStatus(), ['completed', 'paid', 'authorized', 'pending'])) {
                     throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
 
-                $api = new MollieAPI($orderModel->getTest());
-
                 $options = [];
                 if (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on') {
-                    $options['method'] = $orderModel->getMethod();
+                    $options['method'] = $checkout->getModel()->getMethod();
                 }
 
-                if (strpos($orderModel->orderId, 'tr_') === 0) {
-                    $checkout = PaymentCheckout::factory($oBestellung, $api);
-                    $payment = $checkout->create($options);
-                    $url = $payment->getCheckoutUrl();
-                } else {
-                    $checkout = OrderCheckout::factory($oBestellung, $api);
-                    $order = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);
-                    $url = $order->getCheckoutUrl();
-                }
+                $mollie = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);
+                $url = $mollie->getCheckoutUrl();
 
                 header('Location: ' . $url);
                 exit();
