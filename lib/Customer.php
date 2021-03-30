@@ -27,7 +27,7 @@ class Customer
         ], \Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
 
 
-        $api = MollieAPI::API(MollieAPI::getMode());
+        $api = new MollieAPI(MollieAPI::getMode());
 
         if (!$mCustomer->getCustomerId()) {
 
@@ -38,7 +38,7 @@ class Customer
             $customer = new self();
         } else {
             try {
-                $customer = $api->customers->get($mCustomer->getCustomerId());
+                $customer = $api->getClient()->customers->get($mCustomer->getCustomerId());
             } catch (ApiException $e) {
                 $customer = new self();
             }
@@ -58,7 +58,7 @@ class Customer
             $customer->update();
         } else {
             try {
-                $customer = $api->customers->create($customer->toArray());
+                $customer = $api->getClient()->customers->create($customer->toArray());
                 $mCustomer->setCustomerId($customer->id);
                 $mCustomer->save();
             } catch (ApiException $e) {

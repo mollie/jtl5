@@ -25,7 +25,9 @@ class MollieController extends AbstractController
         if (self::Plugin()->getConfig()->getValue('apiKey') === '' && self::Plugin()->getConfig()->getValue('test_apiKey') !== '') {
             $test = true;
         }
-        $_methods = MollieAPI::API($test)->methods->allAvailable([/*'includeWallets' => 'applepay', 'resource' => 'orders'*/]);
+        $api = new MollieAPI($test);
+
+        $_methods = $api->getClient()->methods->allAvailable([/*'includeWallets' => 'applepay', 'resource' => 'orders'*/]);
         $methods = [];
         $oPlugin = self::Plugin();
 

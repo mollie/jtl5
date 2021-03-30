@@ -1,7 +1,7 @@
 <?php
 
 use JTL\Shop;
-use Plugin\ws5_mollie\lib\Order;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Queue;
 
 try {
@@ -10,8 +10,8 @@ try {
 
     ifndef('MOLLIE_QUEUE_MAX', 3);
     Queue::run(MOLLIE_QUEUE_MAX);
-    
-    Order::sendReminders();
+
+    AbstractCheckout::sendReminders();
 
 
 } catch (Exception $e) {

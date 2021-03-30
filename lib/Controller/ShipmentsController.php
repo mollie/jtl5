@@ -8,6 +8,7 @@ use JTL\Checkout\Bestellung;
 use Kunde;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Response;
 use Plugin\ws5_mollie\lib\Shipment;
 use stdClass;
@@ -29,10 +30,12 @@ class ShipmentsController extends AbstractController
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung, Liefererschien oder Mollie OrderId fehlen.');
         }
 
-        if (($oBestellung = new Bestellung($data->kBestellung)) && $oBestellung->kBestellung) {
-            $shipment = Shipment::factory((int)$data->kLieferschein, $data->orderId);
+        $checkout = OrderCheckout::fromID($data->orderId);
 
-            $oKunde = new Kunde($oBestellung->kKunde);
+        if ($checkout->getModel()->getBestellung()) {
+            $shipment = Shipment::factory((int)$data->kLieferschein, $checkout);
+
+            $oKunde = new Kunde($checkout->getBestellung()->kKunde);
 
             $mode = self::Plugin()->getConfig()->getValue('shippingMode');
             switch ($mode) {
@@ -45,7 +48,7 @@ class ShipmentsController extends AbstractController
 
                 case 'B':
                     // only ship if complete shipping
-                    if ($oKunde->nRegistriert || (int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
+                    if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
                         if (!$shipment->send() && !$shipment->result) {
                             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                         }

@@ -15,7 +15,7 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Types\OrderStatus;
-use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
@@ -27,12 +27,12 @@ class Shipment implements JsonSerializable
     /**
      * @var array
      */
-    public array $lines = [];
+    public $lines = [];
 
     /**
      * @var array
      */
-    public array $tracking;
+    public $tracking;
 
     /**
      * @var bool
@@ -68,23 +68,16 @@ class Shipment implements JsonSerializable
      * @throws \JTL\Exceptions\CircularReferenceException
      * @throws \JTL\Exceptions\ServiceNotFoundException
      */
-    public static function syncBestellung(int $kBestellung): array
+    public static function syncBestellung(OrderCheckout $checkout): array
     {
 
         $shipments = [];
+        if ($checkout->getBestellung()->kBestellung) {
 
-        $orderModel = OrderModel::loadByAttributes(
-            ['bestellung' => $kBestellung],
-            Shop::Container()->getDB(),
-            DataModel::ON_NOTEXISTS_FAIL);
-
-        $oBestellung = new Bestellung($kBestellung, true);
-        if ($oBestellung->kBestellung) {
-
-            $oKunde = new \Kunde($oBestellung->kKunde);
+            $oKunde = new \Kunde($checkout->getBestellung()->kKunde);
 
             /** @var Lieferschein $oLieferschein */
-            foreach ($oBestellung->oLieferschein_arr as $oLieferschein) {
+            foreach ($checkout->getBestellung()->oLieferschein_arr as $oLieferschein) {
 
                 try {
 
@@ -96,7 +89,7 @@ class Shipment implements JsonSerializable
                         continue;
                     }
 
-                    $shipment = self::factory($oLieferschein->getLieferschein(), $orderModel->getOrderId());
+                    $shipment = self::factory($oLieferschein->getLieferschein(), $checkout);
 
                     $mode = self::Plugin()->getConfig()->getValue('shippingMode');
                     switch ($mode) {
@@ -110,7 +103,7 @@ class Shipment implements JsonSerializable
 
                         case 'B':
                             // only ship if complete shipping
-                            if ($oKunde->nRegistriert || (int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
+                            if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
                                 if (!$shipment->send() && !$shipment->result) {
                                     throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                                 }
@@ -132,37 +125,26 @@ class Shipment implements JsonSerializable
 
     /**
      * @param int $kLieferschein
-     * @param $orderId
+     * @param OrderCheckout $checkout
      * @return Shipment
-     * @throws ApiException
-     * @throws IncompatiblePlatform
      * @throws Exception
      */
-    public static function factory(int $kLieferschein, $orderId): Shipment
+    public static function factory(int $kLieferschein, OrderCheckout $checkout): Shipment
     {
 
-
-        $orderModel = OrderModel::loadByAttributes(
-            ['orderId' => $orderId],
-            Shop::Container()->getDB(),
-            DataModel::ON_NOTEXISTS_FAIL);
-
         $shipmentsModel = ShipmentsModel::loadByAttributes(
-            ['lieferschein' => (int)$kLieferschein],
+            ['lieferschein' => $kLieferschein],
             \JTL\Shop::Container()->getDB(),
             DataModel::ON_NOTEXISTS_NEW);
         if ($shipmentsModel->getOrderId()) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschien bereits an Mollie übertragen!');
         }
 
-        $mOrder = MollieAPI::API($orderModel->getTest())->orders->get($orderId);
-
-        if ($mOrder->status === OrderStatus::STATUS_COMPLETED) {
+        if ($checkout->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung bei Mollie bereits abgeschlossen!');
         }
 
         $oLieferschein = new Lieferschein($kLieferschein);
-
 
         if (!$oLieferschein->getLieferschein()) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschein konnte nicht geladen werden');
@@ -176,8 +158,8 @@ class Shipment implements JsonSerializable
 
         $shipment = new self();
 
-        $shipment->cOrderId = $orderId;
-        $shipment->kBestellung = $orderModel->getBestellung();
+        $shipment->cOrderId = $checkout->getModel()->getOrderId();
+        $shipment->kBestellung = $checkout->getModel()->getBestellung();
         $shipment->kLieferschein = $kLieferschein;
 
         /** @var Versand $oVersand */
@@ -191,15 +173,15 @@ class Shipment implements JsonSerializable
                 $shipment->tracking['url'] = $oVersand->getLogistikURL();
             }
         }
-        if ($orderModel->getTest()) {
+        if ($checkout->getModel()->getTest()) {
             $shipment->bTestmode = true;
         }
 
-        $oBestellung = new Bestellung($orderModel->getBestellung());
+        $oBestellung = new Bestellung($checkout->getModel()->getBestellung());
         if ((int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
             $shipment->lines = [];
         } else {
-            $shipment->lines = self::getOrderLines($oLieferschein, $mOrder);
+            $shipment->lines = self::getOrderLines($oLieferschein, $checkout->getMollie());
         }
 
         return $shipment;
@@ -264,7 +246,7 @@ class Shipment implements JsonSerializable
         $oShipmentModel->setCode($this->tracking['code'] ?? null);
         $oShipmentModel->setUrl($this->tracking['url'] ?? null);
 
-        $api = MollieAPI::API($this->bTestmode);
+        $api = (new MollieAPI($this->bTestmode))->getClient();
         $this->bTestmode = null;
         $this->cOrderId = null;
         $this->kLieferschein = null;

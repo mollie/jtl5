@@ -7,11 +7,11 @@ namespace Plugin\ws5_mollie\lib\Controller;
 use JTL\Checkout\Bestellung;
 use JTL\Model\DataModel;
 use JTL\Shop;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
-use Plugin\ws5_mollie\lib\MollieAPI;
-use Plugin\ws5_mollie\lib\Order;
-use Plugin\ws5_mollie\lib\PaymentMethod;
 use Plugin\ws5_mollie\lib\Response;
 use stdClass;
 
@@ -28,7 +28,7 @@ class OrdersController extends AbstractController
 
         $oBestellung = new Bestellung($orderModel->bestellung);
 
-        return new Response(PaymentMethod::makeFetchable($oBestellung, $orderModel));
+        return new Response(AbstractCheckout::makeFetchable($oBestellung, $orderModel));
     }
 
     public static function shipments(stdClass $data): Response
@@ -40,18 +40,18 @@ class OrdersController extends AbstractController
                 ':kBestellung' => (int)$data->kBestellung
             ], 2);
 
-            foreach ($lieferschien_arr as $lieferschien) {
+            foreach ($lieferschien_arr as $lieferschein) {
 
                 $shipmentsModel = ShipmentsModel::loadByAttributes(
-                    ['lieferschein' => (int)$lieferschien->kLieferschein],
+                    ['lieferschein' => (int)$lieferschein->kLieferschein],
                     Shop::Container()->getDB(),
                     DataModel::ON_NOTEXISTS_NEW);
 
                 $response[] = (object)[
-                    'kLieferschein' => $lieferschien->kLieferschein,
-                    'cLieferscheinNr' => $lieferschien->cLieferscheinNr,
-                    'cHinweis' => $lieferschien->cHinweis,
-                    'dErstellt' => date('Y-m-d H:i:s', $lieferschien->dErstellt),
+                    'kLieferschein' => $lieferschein->kLieferschein,
+                    'cLieferscheinNr' => $lieferschein->cLieferscheinNr,
+                    'cHinweis' => $lieferschein->cHinweis,
+                    'dErstellt' => date('Y-m-d H:i:s', $lieferschein->dErstellt),
                     'shipment' => $shipmentsModel->getBestellung() ? $shipmentsModel : null,
                 ];
             }
@@ -80,39 +80,32 @@ class OrdersController extends AbstractController
     public static function one(stdClass $data): Response
     {
 
-        $order = Shop::Container()->getDB()
-            ->executeQueryPrepared("SELECT * FROM `xplugin_ws5_mollie_orders` WHERE cOrderId = :cOrderId;",
-                [':cOrderId' => $data->id],
-                1);
-
-        $mOrder = null;
-        if (strpos($order->cOrderId, 'tr_') === 0) {
-            $mOrder = MollieAPI::API((bool)$order->bTest)->payments
-                ->get($order->cOrderId, ['embed' => 'refunds']);
+        $result = [];
+        if (strpos($data->id, 'tr_') !== false) {
+            $checkout = PaymentCheckout::fromID($data->id);
         } else {
-            $mOrder = MollieAPI::API((bool)$order->bTest)->orders
-                ->get($order->cOrderId, ['embed' => 'payments,shipments,refunds']);
+            $checkout = OrderCheckout::fromID($data->id);
         }
 
+        $checkout->updateModel()->saveModel();
 
-        Order::update($mOrder);
+        $result['mollie'] = $checkout->getMollie();
+        $result['order'] = $checkout->getModel()->rawObject();
+        $result['bestellung'] = $checkout->getBestellung();
+        $result['logs'] = Shop::Container()->getDB()
+            ->executeQueryPrepared("SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook",
+                [
+                    ':cTypeWebhook' => "%{$checkout->getModel()->getOrderId()}%",
+                    ':cTypeHook' => "%:{$checkout->getModel()->getBestellung()}%"
+                ], 2);
 
-        $result = (object)[
-            'mollie' => $mOrder,
-            'order' => $order,
-            'bestellung' => new Bestellung($order->kBestellung, true),
-            'logs' => Shop::Container()->getDB()
-                ->executeQueryPrepared("SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cType",
-                    [
-                        ':cType' => "%{$order->cOrderId}%"
-                    ], 2)
-        ];
         return new Response($result);
+
     }
 
     public static function reminder(stdClass $data): Response
     {
-        return new Response(Order::sendReminder($data->id));
+        return new Response(AbstractCheckout::sendReminder($data->id));
     }
 
 }
