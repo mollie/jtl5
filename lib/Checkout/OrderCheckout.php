@@ -127,7 +127,9 @@ class OrderCheckout extends AbstractCheckout
             ->setRequestData('redirectUrl', $this->getPaymentMethod()->getReturnURL($this->oBestellung))
             ->setRequestData('webhookUrl', Shop::getURL(true) . '/?mollie=1');
 
-        if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== '') {
+        if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
+            && self::Plugin()->getConfig()->getValue('resetMethod') !== 'on') {
+
             $this->setRequestData('method', $this->getPaymentMethod()::METHOD);
         }
 
@@ -162,7 +164,7 @@ class OrderCheckout extends AbstractCheckout
         $this->setRequestData('lines', $lines);
 
         if ($dueDays = (int)self::Plugin()->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) {
-            $max = $this->requestData('method') && strpos($this->requestData('method'), 'klarna') !== false ? 28 : 100;
+            $max = $this->RequestData('method') && strpos($this->RequestData('method'), 'klarna') !== false ? 28 : 100;
             $this->setRequestData('expiresAt', date('Y-m-d', strtotime(sprintf("+%d DAYS", min($dueDays, $max)))));
         }
 

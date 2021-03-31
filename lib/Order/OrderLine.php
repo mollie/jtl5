@@ -59,9 +59,13 @@ class OrderLine implements \JsonSerializable
         // TODO: FktAttr? $orderLine->category
         $orderLine->name = $oPosition->cName;
 
-        // TODO: 2 vorher
-        $_netto = round($oPosition->fPreis, 4);
         $_vatRate = (float)$oPosition->fMwSt / 100;
+        if ((int)$oPosition->nPosTyp === C_WARENKORBPOS_TYP_KUPON) {
+            $_netto = round($oPosition->fPreis * (1 + $_vatRate), 4);
+            $_vatRate = 0;
+        } else {
+            $_netto = round($oPosition->fPreis, 4);
+        }
         $_amount = (float)$oPosition->nAnzahl;
 
         if (fmod($oPosition->nAnzahl, 1) !== 0.0) {
@@ -79,7 +83,7 @@ class OrderLine implements \JsonSerializable
         $orderLine->quantity = (int)$_amount;
         $orderLine->unitPrice = new Amount($unitPrice, $currency, false);
         $orderLine->totalAmount = new Amount($totalAmount, $currency, false);
-        $orderLine->vatRate = (string)$oPosition->fMwSt;
+        $orderLine->vatRate = number_format($_vatRate * 100, 2);
         $orderLine->vatAmount = new Amount($vatAmount, $currency, false);
 
         $metadata = [];

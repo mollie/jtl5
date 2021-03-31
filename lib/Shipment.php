@@ -5,8 +5,6 @@ namespace Plugin\ws5_mollie\lib;
 
 
 use Exception;
-use JsonSerializable;
-use JTL\Checkout\Bestellung;
 use JTL\Checkout\Lieferschein;
 use JTL\Checkout\Lieferscheinpos;
 use JTL\Checkout\Versand;
@@ -17,48 +15,64 @@ use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
-use Plugin\ws5_mollie\lib\Traits\Jsonable;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
+use Plugin\ws5_mollie\lib\Traits\RequestData;
 use Shop;
 
-class Shipment implements JsonSerializable
+class Shipment
 {
 
     /**
-     * @var array
+     * @var int|null
      */
-    public $lines = [];
+    protected $kLieferschein;
+
+    use Plugin;
+
+    use RequestData;
 
     /**
-     * @var array
+     * @var ShipmentsModel
      */
-    public $tracking;
-
+    protected $model;
     /**
-     * @var bool
+     * @var OrderCheckout
      */
-    public $bTestmode;
+    protected $checkout;
     /**
      * @var \Mollie\Api\Resources\Shipment
      */
-    public $result;
+    protected $shipment;
     /**
-     * @var int|null
+     * @var Lieferschein
      */
-    protected $kBestellung;
-    /**
-     * @var int|null
-     *
-     */
-    protected $kLieferschein;
-    /**
-     * @var string|null
-     */
-    protected $cOrderId;
+    protected $oLieferschein;
 
-    use Jsonable;
+    public function __construct(int $kLieferschein, OrderCheckout $checkout = null)
+    {
+        $this->kLieferschein = $kLieferschein;
+        if ($checkout) {
+            $this->checkout = $checkout;
+        }
 
-    use Plugin;
+        if (!$this->getLieferschein() || !$this->getLieferschein()->getLieferschein()) {
+            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschein konnte nicht geladen werden');
+        }
+
+        if (!count($this->getLieferschein()->oVersand_arr)) {
+            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Kein Versand gefunden!');
+        }
+
+
+    }
+
+    public function getLieferschein(): ?Lieferschein
+    {
+        if (!$this->oLieferschein && $this->kLieferschein) {
+            $this->oLieferschein = new Lieferschein($this->kLieferschein);
+        }
+        return $this->oLieferschein;
+    }
 
     /**
      * @param int $kBestellung
@@ -81,33 +95,25 @@ class Shipment implements JsonSerializable
 
                 try {
 
-                    $shipmentModel = ShipmentsModel::loadByAttributes(
-                        ['lieferschein' => $oLieferschein->getLieferschein()],
-                        \JTL\Shop::Container()->getDB(),
-                        DataModel::ON_NOTEXISTS_NEW);
-                    if ($shipmentModel->getOrderId() && $shipmentModel->getShipmentId()) {
-                        continue;
-                    }
-
-                    $shipment = self::factory($oLieferschein->getLieferschein(), $checkout);
+                    $shipment = new Shipment($oLieferschein->getLieferschein(), $checkout);
 
                     $mode = self::Plugin()->getConfig()->getValue('shippingMode');
                     switch ($mode) {
                         case 'A':
                             // ship directly
-                            if (!$shipment->send() && !$shipment->result) {
+                            if (!$shipment->send() && !$shipment->getShipment()) {
                                 throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                             }
-                            $shipments[] = $shipment->result;
+                            $shipments[] = $shipment->getShipment();
                             break;
 
                         case 'B':
                             // only ship if complete shipping
                             if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-                                if (!$shipment->send() && !$shipment->result) {
+                                if (!$shipment->send() && !$shipment->getShipment()) {
                                     throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                                 }
-                                $shipments[] = $shipment->result;
+                                $shipments[] = $shipment->getShipment();
                                 break;
                             }
                             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Gastbestellung noch nicht komplett versendet!');
@@ -122,77 +128,118 @@ class Shipment implements JsonSerializable
         return $shipments;
     }
 
-
     /**
-     * @param int $kLieferschein
-     * @param OrderCheckout $checkout
-     * @return Shipment
+     * @return bool
+     * @throws ApiException
+     * @throws IncompatiblePlatform
      * @throws Exception
      */
-    public static function factory(int $kLieferschein, OrderCheckout $checkout): Shipment
+    public function send(): bool
     {
 
-        $shipmentsModel = ShipmentsModel::loadByAttributes(
-            ['lieferschein' => $kLieferschein],
-            \JTL\Shop::Container()->getDB(),
-            DataModel::ON_NOTEXISTS_NEW);
-        if ($shipmentsModel->getOrderId()) {
+        if ($this->getShipment()) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschien bereits an Mollie übertragen!');
         }
 
-        if ($checkout->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
+        if ($this->getCheckout()->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung bei Mollie bereits abgeschlossen!');
         }
 
-        $oLieferschein = new Lieferschein($kLieferschein);
+        $api = $this->getCheckout()->getAPI()->getClient();
 
-        if (!$oLieferschein->getLieferschein()) {
-            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschein konnte nicht geladen werden');
+        $this->shipment = $api->shipments->createForId($this->checkout->getModel()->getOrderId(), $this->loadRequest()->getRequestData());
+
+        return $this->updateModel()->saveModel();
+
+    }
+
+    public function getShipment(): ?\Mollie\Api\Resources\Shipment
+    {
+        if ($this->getModel() && $this->getModel()->getShipmentId()) {
+            $this->shipment = $this->getCheckout()->getAPI()->getClient()->shipments->getForId($this->getModel()->getOrderId(), $this->getModel()->getShipmentId());
         }
+        return $this->shipment;
+    }
 
-
-        if (!count($oLieferschein->oVersand_arr)) {
-            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Kein Versand gefunden!');
+    /**
+     * @return ShipmentsModel
+     * @throws Exception
+     */
+    public function getModel(): ShipmentsModel
+    {
+        if (!$this->model && $this->kLieferschein) {
+            $this->model = ShipmentsModel::loadByAttributes(
+                ['lieferschein' => $this->kLieferschein], Shop::Container()->getDB(),
+                DataModel::ON_NOTEXISTS_NEW
+            );
+            if (!$this->model->getCreated()) {
+                $this->getModel()->setCreated(date('Y-m-d H:i:s'));
+            }
+            $this->updateModel();
         }
+        return $this->model;
+    }
+
+    public function updateModel(): self
+    {
+        $this->getModel()->setLieferschein($this->kLieferschein);
+        if ($this->getCheckout()) {
+            $this->getModel()->setOrderId($this->getCheckout()->getModel()->getOrderId());
+            $this->getModel()->setBestellung($this->getCheckout()->getModel()->getBestellung());
+        }
+        if ($this->getShipment()) {
+            $this->getModel()->setShipmentId($this->getShipment()->id);
+            $this->getModel()->setUrl($this->getShipment()->getTrackingUrl() ?? '');
+        }
+        if ($this->getRequestData()) {
+            if ($tracking = $this->RequestData('tracking')) {
+                $this->getModel()->setCarrier($this->RequestData('tracking')['carrier'] ?? '');
+                $this->getModel()->setCode($this->RequestData('tracking')['code'] ?? '');
+            }
+        }
+        $this->getModel()->setModified(date('Y-m-d H:i:s'));
+        return $this;
+    }
+
+    public function getCheckout(): OrderCheckout
+    {
+        if (!$this->checkout) {
+            //TODO evtl. load by lieferschien
+            throw new Exception('Should not happen, but it did!');
+        }
+        return $this->checkout;
+    }
 
 
-        $shipment = new self();
-
-        $shipment->cOrderId = $checkout->getModel()->getOrderId();
-        $shipment->kBestellung = $checkout->getModel()->getBestellung();
-        $shipment->kLieferschein = $kLieferschein;
+    public function loadRequest(): self
+    {
 
         /** @var Versand $oVersand */
-        $oVersand = $oLieferschein->oVersand_arr[0];
+        $oVersand = $this->getLieferschein()->oVersand_arr[0];
         if ($oVersand->getIdentCode() && $oVersand->getLogistik()) {
-            $shipment->tracking = [
+            $tracking = [
                 'carrier' => $oVersand->getLogistik(),
                 'code' => $oVersand->getIdentCode(),
             ];
             if ($oVersand->getLogistikVarUrl()) {
-                $shipment->tracking['url'] = $oVersand->getLogistikURL();
+                $tracking['url'] = $oVersand->getLogistikURL();
             }
-        }
-        if ($checkout->getModel()->getTest()) {
-            $shipment->bTestmode = true;
+            $this->setRequestData('tracking', $tracking);
         }
 
-        $oBestellung = new Bestellung($checkout->getModel()->getBestellung());
-        if ((int)$oBestellung->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-            $shipment->lines = [];
+        if ((int)$this->getCheckout()->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
+            $this->setRequestData('lines', []);
         } else {
-            $shipment->lines = self::getOrderLines($oLieferschein, $checkout->getMollie());
+            $this->setRequestData('lines', $this->getOrderLines());
         }
-
-        return $shipment;
-
+        return $this;
     }
 
-    protected static function getOrderLines(Lieferschein $oLieferschein, \Mollie\Api\Resources\Order $mOrder): array
+    protected function getOrderLines(): array
     {
         $lines = [];
 
-        if (!count($oLieferschein->oLieferscheinPos_arr)) {
+        if (!count($this->getLieferschein()->oLieferscheinPos_arr)) {
             return $lines;
         }
 
@@ -200,16 +247,16 @@ class Shipment implements JsonSerializable
         $shippedOrderLines = [];
 
         /** @var Lieferscheinpos $oLieferschienPos */
-        foreach ($oLieferschein->oLieferscheinPos_arr as $oLieferschienPos) {
+        foreach ($this->getLieferschein()->oLieferscheinPos_arr as $oLieferschienPos) {
 
             $wkpos = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM twarenkorbpos WHERE kBestellpos = :kBestellpos', [
                 ':kBestellpos' => $oLieferschienPos->getBestellPos()
             ], 1);
 
             /** @var OrderLine $orderLine */
-            foreach ($mOrder->lines as $orderLine) {
+            foreach ($this->getCheckout()->getMollie()->lines as $orderLine) {
 
-                if (!in_array($orderLine->id, $shippedOrderLines, true) && $wkpos->cArtNr === $orderLine->sku) {
+                if ($orderLine->sku === $wkpos->cArtNr && !in_array($orderLine->id, $shippedOrderLines, true)) {
 
                     $quantity = min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity);
                     if ($quantity) {
@@ -231,35 +278,11 @@ class Shipment implements JsonSerializable
 
     /**
      * @return bool
-     * @throws ApiException
-     * @throws IncompatiblePlatform
      * @throws Exception
      */
-    public function send(): bool
+    public function saveModel(): bool
     {
-
-        $oShipmentModel = new ShipmentsModel(Shop::Container()->getDB());
-        $oShipmentModel->setBestellung($this->kBestellung);
-        $oShipmentModel->setLieferschein($this->kLieferschein);
-        $oShipmentModel->setOrderId($this->cOrderId);
-        $oShipmentModel->setCarrier($this->tracking['carrier'] ?? null);
-        $oShipmentModel->setCode($this->tracking['code'] ?? null);
-        $oShipmentModel->setUrl($this->tracking['url'] ?? null);
-
-        $api = (new MollieAPI($this->bTestmode))->getClient();
-        $this->bTestmode = null;
-        $this->cOrderId = null;
-        $this->kLieferschein = null;
-        $this->kBestellung = null;
-
-        //return true;
-
-        $this->result = $api->shipments->createForId($oShipmentModel->orderId, $this->toArray());
-
-        $oShipmentModel->setShipmentId($this->result->id);
-
-        return $oShipmentModel->save();
-
+        return $this->getModel()->save();
     }
 
 }

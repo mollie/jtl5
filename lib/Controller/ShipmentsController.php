@@ -4,7 +4,6 @@
 namespace Plugin\ws5_mollie\lib\Controller;
 
 
-use JTL\Checkout\Bestellung;
 use Kunde;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
@@ -33,7 +32,7 @@ class ShipmentsController extends AbstractController
         $checkout = OrderCheckout::fromID($data->orderId);
 
         if ($checkout->getModel()->getBestellung()) {
-            $shipment = Shipment::factory((int)$data->kLieferschein, $checkout);
+            $shipment = new Shipment((int)$data->kLieferschein, $checkout);
 
             $oKunde = new Kunde($checkout->getBestellung()->kKunde);
 
@@ -41,7 +40,7 @@ class ShipmentsController extends AbstractController
             switch ($mode) {
                 case 'A':
                     // ship directly
-                    if (!$shipment->send() && !$shipment->result) {
+                    if (!$shipment->send() && !$shipment->getShipment()) {
                         throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                     }
                     return new Response(true);
@@ -49,7 +48,7 @@ class ShipmentsController extends AbstractController
                 case 'B':
                     // only ship if complete shipping
                     if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-                        if (!$shipment->send() && !$shipment->result) {
+                        if (!$shipment->send() && !$shipment->getShipment()) {
                             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                         }
                         return new Response(true);

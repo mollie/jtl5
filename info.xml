@@ -70,7 +70,7 @@
                 </Setting>
 
                 <Setting type="checkbox" initialValue="off" sort="50" conf="Y">
-                    <Name>Zahlart bei erneutem Zahlvorgang zurücksetzen (Payment API)</Name>
+                    <Name>Zahlart bei erneutem Zahlvorgang zurücksetzen</Name>
                     <Description>Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte
                         Mollie-Zahlungsart zurückzusetzen, somit hat der Kunde zwischen allen aktiven Mollie-Zahlarten
                         zu wählen.

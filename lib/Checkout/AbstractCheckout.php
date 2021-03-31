@@ -19,6 +19,7 @@ use PaymentMethod;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
+use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
 use SmartyException;
 use stdClass;
@@ -26,6 +27,8 @@ use stdClass;
 abstract class AbstractCheckout
 {
     use Plugin;
+
+    use RequestData;
 
     /**
      * @var OrderModel
@@ -379,25 +382,5 @@ abstract class AbstractCheckout
         }
         return $this->hash;
     }
-
-    public function setRequestData(string $key, $value): self
-    {
-        if (!$this->reqData) {
-            $this->reqData = [];
-        }
-        $this->reqData[$key] = $value;
-        return $this;
-    }
-
-    public function requestData(string $key){
-        return $this->reqData[$key] ?? null;
-    }
-
-    public function getRequestData(): array
-    {
-        return !$this->reqData ? $this->loadRequest()->reqData : $this->reqData;
-    }
-
-    abstract public function loadRequest(array $options = []): AbstractCheckout;
 
 }
