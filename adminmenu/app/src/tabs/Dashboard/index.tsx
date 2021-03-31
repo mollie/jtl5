@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
 import {formatAmount, Loading, usePluginInfo} from "@webstollen/react-jtl-plugin/lib";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCreditCard, faMoneyBill, faShippingFast, faSync} from "@fortawesome/pro-regular-svg-icons";
+import {faCreditCard, faMoneyBill, faShippingFast, faSync, faExternalLink} from "@fortawesome/pro-regular-svg-icons";
 import {faExclamationTriangle, faTimesOctagon} from "@fortawesome/pro-solid-svg-icons"
 import setupImg from '../../assets/img/mollie-dashboard.png';
 import Button from "@webstollen/react-jtl-plugin/lib/components/Button";
@@ -76,7 +76,7 @@ const Dashboard = () => {
 
             <FontAwesomeIcon onClick={loadMethods} spin={loading.methods} icon={faSync} size={"lg"}
                              className="float-right cursor-pointer"
-                             title="aktualisiert"/>
+                             title="aktualisieren"/>
 
             {setup ? <>
                     <img src={prefix + setupImg} alt="Setup Assistant" className="mx-auto"/>
@@ -91,6 +91,12 @@ const Dashboard = () => {
                          className="mr-2 max-w-full"
                          style={{maxWidth: '100px'}}/>
                     <div className="text-xl">Integireren Sie alle wichtigen<br/>Zahlungsmethoden in kürzester zeit.
+                    </div>
+                    <div>
+                        <Button onClick={() => window.open('https://mollie.com/dashboard', '_blank')?.focus()}
+                                className={"mx-8"}>
+                            Mollie Dashboard <FontAwesomeIcon icon={faExternalLink}/>
+                        </Button>
                     </div>
                 </div>}
 

@@ -18,7 +18,24 @@ import paysafecardImg from './assets/img/paysafecard.svg';
 import przelewy24Img from './assets/img/Przelewy24.svg';
 import sofortImg from './assets/img/sofort.svg';
 import voucherImg from './assets/img/Voucher.svg'
+import {MethodProps} from "./tabs/Dashboard/Method";
 
+export const showMethodInfo = (method: MethodProps) => {
+
+    const listShipping = (shipping: Record<string, any>[]) => {
+        return shipping.length ? "Versandarten:\n" + shipping.map((shipping: Record<string, any>) => ' - ' + shipping.cName).join('\n') + "\n\n" : '';
+    }
+
+    return alert(`${method.mollie.description}\n\n`
+        + `${method.duringCheckout ? `!! Zahlung vor Bestellabschluss !!\n\n` : ''}`
+        + `Status: ${method.mollie.status}\n`
+        + (method.api ? `API: ${method.api}\n` : '')
+        + `${method.components ? `Components: ${method.components}\n` : ''}`
+        + `${method.dueDays ? `Gültigkeit: ${method.dueDays} Tage\n` : ''}`
+        + `${method.mollie.minimumAmount ? `Minimum: ${method.mollie.minimumAmount.value} ${method.mollie.minimumAmount.currency}\n` : ''}`
+        + `${method.mollie.maximumAmount ? `Maximum: ${method.mollie.maximumAmount.value} ${method.mollie.maximumAmount.currency}\n` : ''}`
+        + `${method.shipping ? listShipping(method.shipping) : ''}`);
+}
 
 export type MollieOrder = {
     bSynced: string
@@ -34,7 +51,7 @@ export type MollieOrder = {
     cTransactionId: string
     dCreated: string
     dModified: string
-    dReminder: string|null
+    dReminder: string | null
     fAmount: number
     fAmountRefunded: number
     kBestellung: number

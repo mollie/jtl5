@@ -1,8 +1,8 @@
 import React from "react";
 import {MethodProps} from "./index";
 import {faExclamationTriangle, faTimesOctagon} from "@fortawesome/pro-solid-svg-icons";
-import {PaymentMethod2img} from "../../../helper";
-import {faCog} from "@fortawesome/pro-regular-svg-icons";
+import {PaymentMethod2img, showMethodInfo} from "../../../helper";
+import {faCog, faInfoCircle} from "@fortawesome/pro-regular-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const Invalid = ({method}: { method: MethodProps }) => {
@@ -34,6 +34,9 @@ const Invalid = ({method}: { method: MethodProps }) => {
 
             <PaymentMethod2img method={method.mollie.id}/> <span
             className={method.mollie.status !== 'activated' ? "text-red-400" : ''}>{method.mollie.description}</span>
+
+            <FontAwesomeIcon icon={faInfoCircle} title={'Informationen anzeigen'} size={"sm"}
+                             className="ml-2 cursor-help" onClick={() => showMethodInfo(method)}/>
 
             <div className="float-right">
                 {method.paymentMethod === false ? null :
