@@ -52,7 +52,7 @@ class OrderCheckout extends AbstractCheckout
                     return $this->getMollie(true);
                 }
             } catch (Exception $e) {
-                $this->getPaymentMethod()->doLog(sprintf("Letzte Order '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->orderId, $e->getMessage()), LOGLEVEL_ERROR);
+                $this->getPaymentMethod()->doLog(sprintf("OrderCheckout::create: Letzte Order '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->orderId, $e->getMessage()), LOGLEVEL_ERROR);
             }
         }
 
@@ -61,8 +61,7 @@ class OrderCheckout extends AbstractCheckout
             $this->order = $this->getAPI()->getClient()->orders->create($req);
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
-            $this->getPaymentMethod()->doLog(sprintf("Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
-            // TODO: Translate?
+            $this->getPaymentMethod()->doLog(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
             throw new \RuntimeException('Order konnte nicht angelegt werden.');
         }
         return $this->order;
@@ -102,7 +101,7 @@ class OrderCheckout extends AbstractCheckout
             try {
                 $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->getOrderId(), ['embed' => 'payments,shipments,refunds']);
             } catch (Exception $e) {
-                throw new \RuntimeException('Could not get Order');
+                throw new \RuntimeException(sprintf('Mollie-Order \'%s\' konnte nicht geladen werden: %s', $this->getModel()->getOrderId(), $e->getMessage()));
             }
         }
         return $this->order;
@@ -162,6 +161,11 @@ class OrderCheckout extends AbstractCheckout
         }
         $this->setRequestData('lines', $lines);
 
+        if ($dueDays = (int)self::Plugin()->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) {
+            $max = $this->requestData('method') && strpos($this->requestData('method'), 'klarna') !== false ? 28 : 100;
+            $this->setRequestData('expiresAt', date('Y-m-d', strtotime(sprintf("+%d DAYS", min($dueDays, $max)))));
+        }
+
         $this->setRequestData('payment', $options);
 
         return $this;
@@ -196,6 +200,6 @@ class OrderCheckout extends AbstractCheckout
             $res = $this->getMollie()->refundAll();
             return "Order Refund initiiert, Status: " . $res->status;
         }
-        throw new Exception('Bestellung nicht storniert.');
+        throw new Exception('Bestellung ist derzeit nicht storniert, Status: ' . $this->getBestellung()->cStatus);
     }
 }

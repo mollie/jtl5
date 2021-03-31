@@ -9,6 +9,7 @@ export type MethodProps = {
     settings: string
     shipping: Array<Record<string, any>>
     components?: string
+    dueDays?: number
 }
 
 export {Valid, Invalid}

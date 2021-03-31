@@ -34,7 +34,7 @@ class PaymentCheckout extends AbstractCheckout
                     return $this->payment;
                 }
             } catch (Exception $e) {
-                $this->getPaymentMethod()->doLog(sprintf("Letzte Transaktion '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->orderId, $e->getMessage()), LOGLEVEL_ERROR);
+                $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Letzte Transaktion '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->orderId, $e->getMessage()), LOGLEVEL_ERROR);
             }
         }
 
@@ -43,9 +43,8 @@ class PaymentCheckout extends AbstractCheckout
             $this->payment = $this->getAPI()->getClient()->payments->create($req);
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
-            $this->getPaymentMethod()->doLog(sprintf("Neue Transaktion '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
-            // TODO: Translate?
-            throw new \RuntimeException('Transaktion konnte nicht angelegt werden.');
+            $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Neue Transaktion '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
+            throw new \RuntimeException(sprintf('Mollie-Payment \'%s\' konnte nicht geladen werden: %s', $this->getModel()->getOrderId(), $e->getMessage()));
         }
         return $this->payment;
     }
@@ -71,7 +70,7 @@ class PaymentCheckout extends AbstractCheckout
             try {
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->getOrderId(), ['embed' => 'refunds']);
             } catch (Exception $e) {
-                throw new \RuntimeException('Could not get Payment');
+                throw new \RuntimeException('Mollie-Payment konnte nicht geladen werden: ' . $e->getMessage());
             }
         }
         return $this->payment;
@@ -116,7 +115,6 @@ class PaymentCheckout extends AbstractCheckout
 
     public function cancelOrRefund(): string
     {
-        // TODO DEBUG
         if ((int)$this->getBestellung()->cStatus === BESTELLUNG_STATUS_STORNO) {
             if ($this->getMollie()->isCancelable) {
                 $res = $this->getAPI()->getClient()->payments->cancel($this->getMollie()->id);
@@ -125,6 +123,6 @@ class PaymentCheckout extends AbstractCheckout
             $res = $this->getAPI()->getClient()->payments->refund($this->getMollie(), ['amount' => $this->getMollie()->amount]);
             return "Payment Refund initiiert, Status: " . $res->status;
         }
-        throw new Exception('Bestellung nicht storniert.');
+        throw new Exception('Bestellung ist derzeit nicht storniert, Status: ' . $this->getBestellung()->cStatus);
     }
 }

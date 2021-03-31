@@ -2,8 +2,8 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
 import {MethodProps} from "./index";
 import {faExclamationTriangle} from "@fortawesome/pro-solid-svg-icons";
-import {faCog, faCreditCard, faMoneyBill, faShippingFast} from "@fortawesome/pro-regular-svg-icons";
-import {PaymentMethod2img} from "../../../helper";
+import {faCog, faCreditCard, faInfoCircle, faMoneyBill, faShippingFast} from "@fortawesome/pro-regular-svg-icons";
+import {PaymentMethod2img, showMethodInfo} from "../../../helper";
 
 
 const Valid = ({method}: { method: MethodProps }) => {
@@ -18,6 +18,10 @@ const Valid = ({method}: { method: MethodProps }) => {
                                 title={"Zahlung vor Bestellabschluss nicht unterstützt."}/>}
 
             <PaymentMethod2img method={method.mollie.id}/> {method.mollie.description}
+
+            <FontAwesomeIcon icon={faInfoCircle} title={'Informationen anzeigen'} size={"sm"}
+                             className="ml-2 cursor-help" onClick={() => showMethodInfo(method)}/>
+
 
             <div className="float-right">
 

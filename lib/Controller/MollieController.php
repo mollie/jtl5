@@ -32,7 +32,7 @@ class MollieController extends AbstractController
         $oPlugin = self::Plugin();
 
         foreach ($_methods as $method) {
-            if(in_array($method->id, ['voucher', PaymentMethod::DIRECTDEBIT, PaymentMethod::GIFTCARD], true)){
+            if (in_array($method->id, ['voucher', PaymentMethod::DIRECTDEBIT, PaymentMethod::GIFTCARD], true)) {
                 continue;
             }
             $id = 'kPlugin_' . Helper::getIDByPluginID("ws5_mollie") . '_' . $method->id;
@@ -56,6 +56,9 @@ WHERE z.cModulId = :cModulID", [':cModulID' => $id], 2),
             }
             if ($api = $oPlugin->getConfig()->getValue($id . '_components')) {
                 $methods[$method->id]->components = $api;
+            }
+            if ($dueDays = $oPlugin->getConfig()->getValue($id . '_dueDays')) {
+                $methods[$method->id]->dueDays = (int)$dueDays;
             }
 
         }
