@@ -207,13 +207,14 @@ abstract class PaymentMethod extends Method
 
         try {
 
-            $payable = (float)$order->fGesamtsumme > 0;
-            if (!$payable) {
-                $this->doLog("Gesamtsumme 0, keine Zahlung notwendig!", LOGLEVEL_NOTICE);
-                return;
-            }
             if ($this->duringCheckout) {
                 $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
+                return;
+            }
+
+            $payable = (float)$order->fGesamtsumme > 0;
+            if (!$payable) {
+                $this->doLog(sprintf("Bestellung '%s': Gesamtsumme %.2f, keine Zahlung notwendig!", $order->cBestellNr, $order->fGesamtsumme), LOGLEVEL_NOTICE);
                 return;
             }
 
@@ -237,8 +238,12 @@ abstract class PaymentMethod extends Method
                 $url = $mOrder->getCheckoutUrl();
             }
 
-            Shop::Smarty()->assign('redirect', $url);
-            if (!headers_sent()) {
+            // TODO: DOKU
+            ifndef('MOLLIE_REDIRECT_DELAY', 3);
+            $checkoutMode = self::Plugin()->getConfig()->getValue('checkoutMode');
+            Shop::Smarty()->assign('redirect', $url)
+                ->assign('checkoutMode', $checkoutMode);
+            if ($checkoutMode === 'Y' && !headers_sent()) {
                 header('Location: ' . $url);
             }
 

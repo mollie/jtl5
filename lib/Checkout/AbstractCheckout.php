@@ -202,7 +202,7 @@ abstract class AbstractCheckout
     public function handleNotification($hash = null)
     {
 
-        if(!$hash){
+        if (!$hash) {
             $hash = $this->getModel()->getHash();
         }
 
@@ -215,28 +215,17 @@ abstract class AbstractCheckout
                     $this::makeFetchable($this->getBestellung(), $this->getModel());
                     $this->getPaymentMethod()->deletePaymentHash($hash);
 
-                    $this->getPaymentMethod()->doLog("Bestellung '{$this->getBestellung()->cBestellNr}' als bezahlt markiert: {$incoming->fBetrag}", LOGLEVEL_DEBUG);
+                    $this->getPaymentMethod()->doLog(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_NOTICE);
 
                     $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
                     if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
                         $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
                     }
                 } else {
-                    $this->getPaymentMethod()->doLog("Bestellung '{$this->getBestellung()->cBestellNr}': nicht komplett bezahlt: " . print_r($incoming, 1), LOGLEVEL_NOTICE);
+                    $this->getPaymentMethod()->doLog(sprintf("Checkout::handleNotification: Bestellung '%s': nicht komplett bezahlt: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_ERROR);
                 }
             }
         }
-    }
-
-    /**
-     * Speichert das Model
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function saveModel(): bool
-    {
-        return $this->getModel()->save();
     }
 
     /**
@@ -275,6 +264,17 @@ abstract class AbstractCheckout
             }
         }
         return $this->api;
+    }
+
+    /**
+     * Speichert das Model
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function saveModel(): bool
+    {
+        return $this->getModel()->save();
     }
 
     public function updateModel(): self
@@ -387,6 +387,10 @@ abstract class AbstractCheckout
         }
         $this->reqData[$key] = $value;
         return $this;
+    }
+
+    public function requestData(string $key){
+        return $this->reqData[$key] ?? null;
     }
 
     public function getRequestData(): array
