@@ -3,6 +3,7 @@
 
 namespace Plugin\ws5_mollie\lib\Payment;
 
+use JTL\Checkout\Adresse;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
 
 class Address implements \JsonSerializable
@@ -42,12 +43,12 @@ class Address implements \JsonSerializable
     public $country;
 
     /**
-     * @param \Adresse|\stdClass $adresse
+     * @param Adresse|\stdClass $adresse
      * @return Address
      */
-    public static function factory($adresse): Address
+    public static function factory($adresse)
     {
-        $address = new self();
+        $address = new static();
 
         $address->streetAndNumber = $adresse->cStrasse . ' ' . $adresse->cHausnummer;
         $address->postalCode = $adresse->cPLZ;

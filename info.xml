@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-03-24</CreateDate>
-    <Version>1.0.0-beta.6</Version>
+    <CreateDate>2021-04-01</CreateDate>
+    <Version>1.0.0</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -956,7 +956,7 @@ vielen Dank für Ihre Bestellung bei {$Einstellungen.global.global_shopname}.<br
 <p>Zu zahlender Betrag: {$oPluginMail->Amount}</p>
 <p>Jetzt bezahlen: <a href="{$oPluginMail->PayURL}">{$oPluginMail->PayURL}</a></p>
 {includeMailTemplate template=footer type=html}]]></ContentHtml>
-                    <ContentText><![CDATA[{includeMailTemplate template=header type=plain}
+                    <ContentText><![CDATA[{includeMailTemplate template=header type=text}
 
 Guten Tag {$Kunde->cVorname} {$Kunde->cNachname},
 
@@ -968,7 +968,7 @@ Sollte es bei der Zahlung zu Problemen gekommen sein, können Sie diese über de
 Zu zahlender Betrag: {$oPluginMail->Amount}
 Jetzt bezahlen: {$oPluginMail->PayURL}
 
-{includeMailTemplate template=footer type=plain}]]></ContentText>
+{includeMailTemplate template=footer type=text}]]></ContentText>
                 </TemplateLanguage>
                 <TemplateLanguage iso="ENG">
                     <Subject>Reminder</Subject>
@@ -982,7 +982,7 @@ thank you for your order at {$Einstellungen.global.global_shopname}.<br>
 <p>Amount due: {$oPluginMail->Amount}</p>
 <p>Pay now: <a href="{$oPluginMail->PayURL}">{$oPluginMail->PayURL}</a></p>
 {includeMailTemplate template=footer type=html}]]></ContentHtml>
-                    <ContentText><![CDATA[{includeMailTemplate template=header type=plain}
+                    <ContentText><![CDATA[{includeMailTemplate template=header type=text}
 
 Hello {$Kunde->cVorname} {$Kunde->cNachname},
 
@@ -994,7 +994,7 @@ If you had an error, or any other problem while paying, please try again with th
 Amount due: {$oPluginMail->Amount}
 Pay now: {$oPluginMail->PayURL}
 
-{includeMailTemplate template=footer type=plain}]]></ContentText>
+{includeMailTemplate template=footer type=text}]]></ContentText>
                 </TemplateLanguage>
             </Template>
         </Emailtemplate>
