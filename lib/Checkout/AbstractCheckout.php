@@ -8,6 +8,7 @@ use Exception;
 use JTL\Catalog\Currency;
 use JTL\Catalog\Product\Preise;
 use JTL\Checkout\Bestellung;
+use JTL\Customer\Customer;
 use JTL\Mail\Mail\Mail;
 use JTL\Mail\Mailer;
 use JTL\Model\DataModel;
@@ -20,7 +21,6 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
-use RuntimeException;
 use SmartyException;
 use stdClass;
 
@@ -125,7 +125,7 @@ abstract class AbstractCheckout
             'bestellung' => $kBestellung,
         ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
         $oBestellung = new Bestellung($model->getBestellung(), true);
-        if(!$oBestellung->kBestellung){
+        if (!$oBestellung->kBestellung) {
             throw new Exception(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
         }
         if (strpos($model->getOrderId(), 'tr_') !== false) {
@@ -156,7 +156,11 @@ abstract class AbstractCheckout
             ':d' => $reminder
         ], 2);
         foreach ($remindables as $remindable) {
-            self::sendReminder($remindable->kId);
+            try {
+                self::sendReminder($remindable->kId);
+            } catch (Exception $e) {
+                Shop::Container()->getBackendLogService()->error("AbstractCheckout::sendReminders: " . $e->getMessage());
+            }
         }
     }
 
@@ -175,7 +179,12 @@ abstract class AbstractCheckout
         $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->getId() . '-' . $order->getBestellung());
 
         $data = new stdClass();
-        $data->tkunde = new \JTL\Customer\Customer($oBestellung->kKunde);
+        $data->tkunde = new Customer($oBestellung->kKunde);
+        if (!$data->tkunde->kKunde) {
+            $order->setReminder(date('Y-m-d H:i:s'));
+            $order->save(['reminder']);
+            throw new Exception("Kunde '{$oBestellung->kKunde}' nicht gefunden.");
+        }
         $data->Bestellung = $oBestellung;
         $data->PayURL = $repayURL;
         $data->Amount = Preise::getLocalizedPriceString($order->getAmount(), Currency::fromISO($order->getCurrency()), false);
@@ -188,7 +197,7 @@ abstract class AbstractCheckout
         $order->save(['reminder']);
 
         if (!$mailer->send($mail)) {
-            throw new Exception($mail->getError() . "\n" . print_r($order->rawArray(), 1));
+            throw new Exception($mail->getError() . "\n" . print_r([$data, $order->rawArray()], 1));
         }
         return true;
     }
