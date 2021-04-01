@@ -90,7 +90,8 @@ class PaymentCheckout extends AbstractCheckout
                 'cHash' => $this->getPaymentMethod()->generateHash($this->oBestellung),
             ]);
         /** @noinspection NotOptimalIfConditionsInspection */
-        if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== '') {
+        if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
+            && (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())) {
             $this->setRequestData('method', $this->getPaymentMethod()::METHOD);
         }
         foreach ($options as $key => $value) {

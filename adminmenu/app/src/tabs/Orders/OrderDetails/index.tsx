@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import useApi from "@webstollen/react-jtl-plugin/lib/hooks/useAPI";
 import Alert from "@webstollen/react-jtl-plugin/lib/components/Alert";
 import {faExclamation} from "@fortawesome/pro-solid-svg-icons";
@@ -9,7 +9,7 @@ import Payments from "./Payments";
 import Details from "./Details";
 import OrderLines from "./OrderLines";
 import Shipments from "./Shipments";
-import {faChevronDoubleDown, faChevronDoubleLeft, faTimes} from "@fortawesome/pro-regular-svg-icons";
+import {faChevronDoubleDown, faChevronDoubleLeft, faSync, faTimes} from "@fortawesome/pro-regular-svg-icons";
 import Logs from "./Logs";
 import Refunds from "./Refunds";
 
@@ -29,7 +29,7 @@ const OrderDetails = (props: OrderDetailsProps) => {
 
     const api = useApi();
 
-    useEffect(() => {
+    const loadOrder = useCallback(() => {
         setError(null);
         setData(null);
         if (props.id) {
@@ -47,6 +47,8 @@ const OrderDetails = (props: OrderDetailsProps) => {
         }
     }, [api, props.id]);
 
+    useEffect(loadOrder, [loadOrder]);
+
     if (error !== null) {
         return <div className="relative flex-col mb-3 rounded-md w-full">
             <div className="flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
@@ -54,6 +56,9 @@ const OrderDetails = (props: OrderDetailsProps) => {
                     Bestellung: {data?.order.cBestellNr} (
                     <pre className="inline text-ws_gray-light">{props.id}</pre>
                     )
+                </div>
+                <div onClick={loadOrder} className="cursor-pointer mr-2">
+                    <FontAwesomeIcon icon={faSync} spin={loading} size={"sm"}/>
                 </div>
                 <div onClick={props.onClose} className="cursor-pointer">
                     <FontAwesomeIcon icon={faTimes}/>
@@ -71,6 +76,9 @@ const OrderDetails = (props: OrderDetailsProps) => {
                     Bestellung: <span title={data?.order.kBestellung}>{data?.order.cBestellNr}</span> (
                     <pre className="inline text-ws_gray-light">{props.id}</pre>
                     )
+                </div>
+                <div onClick={loadOrder} className="cursor-pointer mr-2">
+                    <FontAwesomeIcon icon={faSync} spin={loading} size={"sm"}/>
                 </div>
                 <div onClick={props.onClose} className="cursor-pointer">
                     <FontAwesomeIcon icon={faTimes}/>

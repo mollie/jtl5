@@ -88,7 +88,7 @@ class Shipment
         $shipments = [];
         if ($checkout->getBestellung()->kBestellung) {
 
-            $oKunde = new \Kunde($checkout->getBestellung()->kKunde);
+            $oKunde = $checkout->getBestellung()->oKunde ?? new \JTL\Customer\Customer($checkout->getBestellung()->kKunde);
 
             /** @var Lieferschein $oLieferschein */
             foreach ($checkout->getBestellung()->oLieferschein_arr as $oLieferschein) {
@@ -118,10 +118,11 @@ class Shipment
                             }
                             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Gastbestellung noch nicht komplett versendet!');
                     }
-
+                } catch (\Plugin\ws5_mollie\lib\Exception\APIException $e) {
+                    $shipments[] = $e->getMessage();
                 } catch (Exception $e) {
-                    Shop::Container()->getLogService()->addError("mollie: Shipment::syncBestellung - " . $e->getMessage());
-                    throw $e;
+                    $shipments[] = $e->getMessage();
+                    Shop::Container()->getLogService()->addError("mollie: Shipment::syncBestellung (BestellNr. {$checkout->getBestellung()->cBestellNr}, Lieferschein: {$shipment->getLieferschein()->getLieferscheinNr()}) - " . $e->getMessage());
                 }
             }
         }
@@ -138,10 +139,10 @@ class Shipment
     {
 
         if ($this->getShipment()) {
-            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschien bereits an Mollie übertragen!');
+            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschien bereits an Mollie übertragen: ' . $this->getShipment()->id);
         }
 
-        if ($this->getCheckout()->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
+        if ($this->getCheckout()->getMollie(true)->status === OrderStatus::STATUS_COMPLETED) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung bei Mollie bereits abgeschlossen!');
         }
 
@@ -153,9 +154,9 @@ class Shipment
 
     }
 
-    public function getShipment(): ?\Mollie\Api\Resources\Shipment
+    public function getShipment($force = false): ?\Mollie\Api\Resources\Shipment
     {
-        if ($this->getModel() && $this->getModel()->getShipmentId()) {
+        if (($force || !$this->shipment) && $this->getModel() && $this->getModel()->getShipmentId()) {
             $this->shipment = $this->getCheckout()->getAPI()->getClient()->shipments->getForId($this->getModel()->getOrderId(), $this->getModel()->getShipmentId());
         }
         return $this->shipment;
@@ -197,7 +198,6 @@ class Shipment
                 $this->getModel()->setCode($this->RequestData('tracking')['code'] ?? '');
             }
         }
-        $this->getModel()->setModified(date('Y-m-d H:i:s'));
         return $this;
     }
 
@@ -227,6 +227,7 @@ class Shipment
             $this->setRequestData('tracking', $tracking);
         }
 
+        // TODO: Wenn alle Lieferschiene in der WAWI erstellt wurden, aber nicht im Shop, kommt status 4.
         if ((int)$this->getCheckout()->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
             $this->setRequestData('lines', []);
         } else {
@@ -258,11 +259,10 @@ class Shipment
 
                 if ($orderLine->sku === $wkpos->cArtNr && !in_array($orderLine->id, $shippedOrderLines, true)) {
 
-                    $quantity = min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity);
-                    if ($quantity) {
+                    if ($quantity = min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity)) {
                         $lines[] = [
                             'id' => $orderLine->id,
-                            'quantity' => min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity)
+                            'quantity' => $quantity
                         ];
                     }
                     $shippedOrderLines[] = $orderLine->id;

@@ -20,12 +20,10 @@
             <div class="col order-1 col-md-6 col-12">
                 <b>{$mollieLang.clearDescr}</b>
             </div>
-            {if $components == 'S'}
-                <div class="col order-2 col-md-4 col-12">
-                    <button class="btn btn-block btn-primary" type="submit" name="clear" value="1"
-                            id="clearMollieComponents">{$mollieLang.clearButton}</button>
-                </div>
-            {/if}
+            <div class="col order-2 col-md-4 col-12">
+                <button class="btn btn-block btn-primary" type="submit" name="clear" value="1"
+                        id="clearMollieComponents">{$mollieLang.clearButton}</button>
+            </div>
         </div>
     {else}
         <div class="form-group">

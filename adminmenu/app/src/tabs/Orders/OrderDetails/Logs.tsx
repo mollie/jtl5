@@ -18,7 +18,7 @@ const Logs = ({data}: LogsProps) => {
         },
         cResult: {
             header: () => 'Result',
-            data: row => row.cResult ?? 'n/a'
+            data: row => <pre>{row.cResult ?? 'n/a'}</pre>
         },
         dDone: {
             header: () => 'Status',

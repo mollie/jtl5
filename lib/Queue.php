@@ -9,8 +9,7 @@ use Generator;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
-use Mollie\Api\Exceptions\ApiException;
-use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
@@ -48,9 +47,7 @@ class Queue
 
                 } catch (Exception $e) {
                     Shop::Container()->getLogService()->error($e->getMessage() . " ({$type}, {$id})");
-                    $todo->setResult($e->getMessage());
-                    $todo->setDone(date('Y-m-d H:i:s'));
-                    $todo->save();
+                    $todo->done("{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}");
                 }
             }
         }
@@ -62,7 +59,7 @@ class Queue
      */
     private static function getOpen($limit): ?Generator
     {
-        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE cResult IS NULL AND dDone IS NULL ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
+        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE dDone IS NULL ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
             ':LIMIT' => $limit
         ], 2);
 
@@ -86,9 +83,7 @@ class Queue
         $checkout = AbstractCheckout::fromID($id);
         if ($checkout->getBestellung()->kBestellung && $checkout->getPaymentMethod()) {
             $checkout->handleNotification();
-            $todo->setResult('Status: ' . $checkout->getMollie()->status);
-            $todo->setDone(date('Y-m-d H:i:s'));
-            return $todo->save();
+            return $todo->done('Status: ' . $checkout->getMollie()->status);
         }
         throw new RuntimeException(`Bestellung oder Zahlungsart konnte nicht geladen werden: ${id}`);
     }
@@ -99,8 +94,6 @@ class Queue
      * @return bool
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
-     * @throws ApiException
-     * @throws IncompatiblePlatform
      * @throws Exception
      */
     protected static function handleHook(int $hook, QueueModel $todo): bool
@@ -112,42 +105,50 @@ class Queue
                     if ((int)$data['kBestellung']) {
                         $checkout = AbstractCheckout::fromBestellung($data['kBestellung']);
 
+                        $result = "";
+                        if ((int)$checkout->getBestellung()->cStatus < BESTELLUNG_STATUS_VERSANDT) {
+                            return $todo->done("Bestellung noch nicht versendet: {$checkout->getBestellung()->cStatus}");
+                        }
+
                         /** @var $method PaymentMethod */
                         if ((int)$data['status']
                             && array_key_exists('status', $data)
-                            && $checkout->getBestellung()->kBestellung
                             && $checkout->getPaymentMethod()
                             && (strpos($checkout->getModel()->getOrderId(), 'tr_') === false)
                             && $checkout->getMollie()) {
                             /** @var OrderCheckout $checkout */
                             $checkout->handleNotification();
-                            if ($checkout->getMollie()->isCreated() || $checkout->getMollie()->isPaid() || $checkout->getMollie()->isAuthorized() || $checkout->getMollie()->isShipping() || $checkout->getMollie()->isPending()) {
+                            if ($checkout->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
+                                $result = 'Mollie Status already ' . $checkout->getMollie()->status;
+                            } else if ($checkout->getMollie()->isCreated() || $checkout->getMollie()->isPaid() || $checkout->getMollie()->isAuthorized() || $checkout->getMollie()->isShipping() || $checkout->getMollie()->isPending()) {
                                 try {
                                     if ($shipments = Shipment::syncBestellung($checkout)) {
                                         foreach ($shipments as $shipment) {
-                                            $checkout->getPaymentMethod()->doLog("Order shipped: \n" . print_r($shipment, 1));
+                                            if (is_string($shipment)) {
+                                                $checkout->getPaymentMethod()->doLog("Shipping-Error: {$shipment}");
+                                                $result .= "Shipping-Error: {$shipment}\n";
+                                            } else {
+                                                $checkout->getPaymentMethod()->doLog("Order shipped: \n" . print_r($shipment, 1));
+                                                $result .= "Order shipped: {$shipment->id}\n";
+                                            }
+
                                         }
-                                        $todo->setResult("Shipped " . count($shipments) . " shipments.");
+                                    } else {
+                                        $result = 'No Shipments ready!';
                                     }
                                 } catch (Exception $e) {
-                                    $todo->setResult($e->getMessage() . "\n" . $e->getFile() . ":" . $e->getLine() . "\n" . $e->getTraceAsString());
+                                    $result = $e->getMessage() . "\n" . $e->getFile() . ":" . $e->getLine() . "\n" . $e->getTraceAsString();
                                 }
                             } else {
-                                $todo->setResult('Unexpected Mollie Status: ' . $checkout->getMollie()->status);
+                                $result = 'Unexpected Mollie Status: ' . $checkout->getMollie()->status;
                             }
 
                         } else {
-                            $todo->setResult('Nothing to do.');
+                            $result = 'Nothing to do.';
                         }
-
-                        $todo->setDone(date('Y-m-d H:i:s'));
-                        return $todo->save();
-
+                        return $todo->done($result);
                     }
-
-                    $todo->setResult("kBestellung missing");
-                    $todo->setDone(date('Y-m-d H:i:s'));
-                    return $todo->save();
+                    return $todo->done("kBestellung missing");
 
                 case HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO:
                     if (self::Plugin()->getConfig()->getValue('autoRefund') !== 'on') {
@@ -155,10 +156,7 @@ class Queue
                     }
 
                     $checkout = AbstractCheckout::fromBestellung((int)$data['kBestellung']);
-                    $todo->setResult($checkout->cancelOrRefund());
-                    $todo->setDone(date('Y-m-d H:i:s'));
-                    return $todo->save();
-
+                    return $todo->done($checkout->cancelOrRefund());
             }
         }
         return false;

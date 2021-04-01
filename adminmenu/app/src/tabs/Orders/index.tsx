@@ -109,7 +109,7 @@ const Orders = () => {
                 </Button>}
 
                 {/* PAYMENT REMINDER */}
-                {!['paid', 'authorized', 'complete', 'pending'].includes(row.cStatus) ?
+                {!['paid', 'authorized', "completed", 'pending'].includes(row.cStatus) && parseInt(row.cJTLStatus) > 0 ?
                     <Button onClick={() => sendReminder(row.kId)}
                             title={"Zahlungserinnerung " + (row.dReminder !== null ? 'erneut ' : '') + "verschicken"}
                             className={"mr-1"}>

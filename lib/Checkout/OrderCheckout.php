@@ -128,7 +128,7 @@ class OrderCheckout extends AbstractCheckout
             ->setRequestData('webhookUrl', Shop::getURL(true) . '/?mollie=1');
 
         if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
-            && self::Plugin()->getConfig()->getValue('resetMethod') !== 'on') {
+            && (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())) {
 
             $this->setRequestData('method', $this->getPaymentMethod()::METHOD);
         }

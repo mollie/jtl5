@@ -41,6 +41,22 @@ use RuntimeException;
  */
 class QueueModel extends DataModel implements JsonSerializable
 {
+    /**
+     * @param string $result
+     * @param string|null $date
+     */
+    public function done(string $result, string $date = null)
+    {
+        $this->setResult($result);
+        $this->setDone($date ?? date('Y-m-d H:i:s'));
+        return $this->save();
+    }
+
+    public function save(array $partial = null): bool
+    {
+        $this->setModified(date("Y-m-d H:i:s"));
+        return parent::save($partial);
+    }
 
     public function setKeyName($keyName): void
     {

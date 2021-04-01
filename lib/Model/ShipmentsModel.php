@@ -56,6 +56,12 @@ final class ShipmentsModel extends DataModel implements JsonSerializable
         throw new RuntimeException(__METHOD__ . ': setting of keyname is not supported', self::ERR_DATABASE);
     }
 
+    public function save(array $partial = null): bool
+    {
+        $this->setModified(date("Y-m-d H:i:s"));
+        return parent::save($partial);
+    }
+
     /**
      * @inheritDoc
      */

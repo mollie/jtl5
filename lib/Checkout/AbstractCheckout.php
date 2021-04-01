@@ -125,6 +125,9 @@ abstract class AbstractCheckout
             'bestellung' => $kBestellung,
         ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
         $oBestellung = new Bestellung($model->getBestellung(), true);
+        if(!$oBestellung->kBestellung){
+            throw new Exception(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
+        }
         if (strpos($model->getOrderId(), 'tr_') !== false) {
             $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
         } else {
@@ -140,7 +143,6 @@ abstract class AbstractCheckout
      */
     public static function sendReminders(): void
     {
-        // TODO DEBUG
         $reminder = (int)self::Plugin()->getConfig()->getValue('reminder');
 
         if (!$reminder) {
@@ -317,14 +319,16 @@ abstract class AbstractCheckout
     abstract public function getIncomingPayment(): ?stdClass;
 
     /**
-     * @return \Plugin\ws5_mollie\lib\PaymentMethod
+     * @return \JTL\Plugin\Payment\FallbackMethod|\JTL\Plugin\Payment\MethodInterface|PaymentMethod|\Plugin\ws5_mollie\lib\PaymentMethod
+     * @throws Exception
      */
-    public function getPaymentMethod(): \Plugin\ws5_mollie\lib\PaymentMethod
+    public function getPaymentMethod()
     {
         if (!$this->paymentMethod) {
-            $this->paymentMethod = LegacyMethod::create($this->oBestellung->Zahlungsart->cModulId);
-            if (!$this->paymentMethod) {
-                throw new RuntimeException('Could not load PaymentMethod!');
+            if ($this->getBestellung()->Zahlungsart && strpos($this->getBestellung()->Zahlungsart->cModulId, "kPlugin_{$this::Plugin()->getID()}_") !== false) {
+                $this->paymentMethod = LegacyMethod::create($this->getBestellung()->Zahlungsart->cModulId);
+            } else {
+                $this->paymentMethod = LegacyMethod::create("kPlugin_{$this::Plugin()->getID()}_mollie");
             }
         }
         return $this->paymentMethod;
