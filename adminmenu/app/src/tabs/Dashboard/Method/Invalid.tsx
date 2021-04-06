@@ -14,7 +14,7 @@ const Invalid = ({method}: { method: MethodProps }) => {
     if (!method.paymentMethod) {
         errors.push("Keine Zahlungsart im Shop gefunden.")
     }
-    if (method.paymentMethod && parseInt(method.paymentMethod.nWaehrendBestellung) >= 0) {
+    if (method.paymentMethod && parseInt(method.paymentMethod.nWaehrendBestellung) > 0) {
         errors.push("Zahlung vor Bestellabschluss leider nicht möglich.")
     }
 
