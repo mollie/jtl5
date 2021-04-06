@@ -238,7 +238,6 @@ abstract class PaymentMethod extends Method
                 $url = $mOrder->getCheckoutUrl();
             }
 
-            // TODO: DOKU
             ifndef('MOLLIE_REDIRECT_DELAY', 3);
             $checkoutMode = self::Plugin()->getConfig()->getValue('checkoutMode');
             Shop::Smarty()->assign('redirect', $url)
