@@ -85,7 +85,7 @@ class Queue
             $checkout->handleNotification();
             return $todo->done('Status: ' . $checkout->getMollie()->status);
         }
-        throw new RuntimeException(`Bestellung oder Zahlungsart konnte nicht geladen werden: ${id}`);
+        throw new RuntimeException("Bestellung oder Zahlungsart konnte nicht geladen werden: {$id}");
     }
 
     /**

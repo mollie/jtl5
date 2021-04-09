@@ -5,6 +5,7 @@ namespace Plugin\ws5_mollie\lib\Order;
 
 
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use Shop;
 
 class Amount implements \JsonSerializable
 {
@@ -35,18 +36,18 @@ class Amount implements \JsonSerializable
 
     public static function optionaleRundung($gesamtsumme)
     {
-        $conf = \Shop::getSettings([CONF_KAUFABWICKLUNG]);
+        $conf = Shop::getSettings([CONF_KAUFABWICKLUNG]);
         if (isset($conf['kaufabwicklung']['bestellabschluss_runden5']) && $conf['kaufabwicklung']['bestellabschluss_runden5'] == 1) {
-            $waehrung = isset($_SESSION['Waehrung']) ? $_SESSION['Waehrung'] : null;
-            if ($waehrung === null || !isset($waehrung->kWaehrung)) {
-                $waehrung = Shop::DB()->select('twaehrung', 'cStandard', 'Y');
-            }
-            $faktor = $waehrung->fFaktor;
-            $gesamtsumme *= $faktor;
+            //$waehrung = isset($_SESSION['Waehrung']) ? $_SESSION['Waehrung'] : null;
+            //if ($waehrung === null || !isset($waehrung->kWaehrung)) {
+            //    $waehrung = Shop::Container()->getDB()->select('twaehrung', 'cStandard', 'Y');
+            //}
+            //$faktor = $waehrung->fFaktor;
+            //$gesamtsumme *= $faktor;
 
             // simplification. see https://de.wikipedia.org/wiki/Rundung#Rappenrundung
             $gesamtsumme = round($gesamtsumme * 20) / 20;
-            $gesamtsumme /= $faktor;
+            //$gesamtsumme /= $faktor;
         }
 
         return $gesamtsumme;
