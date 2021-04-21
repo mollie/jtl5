@@ -6,14 +6,6 @@ stages:
   - finalize
   - publish
 
-before_script:
-  - npm config set "@fortawesome:registry" https://npm.fontawesome.com/
-  - npm config set "//npm.fontawesome.com/:_authToken" $FONT_AWESOME_TOKEN
-  - npm config set "@dash.bar:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
-  - npm config set "@webstollen:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
-  - npm config set "//gitlab.webstollen.com/api/v4/packages/npm/:_authToken" $CI_JOB_TOKEN
-  - npm config set "//gitlab.webstollen.com/api/v4/projects/444/packages/npm/:_authToken" $CI_JOB_TOKEN
-
 sast:
   stage: test
 include:
@@ -51,6 +43,12 @@ node:
       - adminmenu/app/.yarn-cache
     policy: pull
   script:
+    - npm config set "@fortawesome:registry" https://npm.fontawesome.com/
+    - npm config set "//npm.fontawesome.com/:_authToken" $FONT_AWESOME_TOKEN
+    - npm config set "@dash.bar:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
+    - npm config set "@webstollen:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
+    - npm config set "//gitlab.webstollen.com/api/v4/packages/npm/:_authToken" $CI_JOB_TOKEN
+    - npm config set "//gitlab.webstollen.com/api/v4/projects/444/packages/npm/:_authToken" $CI_JOB_TOKEN
     - cd adminmenu/app
     - yarn install --frozen-lockfile --cache-folder .yarn-cache
     - yarn build
