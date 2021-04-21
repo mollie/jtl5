@@ -1,8 +1,10 @@
-image: registry.webstollen.com:443/docker/jtl-plugin-ci:latest
+image: registry.webstollen.com:443/docker/jtl-plugin-ci:master
 
 stages:
+  - test
   - build
   - finalize
+  - publish
 
 before_script:
   - npm config set "@fortawesome:registry" https://npm.fontawesome.com/
@@ -11,6 +13,14 @@ before_script:
   - npm config set "@webstollen:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
   - npm config set "//gitlab.webstollen.com/api/v4/packages/npm/:_authToken" $CI_JOB_TOKEN
   - npm config set "//gitlab.webstollen.com/api/v4/projects/444/packages/npm/:_authToken" $CI_JOB_TOKEN
+
+sast:
+  stage: test
+  only:
+    - tags
+    - master
+include:
+  - template: Security/SAST.gitlab-ci.yml
 
 composer:
   stage: build
@@ -61,7 +71,7 @@ pack:
     - master
   script:
     - rm -rf .gitlab-ci.yml .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/
-    - rm -f adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md
+    - rm -f adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh
     - cd ..
     - compiler $CI_PROJECT_DIR $CI_PROJECT_DIR
     - zip -r $CI_PROJECT_DIR/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip $CI_PROJECT_NAME
@@ -69,3 +79,9 @@ pack:
     expire_in: 30 days
     paths:
       - $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip
+
+upload:
+  stage: publish
+  script:
+    - aws configure set region eu-central-1
+    - aws s3 cp $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip s3://$S3_BUCKET/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip

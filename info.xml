@@ -146,7 +146,6 @@
                         <Option sort="2" value="N">Nicht automatisch weiterleiten</Option>
                     </SelectboxOptions>
                 </Setting>
-
             </Settingslink>
         </Adminmenu>
         <PaymentMethod>
