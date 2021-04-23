@@ -43,7 +43,7 @@ class PaymentCheckout extends AbstractCheckout
             $this->payment = $this->getAPI()->getClient()->payments->create($req);
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
-            $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Neue Transaktion '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
+            $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Neue Transaktion '%s' konnte nicht erstellt werden: %s.\n%s", $this->oBestellung->cBestellNr, $e->getMessage(), json_encode($req)), LOGLEVEL_ERROR);
             throw new \RuntimeException(sprintf('Mollie-Payment \'%s\' konnte nicht geladen werden: %s', $this->getModel()->getOrderId(), $e->getMessage()));
         }
         return $this->payment;
@@ -66,7 +66,7 @@ class PaymentCheckout extends AbstractCheckout
      */
     public function getMollie($force = false): Payment
     {
-        if ($force || !$this->payment) {
+        if ($force || (!$this->payment && $this->getModel()->getOrderId())) {
             try {
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->getOrderId(), ['embed' => 'refunds']);
             } catch (Exception $e) {
