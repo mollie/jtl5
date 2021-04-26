@@ -1,2 +1,2 @@
 # jtl5
-Mollie payments office plugin for JTL-Shop 5
+Mollie payments official plugin for JTL-Shop 5
