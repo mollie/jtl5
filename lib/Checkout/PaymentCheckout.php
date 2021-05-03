@@ -87,7 +87,7 @@ class PaymentCheckout extends AbstractCheckout
                 'kBestellung' => $this->oBestellung->kBestellung,
                 'kKunde' => $this->oBestellung->kKunde,
                 'kKundengruppe' => Frontend::getCustomerGroup()->getID(),
-                'cHash' => $this->getPaymentMethod()->generateHash($this->oBestellung),
+                'cHash' => $this->getHash(),
             ]);
         /** @noinspection NotOptimalIfConditionsInspection */
         if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''

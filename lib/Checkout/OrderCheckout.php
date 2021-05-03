@@ -93,7 +93,9 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
+     * @param bool $force
      * @return Order
+     * @throws Exception
      */
     public function getMollie($force = false): ?Order
     {
