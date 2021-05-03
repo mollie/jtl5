@@ -64,7 +64,7 @@ class PaymentCheckout extends AbstractCheckout
     /**
      * @return Payment
      */
-    public function getMollie($force = false): Payment
+    public function getMollie($force = false): ?Payment
     {
         if ($force || (!$this->payment && $this->getModel()->getOrderId())) {
             try {
