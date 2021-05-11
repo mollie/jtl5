@@ -69,7 +69,7 @@ pack:
   - rm -rf .gitlab-ci.yml .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/
   - rm -f adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh
   - cd ..
-  - compiler $CI_PROJECT_DIR $CI_PROJECT_DIR
+  - if [ $SKIP_COMPILE = 1 ]; then echo "Skipped Compiler!"; else compiler $CI_PROJECT_DIR $CI_PROJECT_DIR; fi
   - zip -r $CI_PROJECT_DIR/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip $CI_PROJECT_NAME
   artifacts:
     expire_in: 30 days
