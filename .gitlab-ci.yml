@@ -11,6 +11,15 @@ sast:
 include:
 - template: Security/SAST.gitlab-ci.yml
 
+phpunit:
+  image: registry.webstollen.com:443/docker/jtl-plugin-ci:php56
+  stage: test
+  only:
+    - tags
+    - master
+  script:
+    - if [ -f "phpunit.xml" ]; then composer install -o && ./vendor/bin/phpunit; else echo "Skipped PHPUnit, no phpunit.xml"; fi
+
 composer:
   stage: build
   only:
@@ -24,7 +33,7 @@ composer:
     - vendor
     policy: pull
   script:
-  - composer install --no-dev -o
+  - if [ -f "composer.json" ]; then composer install --no-dev -o; else echo "Skipped Composer, no composer.json"; fi
   artifacts:
     expire_in: 3 days
     untracked: true
@@ -50,10 +59,7 @@ node:
   - npm config set "//gitlab.webstollen.com/api/v4/packages/npm/:_authToken" $CI_JOB_TOKEN
   - npm config set "//gitlab.webstollen.com/api/v4/projects/444/packages/npm/:_authToken"
     $CI_JOB_TOKEN
-  - cd adminmenu/app
-  - yarn install --frozen-lockfile --cache-folder .yarn-cache
-  - yarn build
-  - rm -rf node_modules/
+  - if [ -f "adminmenu/app/package.json" ]; then cd adminmenu/app && yarn install --frozen-lockfile --cache-folder .yarn-cache && yarn build; else echo "Skipped Yarn build, no packages.json"; fi
   artifacts:
     expire_in: 3 days
     untracked: false
@@ -66,10 +72,10 @@ pack:
   - tags
   - master
   script:
-  - rm -rf .gitlab-ci.yml .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/
-  - rm -f adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh
+  - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/
+  - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh
   - cd ..
-  - if [ $SKIP_COMPILE = 1 ]; then echo "Skipped Compiler!"; else compiler $CI_PROJECT_DIR $CI_PROJECT_DIR; fi
+  - if [[ $SKIP_COMPILE = 1 ]]; then echo "Skipped Compiler."; else compiler $CI_PROJECT_DIR $CI_PROJECT_DIR; fi
   - zip -r $CI_PROJECT_DIR/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip $CI_PROJECT_NAME
   artifacts:
     expire_in: 30 days
