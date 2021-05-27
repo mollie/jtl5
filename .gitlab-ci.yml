@@ -12,7 +12,7 @@ include:
 - template: Security/SAST.gitlab-ci.yml
 
 phpunit:
-  image: registry.webstollen.com:443/docker/jtl-plugin-ci:php56
+  image: registry.webstollen.com:443/docker/jtl-plugin-ci:php73
   stage: test
   only:
     - tags
