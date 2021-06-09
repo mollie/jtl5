@@ -21,7 +21,6 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
-use SmartyException;
 use stdClass;
 
 abstract class AbstractCheckout
@@ -73,7 +72,7 @@ abstract class AbstractCheckout
                 ':kZahlungsart' => $kBestellung,
                 ':cModulId' => 'kPlugin_' . self::Plugin()->getID() . '%'
             ], 1);
-            return $res ? true : false;
+            return (bool)$res;
         }
 
         return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
@@ -93,7 +92,6 @@ abstract class AbstractCheckout
 
     /**
      * @param $id
-     * @param MollieAPI|null $api
      * @return AbstractCheckout
      * @throws Exception
      */
@@ -104,19 +102,22 @@ abstract class AbstractCheckout
         ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
         $oBestellung = new Bestellung($model->getBestellung(), true);
 
-        if (static::class !== AbstractCheckout::class) {
+        if (static::class !== __CLASS__) {
             $self = new static($oBestellung, new MollieAPI($model->getTest()));
+        } else if (strpos($model->getOrderId(), 'tr_') !== false) {
+            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
         } else {
-            if (strpos($model->getOrderId(), 'tr_') !== false) {
-                $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
-            } else {
-                $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
-            }
+            $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
         }
         $self->setModel($model);
         return $self;
     }
 
+    /**
+     * @param $kBestellung
+     * @return AbstractCheckout
+     * @throws Exception
+     */
     public static function fromBestellung($kBestellung): AbstractCheckout
     {
         $model = OrderModel::loadByAttributes([
@@ -136,8 +137,8 @@ abstract class AbstractCheckout
     }
 
     /**
-     * @throws SmartyException
-     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws \JTL\Exceptions\CircularReferenceException
+     * @throws \JTL\Exceptions\ServiceNotFoundException
      */
     public static function sendReminders(): void
     {
@@ -165,8 +166,7 @@ abstract class AbstractCheckout
     /**
      * @param $kID
      * @return bool
-     * @throws \PHPMailer\PHPMailer\Exception
-     * @throws SmartyException
+     * @throws Exception
      */
     public static function sendReminder($kID): bool
     {
@@ -265,6 +265,7 @@ abstract class AbstractCheckout
 
     /**
      * @return MollieAPI
+     * @throws Exception
      */
     public function getAPI(): MollieAPI
     {
@@ -341,6 +342,9 @@ abstract class AbstractCheckout
         return $this->paymentMethod;
     }
 
+    /**
+     * @return bool
+     */
     public function completlyPaid(): bool
     {
 
@@ -382,6 +386,7 @@ abstract class AbstractCheckout
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getHash(): string
     {

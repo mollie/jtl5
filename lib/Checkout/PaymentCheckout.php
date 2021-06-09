@@ -31,6 +31,9 @@ use stdClass;
 class PaymentCheckout extends AbstractCheckout
 {
 
+    /**
+     * @var Payment
+     */
     protected $payment;
 
     /**
@@ -54,8 +57,7 @@ class PaymentCheckout extends AbstractCheckout
         }
 
         try {
-            $req = $this->loadRequest($paymentOptions)->getRequestData();
-            $this->payment = $this->getAPI()->getClient()->payments->create($req);
+            $this->payment = $this->getAPI()->getClient()->payments->create($this->loadRequest($paymentOptions)->jsonSerialize());
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
             $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Neue Transaktion '%s' konnte nicht erstellt werden: %s.\n%s", $this->oBestellung->cBestellNr, $e->getMessage(), json_encode($req)), LOGLEVEL_ERROR);
@@ -78,6 +80,7 @@ class PaymentCheckout extends AbstractCheckout
 
     /**
      * @return Payment
+     * @throws Exception
      */
     public function getMollie($force = false): ?Payment
     {
@@ -93,7 +96,7 @@ class PaymentCheckout extends AbstractCheckout
 
     /**
      * @param array $options
-     * @return AbstractCheckout
+     * @return PaymentCheckout
      * @throws Exception
      */
     public function loadRequest(array $options = []): self
@@ -121,6 +124,10 @@ class PaymentCheckout extends AbstractCheckout
         return $this;
     }
 
+    /**
+     * @return stdClass|null
+     * @throws Exception
+     */
     public function getIncomingPayment(): ?stdClass
     {
         if (in_array($this->getMollie()->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
@@ -134,6 +141,12 @@ class PaymentCheckout extends AbstractCheckout
         return null;
     }
 
+    /**
+     * @return string
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @throws Exception
+     */
     public function cancelOrRefund(): string
     {
         if ((int)$this->getBestellung()->cStatus === BESTELLUNG_STATUS_STORNO) {

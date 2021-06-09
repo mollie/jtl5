@@ -47,6 +47,11 @@ class OrderCheckout extends AbstractCheckout
     /** @var Payment */
     protected $mollie;
 
+    /**
+     * @param array $paymentOptions
+     * @return Order
+     * @throws Exception
+     */
     public function create(array $paymentOptions = []): Order
     {
         if ($this->getModel()->orderId) {
@@ -77,7 +82,7 @@ class OrderCheckout extends AbstractCheckout
         }
 
         try {
-            $req = $this->loadRequest($paymentOptions)->getRequestData();
+            $req = $this->loadRequest($paymentOptions)->jsonSerialize();
             $this->order = $this->getAPI()->getClient()->orders->create($req);
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
@@ -197,6 +202,10 @@ class OrderCheckout extends AbstractCheckout
 
     }
 
+    /**
+     * @return stdClass|null
+     * @throws Exception
+     */
     public function getIncomingPayment(): ?stdClass
     {
         /** @var Payment $payment */
@@ -215,6 +224,11 @@ class OrderCheckout extends AbstractCheckout
         return null;
     }
 
+    /**
+     * @return string
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws Exception
+     */
     public function cancelOrRefund(): string
     {
         if ((int)$this->getBestellung()->cStatus === BESTELLUNG_STATUS_STORNO) {
