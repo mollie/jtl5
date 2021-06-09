@@ -45,7 +45,7 @@ class MollieAPI
     public static function getMode(): bool
     {
         try {
-            if (self::Plugin()->getConfig()->getValue("testAsAdmin") === 'on') {
+            if (self::Plugin()->getConfig()->getValue("testAsAdmin") === 'on' && self::Plugin()->getConfig()->getValue('test_apiKey') !== '') {
                 $_GET['fromAdmin'] = 'yes';
                 return Shop::isAdmin(true);
             }

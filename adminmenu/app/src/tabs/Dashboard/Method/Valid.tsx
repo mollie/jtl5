@@ -11,7 +11,7 @@ const Valid = ({method}: { method: MethodProps }) => {
         <div className="m-2 p-2 border-b">
 
             {method.paymentMethod
-            && parseInt(method.paymentMethod.nWaehrendBestellung) > 0
+            && method.duringCheckout && !method.allowDuringCheckout
             && <FontAwesomeIcon className={"mr-4 ml-1 cursor-help"} icon={faExclamationTriangle}
                                 color={"red"}
                                 onClick={() => alert('Zahlung vor Bestellabschluss wird nicht unterstützt. Diese Zahlungsart wird nicht zur auswahl stehen.')}

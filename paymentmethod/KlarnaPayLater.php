@@ -12,6 +12,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 class KlarnaPayLater extends PaymentMethod
 {
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
     public const METHOD = \Mollie\Api\Types\PaymentMethod::KLARNA_PAY_LATER;
 
     public function getPaymentOptions(Bestellung $order, $apiType): array

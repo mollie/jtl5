@@ -25,6 +25,8 @@ use Shop;
 abstract class PaymentMethod extends Method
 {
 
+    public const ALLOW_AUTO_STORNO = true;
+
     public const ALLOW_PAYMENT_BEFORE_ORDER = false;
 
     public const METHOD = '';
@@ -207,7 +209,7 @@ abstract class PaymentMethod extends Method
 
         try {
 
-            if ($this->duringCheckout) {
+            if ($this->duringCheckout && !static::ALLOW_PAYMENT_BEFORE_ORDER) {
                 $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
                 return;
             }

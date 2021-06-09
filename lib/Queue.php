@@ -53,6 +53,40 @@ class Queue
         }
     }
 
+    public static function storno($delay){
+        if (!$delay) {
+            return true;
+        }
+
+        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT p.kId, b.cBestellNr, p.kBestellung, b.cStatus FROM xplugin_ws5_mollie_orders p JOIN tbestellung b ON b.kBestellung = p.kBestellung WHERE b.cStatus IN ('1', '2') AND p.dCreated < NOW() - INTERVAL :d HOUR",
+            [':d' => $delay], 2);
+
+        foreach ($open as $o) {
+            try {
+
+                $checkout = AbstractCheckout::fromBestellung($o->kBestellung);
+                $pm = $checkout->getPaymentMethod();
+                if ($pm::ALLOW_AUTO_STORNO && $pm::METHOD === $checkout->getMollie()->method) {
+                    if ($checkout->getBestellung()->cAbgeholt === 'Y' && (bool)$checkout->getModel()->bSynced === false) {
+                        if (!in_array($checkout->getMollie()->status, [OrderStatus::STATUS_PAID, OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_AUTHORIZED], true)) {
+                            $checkout->storno();
+                        } else {
+                            $checkout->Log(sprintf('AutoStorno: Bestellung bezahlt? %s - Method: %s', $checkout->getMollie()->status, $checkout->getMollie()->method), LOGLEVEL_ERROR);
+                        }
+                    } else {
+                        $checkout->Log('AutoStorno: bereits zur WAWI synchronisiert.', LOGLEVEL_ERROR);
+                    }
+                } else {
+                    $checkout->Log(sprintf('AutoStorno aktiv: %d (%s) - Method: %s', (int)$pm::ALLOW_AUTO_STORNO, $pm::METHOD, $checkout->getMollie()->method), LOGLEVEL_ERROR);
+                }
+
+            } catch (Exception $e) {
+                Shop::Container()->getLogService()->error(sprintf("Fehler beim stornieren der Order: %s / Bestellung: %s: %s", $o->cBestellNr, $o->kId, $e->getMessage()));
+            }
+        }
+        return true;
+    }
+
     /**
      * @param $limit
      * @return Generator|null

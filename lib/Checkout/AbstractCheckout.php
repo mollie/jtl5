@@ -8,6 +8,7 @@ use Exception;
 use JTL\Catalog\Currency;
 use JTL\Catalog\Product\Preise;
 use JTL\Checkout\Bestellung;
+use JTL\Checkout\ZahlungsLog;
 use JTL\Customer\Customer;
 use JTL\Mail\Mail\Mail;
 use JTL\Mail\Mailer;
@@ -61,6 +62,16 @@ abstract class AbstractCheckout
     {
         $this->oBestellung = $oBestellung;
         $this->api = $api;
+    }
+
+    /**
+     * @param string $hash
+     * @param string $id
+     * @param bool $test
+     */
+    public static function finalizeOrder(string $hash, string $id, bool $test)
+    {
+// TODO
     }
 
     /**
@@ -202,6 +213,91 @@ abstract class AbstractCheckout
         return true;
     }
 
+    public function Log($msg, $level = LOGLEVEL_NOTICE)
+    {
+        try {
+            $data = '';
+            if ($this->getBestellung()) {
+                $data .= '#' . $this->getBestellung()->kBestellung;
+            }
+            if ($this->getMollie()) {
+                $data .= '$' . $this->getMollie()->id;
+            }
+            ZahlungsLog::add($this->getPaymentMethod()->moduleID, "[" . microtime(true) . " - " . $_SERVER['PHP_SELF'] . "] " . $msg, $data, $level);
+        } catch (Exception $e) {
+            Shop::Container()->getLogService()->error(sprintf("Error while Logging: %s\nPrevious Error: %s", $e->getMessage(), $msg));
+        }
+        return $this;
+    }
+
+    /**
+     * @return Bestellung
+     * @throws Exception
+     */
+    public function getBestellung(): ?Bestellung
+    {
+        if (!$this->oBestellung && $this->getModel()->getBestellung()) {
+            $this->oBestellung = new Bestellung($this->getModel()->getBestellung(), true);
+        }
+        return $this->oBestellung;
+    }
+
+    /**
+     * Lädt das Model falls vorhanden, oder gibt eun neues leeres zurück
+     *
+     * @return OrderModel
+     * @throws Exception
+     */
+    public function getModel(): OrderModel
+    {
+        if (!$this->model) {
+            $this->model = OrderModel::loadByAttributes([
+                'bestellung' => $this->oBestellung->kBestellung,
+            ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
+            $this->model->setTest($this->getAPI()->isTest());
+        }
+        return $this->model;
+    }
+
+    protected function setModel(OrderModel $model): self
+    {
+        $this->model = $model;
+        return $this;
+    }
+
+    /**
+     * @return MollieAPI
+     */
+    public function getAPI(): MollieAPI
+    {
+        if (!$this->api) {
+            if ($this->getModel()->getOrderId()) {
+                $this->api = new MollieAPI($this->getModel()->getTest());
+            } else {
+                $this->api = new MollieAPI(MollieAPI::getMode());
+            }
+        }
+        return $this->api;
+    }
+
+    abstract public function getMollie($force = false);
+
+    /**
+     * @return \JTL\Plugin\Payment\FallbackMethod|\JTL\Plugin\Payment\MethodInterface|PaymentMethod|\Plugin\ws5_mollie\lib\PaymentMethod
+     * @throws Exception
+     */
+    public function getPaymentMethod()
+    {
+        if (!$this->paymentMethod) {
+            if ($this->getBestellung()->Zahlungsart && strpos($this->getBestellung()->Zahlungsart->cModulId, "kPlugin_{$this::Plugin()->getID()}_") !== false) {
+                $this->paymentMethod = LegacyMethod::create($this->getBestellung()->Zahlungsart->cModulId);
+            } else {
+                $this->paymentMethod = LegacyMethod::create("kPlugin_{$this::Plugin()->getID()}_mollie");
+            }
+        }
+        return $this->paymentMethod;
+    }
+
     /**
      * cancels oder refunds eine stornierte Bestellung
      *
@@ -243,44 +339,6 @@ abstract class AbstractCheckout
     }
 
     /**
-     * Lädt das Model falls vorhanden, oder gibt eun neues leeres zurück
-     *
-     * @return OrderModel
-     * @throws Exception
-     */
-    public function getModel(): OrderModel
-    {
-        if (!$this->model) {
-            $this->model = OrderModel::loadByAttributes([
-                'bestellung' => $this->oBestellung->kBestellung,
-            ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
-            $this->model->setTest($this->getAPI()->isTest());
-        }
-        return $this->model;
-    }
-
-    protected function setModel(OrderModel $model): self
-    {
-        $this->model = $model;
-        return $this;
-    }
-
-    /**
-     * @return MollieAPI
-     */
-    public function getAPI(): MollieAPI
-    {
-        if (!$this->api) {
-            if ($this->getModel()->getOrderId()) {
-                $this->api = new MollieAPI($this->getModel()->getTest());
-            } else {
-                $this->api = new MollieAPI(MollieAPI::getMode());
-            }
-        }
-        return $this->api;
-    }
-
-    /**
      * Speichert das Model
      *
      * @return bool
@@ -308,40 +366,10 @@ abstract class AbstractCheckout
         return $this;
     }
 
-    abstract public function getMollie($force = false);
-
-    /**
-     * @return Bestellung
-     * @throws Exception
-     */
-    public function getBestellung(): Bestellung
-    {
-        if (!$this->oBestellung && $this->getModel()->getBestellung()) {
-            $this->oBestellung = new Bestellung($this->getModel()->getBestellung(), true);
-        }
-        return $this->oBestellung;
-    }
-
     /**
      * @return stdClass
      */
     abstract public function getIncomingPayment(): ?stdClass;
-
-    /**
-     * @return \JTL\Plugin\Payment\FallbackMethod|\JTL\Plugin\Payment\MethodInterface|PaymentMethod|\Plugin\ws5_mollie\lib\PaymentMethod
-     * @throws Exception
-     */
-    public function getPaymentMethod()
-    {
-        if (!$this->paymentMethod) {
-            if ($this->getBestellung()->Zahlungsart && strpos($this->getBestellung()->Zahlungsart->cModulId, "kPlugin_{$this::Plugin()->getID()}_") !== false) {
-                $this->paymentMethod = LegacyMethod::create($this->getBestellung()->Zahlungsart->cModulId);
-            } else {
-                $this->paymentMethod = LegacyMethod::create("kPlugin_{$this::Plugin()->getID()}_mollie");
-            }
-        }
-        return $this->paymentMethod;
-    }
 
     public function completlyPaid(): bool
     {
@@ -370,7 +398,7 @@ abstract class AbstractCheckout
             try {
                 return $model->save(['synced']);
             } catch (Exception $e) {
-                Shop::Container()->getBackendLogService()->error(sprintf("Fehler beim speichern des Models: %s / Bestellung: %s", $model->getId(), $oBestellung->cBestellNr));
+                Shop::Container()->getLogService()->error(sprintf("Fehler beim speichern des Models: %s / Bestellung: %s", $model->getId(), $oBestellung->cBestellNr));
             }
         }
         return false;
@@ -394,6 +422,33 @@ abstract class AbstractCheckout
             $this->hash = $this->getPaymentMethod()->generateHash($this->oBestellung);
         }
         return $this->hash;
+    }
+
+    /**
+     * @throws Exception
+     * @todo
+     */
+    public function storno(): void
+    {
+        /*if (in_array((int)$this->getBestellung()->cStatus, [BESTELLUNG_STATUS_OFFEN, BESTELLUNG_STATUS_IN_BEARBEITUNG], true)) {
+
+            $log = [];
+
+            $conf = Shop::getSettings([CONF_GLOBAL, CONF_TRUSTEDSHOPS]);
+            $nArtikelAnzeigefilter = (int)$conf['global']['artikel_artikelanzeigefilter'];
+
+            foreach ($this->getBestellung()->Positionen as $pos) {
+                if ($pos->kArtikel && $pos->Artikel && $pos->Artikel->cLagerBeachten === 'Y') {
+                    $log[] = sprintf('Reset stock of "%s" by %d', $pos->Artikel->cArtNr, -1 * $pos->nAnzahl);
+                    self::aktualisiereLagerbestand($pos->Artikel, -1 * $pos->nAnzahl, $pos->WarenkorbPosEigenschaftArr, $nArtikelAnzeigefilter);
+                }
+            }
+            $log[] = sprintf("Cancel order '%s'.", $this->getBestellung()->cBestellNr);
+
+            if (Shop::DB()->executeQueryPrepared('UPDATE tbestellung SET cAbgeholt = "N", cStatus = :cStatus WHERE kBestellung = :kBestellung', [':cStatus' => '-1', ':kBestellung' => $this->getBestellung()->kBestellung], 3)) {
+                $this->Log(implode('\n', $log));
+            }
+        }*/
     }
 
 }

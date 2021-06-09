@@ -64,7 +64,7 @@ const Dashboard = () => {
     Object.keys(methods).forEach((id) => {
         if (methods[id].mollie.status === 'activated'
             && methods[id].shipping.length
-            && methods[id].paymentMethod && parseInt(methods[id].paymentMethod.nWaehrendBestellung) <= 0) {
+            && methods[id].paymentMethod && (!methods[id].duringCheckout || methods[id].allowDuringCheckout)) {
             validMethods.push(<Valid method={methods[id] as MethodProps}/>)
         } else {
             invalidMethods.push(<Invalid method={methods[id] as MethodProps}/>)

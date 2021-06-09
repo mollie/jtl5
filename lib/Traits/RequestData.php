@@ -26,7 +26,7 @@ trait RequestData
         return $this->reqestData;
     }
 
-    abstract public function loadRequest(): self;
+    abstract public function loadRequest(array &$options = []): self;
 
     public function setRequestData($key, $value): self
     {

@@ -38,7 +38,7 @@ class Queue extends AbstractHook
         }
     }
 
-    protected static function saveToQueue($hook, $args_arr, $type = 'hook'): bool
+    public static function saveToQueue($hook, $args_arr, $type = 'hook'): bool
     {
         $mQueue = QueueModel::newInstance(Shop::Container()->getDB());
         $mQueue->setType($type . ':' . $hook);
@@ -62,7 +62,12 @@ class Queue extends AbstractHook
     public static function headPostGet(): void
     {
         if (array_key_exists('mollie', $_REQUEST) && (int)$_REQUEST['mollie'] === 1 && array_key_exists('id', $_REQUEST)) {
-            self::saveToQueue($_REQUEST['id'], $_REQUEST['id'], 'webhook');
+
+            if (array_key_exists('hash', $_REQUEST) && $hash = trim(\StringHandler::htmlentities(\StringHandler::filterXSS($_REQUEST['hash'])), '_')) {
+                AbstractCheckout::finalizeOrder($hash, $_REQUEST['id'], array_key_exists('test', $_REQUEST));
+            } else {
+                self::saveToQueue($_REQUEST['id'], $_REQUEST['id'], 'webhook');
+            }
             exit();
         }
         if (array_key_exists('m_pay', $_REQUEST)) {

@@ -19,7 +19,8 @@ class Amount implements \JsonSerializable
      * @param $value
      * @param \Currency $currency
      * @param bool $useFactor
-     * @param bool $useRounding
+     * @param bool $useRounding (is it total SUM => true [5 Rappen Rounding])
+     * @todo: prüfe mit Shop4
      */
     public function __construct($value, \Currency $currency, $useFactor = true, $useRounding = false)
     {

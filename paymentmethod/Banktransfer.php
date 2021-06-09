@@ -12,6 +12,8 @@ use Session;
 class Banktransfer extends PaymentMethod
 {
 
+    public const ALLOW_AUTO_STORNO = false;
+
     public const METHOD = \Mollie\Api\Types\PaymentMethod::BANKTRANSFER;
 
     public function getPaymentOptions(Bestellung $order, $apiType): array

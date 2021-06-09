@@ -111,10 +111,10 @@ class OrderCheckout extends AbstractCheckout
 
     /**
      * @param array $options
-     * @return AbstractCheckout
+     * @return self
      * @throws Exception
      */
-    public function loadRequest(array $options = []): AbstractCheckout
+    public function loadRequest(array &$options = []): self
     {
 
         $this->setRequestData('locale', Locale::getLocale(Frontend::get('cISOSprache', 'ger'), Frontend::getCustomer()->cLand))

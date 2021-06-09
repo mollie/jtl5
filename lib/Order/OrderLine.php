@@ -53,11 +53,18 @@ class OrderLine implements \JsonSerializable
     public static function factory($oPosition, Currency $currency): OrderLine
     {
 
+        if (!$oPosition) {
+            throw new \RuntimeException('$oPosition invalid: ', print_r($oPosition, 1));
+        }
+
         $orderLine = new self();
 
         $orderLine->type = self::getType($oPosition->nPosTyp);
         // TODO: FktAttr? $orderLine->category
         $orderLine->name = $oPosition->cName;
+        if (!$orderLine->name) {
+            $orderLine->name = '(null)';
+        }
 
         $_vatRate = (float)$oPosition->fMwSt / 100;
         if ((int)$oPosition->nPosTyp === C_WARENKORBPOS_TYP_KUPON) {
@@ -101,8 +108,8 @@ class OrderLine implements \JsonSerializable
             /** @var CartItemProperty $eigenschaft */
             foreach ($oPosition->WarenkorbPosEigenschaftArr as $eigenschaft) {
                 $metadata['properties'][] = [
-                    'kEigenschaft' => (int)$eigenschaft->kEigenschaft,
-                    'kEigenschaftWert' => (int)$eigenschaft->kEigenschaftWert,
+                    'kEigenschaft' => $eigenschaft->kEigenschaft,
+                    'kEigenschaftWert' => $eigenschaft->kEigenschaftWert,
                     'name' => $eigenschaft->cEigenschaftName,
                     'value' => $eigenschaft->cEigenschaftWertName,
                 ];

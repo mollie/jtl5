@@ -17,6 +17,7 @@ use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
+use RuntimeException;
 use Shop;
 
 class Shipment
@@ -89,6 +90,16 @@ class Shipment
         if ($checkout->getBestellung()->kBestellung) {
 
             $oKunde = $checkout->getBestellung()->oKunde ?? new \JTL\Customer\Customer($checkout->getBestellung()->kKunde);
+
+            // TODO: SETTING!
+//            $shippingActive = self::Plugin()->getConfig()->getValue('shippingActive');
+//            if ($shippingActive === 'N') {
+//                throw new RuntimeException('Shipping deaktiviert');
+//            }
+//
+//            if ($shippingActive === 'K' && !$oKunde->nRegistriert && (int)$checkout->getBestellung()->cStatus !== BESTELLUNG_STATUS_VERSANDT) {
+//                throw new RuntimeException('Shipping fr Gast-Bestellungen und Teilversand deaktiviert');
+//            }
 
             /** @var Lieferschein $oLieferschein */
             foreach ($checkout->getBestellung()->oLieferschein_arr as $oLieferschein) {

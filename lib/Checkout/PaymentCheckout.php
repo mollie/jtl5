@@ -76,7 +76,12 @@ class PaymentCheckout extends AbstractCheckout
         return $this->payment;
     }
 
-    public function loadRequest($options = []): AbstractCheckout
+    /**
+     * @param array $options
+     * @return $this
+     * @throws Exception
+     */
+    public function loadRequest(array &$options = []): self
     {
         $this->setRequestData('amount', new Amount($this->oBestellung->fGesamtsumme, $this->oBestellung->Waehrung, true, true))
             ->setRequestData('description', 'Order ' . $this->oBestellung->cBestellNr)

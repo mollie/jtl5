@@ -9,6 +9,9 @@ use Plugin\ws5_mollie\lib\PaymentMethod;
 
 class Bancontact extends PaymentMethod
 {
+
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
     public const METHOD = \Mollie\Api\Types\PaymentMethod::BANCONTACT;
 
     public function getPaymentOptions(Bestellung $order, $apiType): array

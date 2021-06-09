@@ -5,6 +5,7 @@ namespace Plugin\ws5_mollie\lib\Controller;
 
 
 use JTL\Plugin\Helper;
+use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Shop;
 use Mollie\Api\Types\PaymentMethod;
 use Plugin\ws5_mollie\lib\MollieAPI;
@@ -40,10 +41,13 @@ class MollieController extends AbstractController
                 ':cModulID' => $id
             ], 1);
 
+            $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
+
             $methods[$method->id] = (object)[
                 'settings' => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart={$oZahlungsart->kZahlungsart}&token={$_SESSION['jtl_token']}",
                 'mollie' => $method,
                 'duringCheckout' => (int)$oZahlungsart->nWaehrendBestellung === 1,
+                'allowDuringCheckout' => $oPaymentMethod::ALLOW_PAYMENT_BEFORE_ORDER ?? null,
                 'paymentMethod' => $oZahlungsart,
                 'shipping' => \Shop::Container()->getDB()->executeQueryPrepared("SELECT v.* FROM tversandart v
 JOIN tversandartzahlungsart vz ON v.kVersandart = vz.kVersandart

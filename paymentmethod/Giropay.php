@@ -12,6 +12,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 class Giropay extends PaymentMethod
 {
+
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
     public const METHOD = \Mollie\Api\Types\PaymentMethod::GIROPAY;
 
     public function getPaymentOptions(Bestellung $order, $apiType): array

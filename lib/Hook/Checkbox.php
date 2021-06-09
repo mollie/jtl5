@@ -5,23 +5,25 @@ namespace Plugin\ws5_mollie\lib\Hook;
 
 
 use JTL\Language\LanguageHelper;
-use JTL\Link\Link;
 use JTL\Model\DataModel;
-use JTL\Shop;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use Session;
 
 class Checkbox extends AbstractHook
 {
 
-    public static function execute(&$args_arr)
+    /**
+     * @param $args_arr
+     * @throws \Exception
+     */
+    public static function execute(&$args_arr): void
     {
 
         if (!Session::get('Zahlungsart') || strpos(Session::get('Zahlungsart')->cModulId, 'kPlugin_' . self::Plugin()->getID() . '_') === false) {
             return;
         }
 
-        if ((int)Session::getCustomer()->nRegistriert && $args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS) {
+        if (Session::getCustomer()->nRegistriert && $args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS) {
 
 
             $mCustomer = CustomerModel::loadByAttributes([
