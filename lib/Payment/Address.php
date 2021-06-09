@@ -11,7 +11,6 @@ class Address implements \JsonSerializable
 
     use Jsonable;
 
-
     /**
      * @var string
      */

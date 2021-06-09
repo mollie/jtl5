@@ -11,8 +11,23 @@ use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\Order\Amount;
+use Plugin\ws5_mollie\lib\Payment\Address;
 use stdClass;
 
+/**
+ * Class PaymentCheckout
+ * @package Plugin\ws5_mollie\lib\Checkout
+ * @property string $locale
+ * @property Amount $amount
+ * @property string $description
+ * @property array|null $metadata
+ * @property string $redirectUrl
+ * @property string $webhookUrl
+ * @property string|null $method
+ * @property Address $billingAddress
+ * @property string|null $expiresAt
+ *
+ */
 class PaymentCheckout extends AbstractCheckout
 {
 
@@ -76,26 +91,31 @@ class PaymentCheckout extends AbstractCheckout
         return $this->payment;
     }
 
-    public function loadRequest($options = []): AbstractCheckout
+    /**
+     * @param array $options
+     * @return AbstractCheckout
+     * @throws Exception
+     */
+    public function loadRequest(array $options = []): self
     {
-        $this->setRequestData('amount', new Amount($this->oBestellung->fGesamtsumme, $this->oBestellung->Waehrung, true, true))
-            ->setRequestData('description', 'Order ' . $this->oBestellung->cBestellNr)
-            ->setRequestData('redirectUrl', $this->getPaymentMethod()->getReturnURL($this->oBestellung))
-            ->setRequestData('webhookUrl', Shop::getURL(true) . '/?mollie=1')
-            ->setRequestData('locale', Locale::getLocale(Frontend::get('cISOSprache', 'ger'), Frontend::getCustomer()->cLand))
-            ->setRequestData('metadata', [
-                'kBestellung' => $this->oBestellung->kBestellung,
-                'kKunde' => $this->oBestellung->kKunde,
-                'kKundengruppe' => Frontend::getCustomerGroup()->getID(),
-                'cHash' => $this->getHash(),
-            ]);
+        $this->amount = new Amount($this->oBestellung->fGesamtsumme, $this->oBestellung->Waehrung, true, true);
+        $this->description = 'Order ' . $this->oBestellung->cBestellNr;
+        $this->redirectUrl = $this->getPaymentMethod()->getReturnURL($this->oBestellung);
+        $this->webhookUrl = Shop::getURL(true) . '/?mollie=1';
+        $this->locale = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), Frontend::getCustomer()->cLand);
+        $this->metadata = [
+            'kBestellung' => $this->oBestellung->kBestellung,
+            'kKunde' => $this->oBestellung->kKunde,
+            'kKundengruppe' => Frontend::getCustomerGroup()->getID(),
+            'cHash' => $this->getHash(),
+        ];
         /** @noinspection NotOptimalIfConditionsInspection */
         if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
             && (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())) {
-            $this->setRequestData('method', $this->getPaymentMethod()::METHOD);
+            $this->method = $this->getPaymentMethod()::METHOD;
         }
         foreach ($options as $key => $value) {
-            $this->setRequestData($key, $value);
+            $this->$key = $value;
         }
 
         return $this;

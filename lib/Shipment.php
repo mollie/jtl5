@@ -19,6 +19,14 @@ use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use Shop;
 
+/**
+ * Class Shipment
+ * @package Plugin\ws5_mollie\lib
+ *
+ * @property array|null $lines
+ * @property string|null $tracking
+ *
+ */
 class Shipment
 {
 
@@ -224,14 +232,14 @@ class Shipment
             if ($oVersand->getLogistikVarUrl()) {
                 $tracking['url'] = $oVersand->getLogistikURL();
             }
-            $this->setRequestData('tracking', $tracking);
+            $this->tracking = $tracking;
         }
 
         // TODO: Wenn alle Lieferschiene in der WAWI erstellt wurden, aber nicht im Shop, kommt status 4.
         if ((int)$this->getCheckout()->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-            $this->setRequestData('lines', []);
+            $this->lines = [];
         } else {
-            $this->setRequestData('lines', $this->getOrderLines());
+            $this->lines = $this->getOrderLines();
         }
         return $this;
     }

@@ -35,8 +35,6 @@ abstract class AbstractCheckout
      */
     protected $model;
 
-    protected $reqData;
-
     protected $hash;
 
     /**

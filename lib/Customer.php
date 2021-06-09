@@ -1,14 +1,16 @@
 <?php
 
-
 namespace Plugin\ws5_mollie\lib;
-
 
 use JTL\Model\DataModel;
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
 
+/**
+ * Class Customer
+ * @package Plugin\ws5_mollie\lib
+ */
 class Customer
 {
     use Jsonable;
@@ -18,7 +20,11 @@ class Customer
     public $locale;
     public $metadata;
 
-
+    /**
+     * @param \JTL\Customer\Customer $oKunde
+     * @return string|null
+     * @throws \Exception
+     */
     public static function createOrUpdate(\JTL\Customer\Customer $oKunde): ?string
     {
 
