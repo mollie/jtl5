@@ -5,27 +5,17 @@ namespace Plugin\ws5_mollie\lib\Checkout;
 
 
 use Exception;
-use JTL\Session\Frontend;
-use JTL\Shop;
+use JTL\Shopsetting;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
-use Plugin\ws5_mollie\lib\Locale;
-use Plugin\ws5_mollie\lib\Order\Amount;
-use Plugin\ws5_mollie\lib\Payment\Address;
+use Shop;
 use stdClass;
 
 /**
  * Class PaymentCheckout
  * @package Plugin\ws5_mollie\lib\Checkout
- * @property string $locale
- * @property Amount $amount
  * @property string $description
- * @property array|null $metadata
- * @property string $redirectUrl
- * @property string $webhookUrl
- * @property string|null $method
- * @property Address $billingAddress
- * @property string|null $expiresAt
+ * @property string $customerId
  *
  */
 class PaymentCheckout extends AbstractCheckout
@@ -97,24 +87,13 @@ class PaymentCheckout extends AbstractCheckout
      * @return $this
      * @throws Exception
      */
-    public function loadRequest(array &$options = []): self
+    public function loadRequest(array &$options = [])
     {
-        $this->amount = new Amount($this->getBestellung()->fGesamtsumme, $this->getBestellung()->Waehrung, true, true);
+
+        parent::loadRequest($options);
+
         $this->description = 'Order ' . $this->getBestellung()->cBestellNr;
-        $this->redirectUrl = $this->getPaymentMethod()->getReturnURL($this->getBestellung());
-        $this->webhookUrl = Shop::getURL(true) . '/?mollie=1';
-        $this->locale = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), Frontend::getCustomer()->cLand);
-        $this->metadata = [
-            'kBestellung' => $this->getBestellung()->kBestellung,
-            'kKunde' => $this->getBestellung()->kKunde,
-            'kKundengruppe' => Frontend::getCustomerGroup()->getID(),
-            'cHash' => $this->getHash(),
-        ];
-        /** @noinspection NotOptimalIfConditionsInspection */
-        if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
-            && (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())) {
-            $this->method = $this->getPaymentMethod()::METHOD;
-        }
+
         foreach ($options as $key => $value) {
             $this->$key = $value;
         }
@@ -146,5 +125,49 @@ class PaymentCheckout extends AbstractCheckout
             return "Payment Refund initiiert, Status: " . $res->status;
         }
         throw new Exception('Bestellung ist derzeit nicht storniert, Status: ' . $this->getBestellung()->cStatus);
+    }
+
+    /**
+     * @param \Mollie\Api\Resources\Order|Payment $model
+     * @return $this|PaymentCheckout
+     */
+    protected function setMollie($model)
+    {
+        $this->payment = $model;
+        return $this;
+    }
+
+    protected function updateOrderNumber()
+    {
+        try {
+            if ($this->getMollie()) {
+                $this->getMollie()->description = $this->getDescription();
+                $this->getMollie()->webhookUrl = Shop::getURL() . '/?mollie=1';
+                $this->getMollie()->update();
+            }
+        } catch (Exception $e) {
+            $this->Log('OrderCheckout::updateOrderNumber:' . $e->getMessage(), LOGLEVEL_ERROR);
+        }
+        return $this;
+    }
+
+    public function getDescription()
+    {
+        // TODO: SETTING
+        $descTemplate = "Order {orderNumber}"; // trim(Helper::getSetting('paymentDescTpl')) ?: "Order {orderNumber}";
+        $oKunde = $this->getBestellung()->oKunde ?: $_SESSION['Kunde'];
+        return str_replace([
+            '{orderNumber}',
+            '{storeName}',
+            '{customer.firstname}',
+            '{customer.lastname}',
+            '{customer.company}',
+        ], [
+            $this->getBestellung()->cBestellNr,
+            Shopsetting::getInstance()->getValue(CONF_GLOBAL, 'global_shopname'),  //Shop::getSettings([CONF_GLOBAL])['global']['global_shopname'],
+            $oKunde->cVorname,
+            $oKunde->cNachname,
+            $oKunde->cFirma
+        ], $descTemplate);
     }
 }

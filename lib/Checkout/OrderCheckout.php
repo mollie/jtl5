@@ -8,30 +8,22 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use JTL\Session\Frontend;
-use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\OrderStatus;
 use Mollie\Api\Types\PaymentStatus;
-use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\Order\Address;
-use Plugin\ws5_mollie\lib\Order\Amount;
 use Plugin\ws5_mollie\lib\Order\OrderLine as WSOrderLine;
 use RuntimeException;
+use Shop;
 use stdClass;
 
 /**
  * Class OrderCheckout
  * @package Plugin\ws5_mollie\lib\Checkout
  *
- * @property string $locale
- * @property Amount $amount
  * @property string $orderNumber
- * @property array|null $metadata
- * @property string $redirectUrl
- * @property string $webhookUrl
- * @property string|null $method
  * @property Address $billingAddress
  * @property Address|null $shippingAddress
  * @property string|null $consumerDateOfBirth
@@ -135,31 +127,26 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
+     * @param Order|Payment $model
+     * @return $this|OrderCheckout
+     */
+    protected function setMollie($model)
+    {
+        $this->order = $model;
+        return $this;
+    }
+
+    /**
      * @param array $options
-     * @return self
+     * @return $this
      * @throws Exception
      */
-    public function loadRequest(array &$options = []): self
+    public function loadRequest(array &$options = [])
     {
 
-        $this->locale = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), Frontend::getCustomer()->cLand);
-        $this->amount = new Amount($this->getBestellung()->fGesamtsumme, $this->getBestellung()->Waehrung, true, true);
+        parent::loadRequest($options);
+
         $this->orderNumber = $this->getBestellung()->cBestellNr;
-        $this->metadata = [
-            'kBestellung' => $this->getBestellung()->kBestellung,
-            'kKunde' => $this->getBestellung()->kKunde,
-            'kKundengruppe' => Frontend::getCustomerGroup()->getID(),
-            'cHash' => $this->getHash(),
-        ];
-        $this->redirectUrl = $this->getPaymentMethod()->getReturnURL($this->getBestellung());
-        $this->webhookUrl = Shop::getURL(true) . '/?mollie=1';
-
-        if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
-            && (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())) {
-
-            $this->method = $this->getPaymentMethod()::METHOD;
-        }
-
         $this->billingAddress = Address::factory($this->getBestellung()->oRechnungsadresse);
         if ($this->getBestellung()->Lieferadresse !== null) {
             if (!$this->getBestellung()->Lieferadresse->cMail) {
@@ -240,4 +227,19 @@ class OrderCheckout extends AbstractCheckout
         }
         throw new Exception('Bestellung ist derzeit nicht storniert, Status: ' . $this->getBestellung()->cStatus);
     }
+
+    protected function updateOrderNumber()
+    {
+        try {
+            if ($this->getMollie()) {
+                $this->getMollie()->orderNumber = $this->getBestellung()->cBestellNr;
+                $this->getMollie()->webhookUrl = Shop::getURL() . '/?mollie=1';
+                $this->getMollie()->update();
+            }
+        } catch (Exception $e) {
+            $this->Log('OrderCheckout::updateOrderNumber:' . $e->getMessage(), LOGLEVEL_ERROR);
+        }
+        return $this;
+    }
+
 }

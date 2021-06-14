@@ -9,18 +9,6 @@ trait RequestData
 
     protected $requestData;
 
-    /**
-     * @param $key string
-     * @return mixed|null
-     * @deprecated
-     */
-    public function RequestData(string $key)
-    {
-        if (!$this->getRequestData()) {
-            $this->loadRequest();
-        }
-        return $this->requestData[$key] ?? null;
-    }
 
     /**
      * @return array|null
@@ -31,24 +19,6 @@ trait RequestData
         return $this->requestData;
     }
 
-
-    /**
-     * @param $key
-     * @param $value
-     * @return $this
-     * @deprecated
-     */
-    public function setRequestData($key, $value): self
-    {
-        if (!$this->requestData) {
-            $this->requestData = [];
-        }
-        $this->requestData[$key] = $value;
-        return $this;
-    }
-
-    abstract public function loadRequest(array &$options = []): self;
-
     public function jsonSerialize()
     {
         if (!$this->requestData) {
@@ -56,6 +26,12 @@ trait RequestData
         }
         return $this->requestData;
     }
+
+    /**
+     * @param array $options
+     * @return $this
+     */
+    abstract public function loadRequest(array &$options = []);
 
     public function __get($name)
     {

@@ -26,7 +26,7 @@ try {
         if ($paymentSession && $paymentSession->kBestellung) {
             $oBestellung = new \JTL\Checkout\Bestellung($paymentSession->kBestellung);
 
-            if (\JTL\Shopsetting::getInstance()->getValue('kaufabwicklung', 'bestellabschluss_abschlusseite') === 'A') {
+            if (\JTL\Shopsetting::getInstance()->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlusseite') === 'A') {
                 $oBestellID = Shop::Container()->getDB()->select('tbestellid', 'kBestellung', $paymentSession->kBestellung);
                 if ($oBestellID) {
                     header(sprintf('Location: %s/bestellabschluss.php?i=%s', Shop::getURL(), $oBestellID->cId));
