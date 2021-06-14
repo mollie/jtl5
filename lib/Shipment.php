@@ -17,9 +17,16 @@ use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
-use RuntimeException;
 use Shop;
 
+/**
+ * Class Shipment
+ * @package Plugin\ws5_mollie\lib
+ *
+ * @property array|null $lines
+ * @property string|null $tracking
+ *
+ */
 class Shipment
 {
 
@@ -91,7 +98,7 @@ class Shipment
 
             $oKunde = $checkout->getBestellung()->oKunde ?? new \JTL\Customer\Customer($checkout->getBestellung()->kKunde);
 
-            // TODO: SETTING!
+//            TODO: SETTING!
 //            $shippingActive = self::Plugin()->getConfig()->getValue('shippingActive');
 //            if ($shippingActive === 'N') {
 //                throw new RuntimeException('Shipping deaktiviert');
@@ -192,6 +199,9 @@ class Shipment
         return $this->model;
     }
 
+    /**
+     * @throws Exception
+     */
     public function updateModel(): self
     {
         $this->getModel()->setLieferschein($this->kLieferschein);
@@ -203,11 +213,9 @@ class Shipment
             $this->getModel()->setShipmentId($this->getShipment()->id);
             $this->getModel()->setUrl($this->getShipment()->getTrackingUrl() ?? '');
         }
-        if ($this->getRequestData()) {
-            if ($tracking = $this->RequestData('tracking')) {
-                $this->getModel()->setCarrier($this->RequestData('tracking')['carrier'] ?? '');
-                $this->getModel()->setCode($this->RequestData('tracking')['code'] ?? '');
-            }
+        if ($this->tracking) {
+            $this->getModel()->setCarrier($this->tracking['carrier'] ?? '');
+            $this->getModel()->setCode($this->tracking['code'] ?? '');
         }
         return $this;
     }
@@ -235,14 +243,14 @@ class Shipment
             if ($oVersand->getLogistikVarUrl()) {
                 $tracking['url'] = $oVersand->getLogistikURL();
             }
-            $this->setRequestData('tracking', $tracking);
+            $this->tracking = $tracking;
         }
 
         // TODO: Wenn alle Lieferschiene in der WAWI erstellt wurden, aber nicht im Shop, kommt status 4.
         if ((int)$this->getCheckout()->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-            $this->setRequestData('lines', []);
+            $this->lines = [];
         } else {
-            $this->setRequestData('lines', $this->getOrderLines());
+            $this->lines = $this->getOrderLines();
         }
         return $this;
     }

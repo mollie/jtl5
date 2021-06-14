@@ -10,10 +10,14 @@ use JTL\Catalog\Product\Preise;
 use JTL\Checkout\Bestellung;
 use JTL\Checkout\ZahlungsLog;
 use JTL\Customer\Customer;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Mail\Mail\Mail;
 use JTL\Mail\Mailer;
 use JTL\Model\DataModel;
+use JTL\Plugin\Payment\FallbackMethod;
 use JTL\Plugin\Payment\LegacyMethod;
+use JTL\Plugin\Payment\MethodInterface;
 use JTL\Shop;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
@@ -36,8 +40,9 @@ abstract class AbstractCheckout
      */
     protected $model;
 
-    protected $reqData;
-
+    /**
+     * @var string
+     */
     protected $hash;
 
     /**
@@ -117,14 +122,12 @@ abstract class AbstractCheckout
         ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
         $oBestellung = new Bestellung($model->getBestellung(), true);
 
-        if (static::class !== AbstractCheckout::class) {
+        if (static::class !== __CLASS__) {
             $self = new static($oBestellung, new MollieAPI($model->getTest()));
+        } else if (strpos($model->getOrderId(), 'tr_') !== false) {
+            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
         } else {
-            if (strpos($model->getOrderId(), 'tr_') !== false) {
-                $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
-            } else {
-                $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
-            }
+            $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
         }
         $self->setModel($model);
         return $self;
@@ -149,8 +152,8 @@ abstract class AbstractCheckout
     }
 
     /**
-     * @throws SmartyException
-     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      */
     public static function sendReminders(): void
     {
@@ -178,8 +181,7 @@ abstract class AbstractCheckout
     /**
      * @param $kID
      * @return bool
-     * @throws \PHPMailer\PHPMailer\Exception
-     * @throws SmartyException
+     * @throws Exception
      */
     public static function sendReminder($kID): bool
     {
@@ -213,6 +215,13 @@ abstract class AbstractCheckout
         return true;
     }
 
+    /**
+     * @param $msg
+     * @param int $level
+     * @return $this
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
     public function Log($msg, $level = LOGLEVEL_NOTICE)
     {
         try {
@@ -283,7 +292,7 @@ abstract class AbstractCheckout
     abstract public function getMollie($force = false);
 
     /**
-     * @return \JTL\Plugin\Payment\FallbackMethod|\JTL\Plugin\Payment\MethodInterface|PaymentMethod|\Plugin\ws5_mollie\lib\PaymentMethod
+     * @return FallbackMethod|MethodInterface|PaymentMethod|\Plugin\ws5_mollie\lib\PaymentMethod
      * @throws Exception
      */
     public function getPaymentMethod()
@@ -306,8 +315,8 @@ abstract class AbstractCheckout
     abstract public function cancelOrRefund(): string;
 
     /**
-     * @throws \JTL\Exceptions\CircularReferenceException
-     * @throws \JTL\Exceptions\ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      */
     public function handleNotification($hash = null)
     {
@@ -387,8 +396,8 @@ abstract class AbstractCheckout
      * @param Bestellung $oBestellung
      * @param OrderModel $model
      * @return bool
-     * @throws \JTL\Exceptions\CircularReferenceException
-     * @throws \JTL\Exceptions\ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      */
     public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
     {
