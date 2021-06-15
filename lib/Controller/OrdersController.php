@@ -21,12 +21,9 @@ class OrdersController extends AbstractController
     public static function fetchable(stdClass $data): Response
     {
 
-        $orderModel = OrderModel::loadByAttributes(
-            ['orderId' => $data->id],
-            Shop::Container()->getDB(),
-            DataModel::ON_NOTEXISTS_FAIL);
+        $orderModel = OrderModel::fromID('cOrderId', $data->id, true);
 
-        $oBestellung = new Bestellung($orderModel->bestellung);
+        $oBestellung = new Bestellung($orderModel->kBestellung);
 
         return new Response(AbstractCheckout::makeFetchable($oBestellung, $orderModel));
     }
@@ -42,17 +39,14 @@ class OrdersController extends AbstractController
 
             foreach ($lieferschien_arr as $lieferschein) {
 
-                $shipmentsModel = ShipmentsModel::loadByAttributes(
-                    ['lieferschein' => (int)$lieferschein->kLieferschein],
-                    Shop::Container()->getDB(),
-                    DataModel::ON_NOTEXISTS_NEW);
+                $shipmentsModel = ShipmentsModel::fromID('kLieferschein', (int)$lieferschein->kLieferschein, false);
 
                 $response[] = (object)[
                     'kLieferschein' => $lieferschein->kLieferschein,
                     'cLieferscheinNr' => $lieferschein->cLieferscheinNr,
                     'cHinweis' => $lieferschein->cHinweis,
                     'dErstellt' => date('Y-m-d H:i:s', $lieferschein->dErstellt),
-                    'shipment' => $shipmentsModel->getBestellung() ? $shipmentsModel : null,
+                    'shipment' => $shipmentsModel->kBestellung ? $shipmentsModel : null,
                 ];
             }
         }
@@ -90,13 +84,13 @@ class OrdersController extends AbstractController
         $checkout->updateModel()->saveModel();
 
         $result['mollie'] = $checkout->getMollie();
-        $result['order'] = $checkout->getModel()->rawObject();
+        $result['order'] = $checkout->getModel()->jsonSerialize();
         $result['bestellung'] = $checkout->getBestellung();
         $result['logs'] = Shop::Container()->getDB()
             ->executeQueryPrepared("SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook",
                 [
-                    ':cTypeWebhook' => "%{$checkout->getModel()->getOrderId()}%",
-                    ':cTypeHook' => "%:{$checkout->getModel()->getBestellung()}%"
+                    ':cTypeWebhook' => "%{$checkout->getModel()->cOrderId}%",
+                    ':cTypeHook' => "%:{$checkout->getModel()->kBestellung}%"
                 ], 2);
 
         return new Response($result);

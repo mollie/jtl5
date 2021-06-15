@@ -4,92 +4,45 @@
 namespace Plugin\ws5_mollie\lib\Model;
 
 
-use JsonSerializable;
-use JTL\Model\DataAttribute;
-use JTL\Model\DataModel;
 use JTL\Services\JTL\Validation\Rules\DateTime;
-use RuntimeException;
 
 /**
  * Class QueueModel
  * @package Plugin\ws5_mollie\lib\Model
  *
- * @property int $id
- * @property string $type
- * @property string $data
- * @property string $result
- * @property DateTime $done
- * @property DateTime $created
- * @property DateTime $modified
- *
- * @method void setId(int $id)
- * @method void setType(string $type)
- * @method void setData(string $data)
- * @method void setResult(string $result)
- * @method void setDone(string $done)
- * @method void setCreated(string $created)
- * @method void setModified(string $modified)
- *
- * @method int getId()
- * @method string getType()
- * @method string getData()
- * @method string getResult()
- * @method string getDone()
- * @method string getCreated()
- * @method string getModified()
+ * @property int $kId
+ * @property string $cType
+ * @property string $cData
+ * @property string $cResult
+ * @property string $dDone
+ * @property string $dCreated
+ * @property string $dModified
  *
  */
-class QueueModel extends DataModel implements JsonSerializable
+class QueueModel extends AbstractModel
 {
+
+    const TABLE = "xplugin_ws5_mollie_queue";
+    const PRIMARY = 'kId';
+
     /**
      * @param string $result
      * @param string|null $date
+     * @return bool
      */
-    public function done(string $result, string $date = null)
+    public function done(string $result, string $date = null): bool
     {
-        $this->setResult($result);
-        $this->setDone($date ?? date('Y-m-d H:i:s'));
+        $this->cResult = $result;
+        $this->dDone = $date ?? date('Y-m-d H:i:s');
         return $this->save();
     }
 
-    public function save(array $partial = null): bool
-    {
-        $this->setModified(date("Y-m-d H:i:s"));
-        return parent::save($partial);
-    }
-
-    public function setKeyName($keyName): void
-    {
-        throw new RuntimeException(__METHOD__ . ': setting of keyname is not supported', self::ERR_DATABASE);
-    }
-
-    public function getAttributes(): array
-    {
-        static $attr = null;
-        if ($attr === null) {
-            $attr = [];
-            $attr['id'] = DataAttribute::create('kId', 'int', null, false, true);
-            $attr['type'] = DataAttribute::create('cType', 'string', null, false, false);
-            $attr['data'] = DataAttribute::create('cData', 'string', null, true, false);
-            $attr['result'] = DataAttribute::create('cResult', 'string', null, true, false);
-            $attr['done'] = DataAttribute::create('dDone', 'datetime', null, true, false);
-            $attr['created'] = DataAttribute::create('dCreated', 'datetime', null, false, false);
-            $attr['modified'] = DataAttribute::create('dModified', 'datetime', null, true, false);
-
-        }
-        return $attr;
-    }
-
     /**
-     * @inheritDoc
+     * @return bool
      */
-    public function getTableName(): string
+    public function save(): bool
     {
-        return 'xplugin_ws5_mollie_queue';
-    }
-
-    public function jsonSerialize()
-    {
-        return $this->rawArray();
+        $this->dModified = date("Y-m-d H:i:s");
+        return parent::save();
     }
 }

@@ -40,10 +40,10 @@ class Queue extends AbstractHook
 
     public static function saveToQueue($hook, $args_arr, $type = 'hook'): bool
     {
-        $mQueue = QueueModel::newInstance(Shop::Container()->getDB());
-        $mQueue->setType($type . ':' . $hook);
-        $mQueue->setData(serialize($args_arr));
-        $mQueue->setCreated(date('Y-m-d H:i:s'));
+        $mQueue = new QueueModel();
+        $mQueue->cType = $type . ':' . $hook;
+        $mQueue->cData = serialize($args_arr);
+        $mQueue->dCreated = date('Y-m-d H:i:s');
         try {
             return $mQueue->save();
         } catch (Exception $e) {
@@ -88,13 +88,13 @@ class Queue extends AbstractHook
                 $checkout->getMollie(true);
                 $checkout->updateModel()->saveModel();
 
-                if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->getStatus(), ['completed', 'paid', 'authorized', 'pending'])) {
+                if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->cStatus, ['completed', 'paid', 'authorized', 'pending'])) {
                     throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
 
                 $options = [];
                 if (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on') {
-                    $options['method'] = $checkout->getModel()->getMethod();
+                    $options['method'] = $checkout->getModel()->cMethod;
                 }
 
                 $mollie = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);

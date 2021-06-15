@@ -33,13 +33,13 @@ class PaymentCheckout extends AbstractCheckout
 
         if ($this->getModel()->orderId) {
             try {
-                $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->orderId);
+                $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId);
                 if ($this->payment->status === PaymentStatus::STATUS_OPEN) {
                     $this->updateModel()->updateModel();
                     return $this->payment;
                 }
             } catch (Exception $e) {
-                $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Letzte Transaktion '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->orderId, $e->getMessage()), LOGLEVEL_ERROR);
+                $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Letzte Transaktion '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->cOrderId, $e->getMessage()), LOGLEVEL_ERROR);
             }
         }
 
@@ -49,7 +49,7 @@ class PaymentCheckout extends AbstractCheckout
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
             $this->getPaymentMethod()->doLog(sprintf("PaymentCheckout::create: Neue Transaktion '%s' konnte nicht erstellt werden: %s.\n%s", $this->oBestellung->cBestellNr, $e->getMessage(), json_encode($req)), LOGLEVEL_ERROR);
-            throw new \RuntimeException(sprintf('Mollie-Payment \'%s\' konnte nicht geladen werden: %s', $this->getModel()->getOrderId(), $e->getMessage()));
+            throw new \RuntimeException(sprintf('Mollie-Payment \'%s\' konnte nicht geladen werden: %s', $this->getModel()->cOrderId, $e->getMessage()));
         }
         return $this->payment;
     }
@@ -61,8 +61,8 @@ class PaymentCheckout extends AbstractCheckout
     public function updateModel(): AbstractCheckout
     {
         parent::updateModel();
-        $this->getModel()->setHash($this->getHash());
-        $this->getModel()->setAmountRefunded($this->getMollie()->amountRefunded->value ?? 0);
+        $this->getModel()->cHash = $this->getHash();
+        $this->getModel()->fAmountRefunded = $this->getMollie()->amountRefunded->value ?? 0;
         return $this;
     }
 
@@ -72,9 +72,9 @@ class PaymentCheckout extends AbstractCheckout
      */
     public function getMollie($force = false): ?Payment
     {
-        if ($force || (!$this->payment && $this->getModel()->getOrderId())) {
+        if ($force || (!$this->payment && $this->getModel()->cOrderId)) {
             try {
-                $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->getOrderId(), ['embed' => 'refunds']);
+                $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId, ['embed' => 'refunds']);
             } catch (Exception $e) {
                 throw new \RuntimeException('Mollie-Payment konnte nicht geladen werden: ' . $e->getMessage());
             }

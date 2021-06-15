@@ -8,7 +8,6 @@ use Exception;
 use JTL\Checkout\Lieferschein;
 use JTL\Checkout\Lieferscheinpos;
 use JTL\Checkout\Versand;
-use JTL\Model\DataModel;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\OrderLine;
@@ -166,7 +165,7 @@ class Shipment
 
         $api = $this->getCheckout()->getAPI()->getClient();
 
-        $this->shipment = $api->shipments->createForId($this->checkout->getModel()->getOrderId(), $this->loadRequest()->getRequestData());
+        $this->shipment = $api->shipments->createForId($this->checkout->getModel()->cOrderId, $this->loadRequest()->jsonSerialize());
 
         return $this->updateModel()->saveModel();
 
@@ -174,8 +173,8 @@ class Shipment
 
     public function getShipment($force = false): ?\Mollie\Api\Resources\Shipment
     {
-        if (($force || !$this->shipment) && $this->getModel() && $this->getModel()->getShipmentId()) {
-            $this->shipment = $this->getCheckout()->getAPI()->getClient()->shipments->getForId($this->getModel()->getOrderId(), $this->getModel()->getShipmentId());
+        if (($force || !$this->shipment) && $this->getModel() && $this->getModel()->cShipmentId) {
+            $this->shipment = $this->getCheckout()->getAPI()->getClient()->shipments->getForId($this->getModel()->cOrderId, $this->getModel()->cShipmentId);
         }
         return $this->shipment;
     }
@@ -187,12 +186,9 @@ class Shipment
     public function getModel(): ShipmentsModel
     {
         if (!$this->model && $this->kLieferschein) {
-            $this->model = ShipmentsModel::loadByAttributes(
-                ['lieferschein' => $this->kLieferschein], Shop::Container()->getDB(),
-                DataModel::ON_NOTEXISTS_NEW
-            );
-            if (!$this->model->getCreated()) {
-                $this->getModel()->setCreated(date('Y-m-d H:i:s'));
+            $this->model = ShipmentsModel::fromID($this->kLieferschein, 'kLieferschein');
+            if (!$this->model->dCreated) {
+                $this->getModel()->dCreated = date('Y-m-d H:i:s');
             }
             $this->updateModel();
         }
@@ -204,18 +200,18 @@ class Shipment
      */
     public function updateModel(): self
     {
-        $this->getModel()->setLieferschein($this->kLieferschein);
+        $this->getModel()->kLieferschein = $this->kLieferschein;
         if ($this->getCheckout()) {
-            $this->getModel()->setOrderId($this->getCheckout()->getModel()->getOrderId());
-            $this->getModel()->setBestellung($this->getCheckout()->getModel()->getBestellung());
+            $this->getModel()->cOrderId = $this->getCheckout()->getModel()->cOrderId;
+            $this->getModel()->kBestellung = $this->getCheckout()->getModel()->kBestellung;
         }
         if ($this->getShipment()) {
-            $this->getModel()->setShipmentId($this->getShipment()->id);
-            $this->getModel()->setUrl($this->getShipment()->getTrackingUrl() ?? '');
+            $this->getModel()->cShipmentId = $this->getShipment()->id;
+            $this->getModel()->cUrl = $this->getShipment()->getTrackingUrl() ?? '';
         }
         if ($this->tracking) {
-            $this->getModel()->setCarrier($this->tracking['carrier'] ?? '');
-            $this->getModel()->setCode($this->tracking['code'] ?? '');
+            $this->getModel()->cCarrier = $this->tracking['carrier'] ?? '';
+            $this->getModel()->cCode = $this->tracking['code'] ?? '';
         }
         return $this;
     }

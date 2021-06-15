@@ -5,7 +5,6 @@ namespace Plugin\ws5_mollie\lib\Hook;
 
 
 use JTL\Language\LanguageHelper;
-use JTL\Model\DataModel;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use Session;
 
@@ -26,11 +25,9 @@ class Checkbox extends AbstractHook
         if (Session::getCustomer()->nRegistriert && $args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS) {
 
 
-            $mCustomer = CustomerModel::loadByAttributes([
-                'kunde' => Session::getCustomer()->getID(),
-            ], \Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
+            $mCustomer = CustomerModel::fromID(Session::getCustomer()->getID(), 'kKunde');
 
-            if ($mCustomer->getCustomerId()) {
+            if ($mCustomer->customerId) {
                 return;
             }
 

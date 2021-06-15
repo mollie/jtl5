@@ -4,7 +4,6 @@
 namespace Plugin\ws5_mollie\lib;
 
 
-use JTL\Model\DataModel;
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
@@ -22,14 +21,11 @@ class Customer
     public static function createOrUpdate(\JTL\Customer\Customer $oKunde): ?string
     {
 
-        $mCustomer = CustomerModel::loadByAttributes([
-            'kunde' => $oKunde->kKunde,
-        ], \Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
-
+        $mCustomer = CustomerModel::fromID($oKunde->kKunde, 'kKunde');
 
         $api = new MollieAPI(MollieAPI::getMode());
 
-        if (!$mCustomer->getCustomerId()) {
+        if (!$mCustomer->customerId) {
 
             if (!array_key_exists('mollie_create_customer', $_SESSION['cPost_arr']) || $_SESSION['cPost_arr']['mollie_create_customer'] !== 'on') {
                 return null;
@@ -38,7 +34,7 @@ class Customer
             $customer = new self();
         } else {
             try {
-                $customer = $api->getClient()->customers->get($mCustomer->getCustomerId());
+                $customer = $api->getClient()->customers->get($mCustomer->customerId);
             } catch (ApiException $e) {
                 $customer = new self();
             }
@@ -59,14 +55,14 @@ class Customer
         } else {
             try {
                 $customer = $api->getClient()->customers->create($customer->toArray());
-                $mCustomer->setCustomerId($customer->id);
+                $mCustomer->customerId = $customer->id;
                 $mCustomer->save();
             } catch (ApiException $e) {
                 return null;
             }
         }
 
-        return $mCustomer->getCustomerId();
+        return $mCustomer->customerId;
     }
 
 }

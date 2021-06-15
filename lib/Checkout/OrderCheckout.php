@@ -64,7 +64,7 @@ class OrderCheckout extends AbstractCheckout
                         }
                     }
                     if (!$this->mollie) {
-                        $this->mollie = $this->getAPI()->getClient()->orderPayments->createForId($this->getModel()->getOrderId(), $paymentOptions);
+                        $this->mollie = $this->getAPI()->getClient()->orderPayments->createForId($this->getModel()->cOrderId, $paymentOptions);
                     }
                     $this->updateModel()->saveModel();
                     return $this->getMollie(true);
@@ -101,11 +101,11 @@ class OrderCheckout extends AbstractCheckout
             }
         }
         if ($this->mollie) {
-            $this->getModel()->setTransactionId($this->mollie->id);
+            $this->getModel()->cTransactionId = $this->mollie->id;
         }
-        $this->getModel()->setStatus($this->getMollie()->status);
-        $this->getModel()->setHash($this->getHash());
-        $this->getModel()->setAmountRefunded($this->getMollie()->amountRefunded->value ?? 0);
+        $this->getModel()->cStatus = $this->getMollie()->status;
+        $this->getModel()->cHash = $this->getHash();
+        $this->getModel()->fAmountRefunded = $this->getMollie()->amountRefunded->value ?? 0;
         return $this;
     }
 
@@ -116,11 +116,11 @@ class OrderCheckout extends AbstractCheckout
      */
     public function getMollie($force = false): ?Order
     {
-        if ($force || (!$this->order && $this->getModel()->getOrderId())) {
+        if ($force || (!$this->order && $this->getModel()->cOrderId)) {
             try {
-                $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->getOrderId(), ['embed' => 'payments,shipments,refunds']);
+                $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->cOrderId, ['embed' => 'payments,shipments,refunds']);
             } catch (Exception $e) {
-                throw new RuntimeException(sprintf('Mollie-Order \'%s\' konnte nicht geladen werden: %s', $this->getModel()->getOrderId(), $e->getMessage()));
+                throw new RuntimeException(sprintf('Mollie-Order \'%s\' konnte nicht geladen werden: %s', $this->getModel()->cOrderId, $e->getMessage()));
             }
         }
         return $this->order;

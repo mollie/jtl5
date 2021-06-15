@@ -14,7 +14,6 @@ use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Mail\Mail\Mail;
 use JTL\Mail\Mailer;
-use JTL\Model\DataModel;
 use JTL\Plugin\Payment\FallbackMethod;
 use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Plugin\Payment\MethodInterface;
@@ -25,6 +24,7 @@ use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\OrderStatus;
 use PaymentMethod;
 use Plugin\ws5_mollie\lib\Locale;
+use Plugin\ws5_mollie\lib\Model\AbstractModel;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order\Amount;
@@ -169,22 +169,20 @@ abstract class AbstractCheckout
      */
     public static function fromID($id, $bFill = true, Bestellung $order = null)
     {
-        $model = OrderModel::loadByAttributes([
-            'orderId' => $id,
-        ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
-
+        /** @var OrderModel $model */
+        $model = OrderModel::fromID($id, 'cOrderId', true);
 
         $oBestellung = $order;
         if (!$oBestellung) {
-            $oBestellung = new Bestellung($model->getBestellung(), $bFill);
+            $oBestellung = new Bestellung($model->kBestellung, $bFill);
         }
 
         if (static::class !== __CLASS__) {
-            $self = new static($oBestellung, new MollieAPI($model->getTest()));
-        } else if (strpos($model->getOrderId(), 'tr_') !== false) {
-            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
+            $self = new static($oBestellung, new MollieAPI($model->bTest));
+        } else if (strpos($model->cOrderId, 'tr_') !== false) {
+            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
         } else {
-            $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
+            $self = new OrderCheckout($oBestellung, new MollieAPI($model->bTest));
         }
         $self->setModel($model);
         return $self;
@@ -193,12 +191,13 @@ abstract class AbstractCheckout
     /**
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
+     * @throws Exception
      */
     public function handleNotification($hash = null)
     {
 
         if (!$hash) {
-            $hash = $this->getModel()->getHash();
+            $hash = $this->getModel()->cHash;
         }
 
         $this->updateModel()->saveModel();
@@ -232,10 +231,8 @@ abstract class AbstractCheckout
     public function getModel(): OrderModel
     {
         if (!$this->model) {
-            $this->model = OrderModel::loadByAttributes([
-                'bestellung' => $this->oBestellung->kBestellung,
-            ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_NEW);
-            $this->model->setTest($this->getAPI()->isTest());
+            $this->model = OrderModel::fromID($this->getBestellung()->kBestellung, 'kBestellung');
+            $this->model->bTest = $this->getAPI()->isTest();
         }
         return $this->model;
     }
@@ -247,13 +244,25 @@ abstract class AbstractCheckout
     }
 
     /**
+     * @return Bestellung
+     * @throws Exception
+     */
+    public function getBestellung(): ?Bestellung
+    {
+        if (!$this->oBestellung && $this->getModel()->kBestellung) {
+            $this->oBestellung = new Bestellung($this->getModel()->kBestellung, true);
+        }
+        return $this->oBestellung;
+    }
+
+    /**
      * @return MollieAPI
      */
     public function getAPI(): MollieAPI
     {
         if (!$this->api) {
-            if ($this->getModel()->getOrderId()) {
-                $this->api = new MollieAPI($this->getModel()->getTest());
+            if ($this->getModel()->cOrderId) {
+                $this->api = new MollieAPI($this->getModel()->bTest);
             } else {
                 $this->api = new MollieAPI(MollieAPI::getMode());
             }
@@ -275,33 +284,20 @@ abstract class AbstractCheckout
     public function updateModel(): self
     {
         if ($this->getMollie()) {
-            $this->getModel()->setOrderId($this->getMollie()->id);
-            $this->getModel()->setLocale($this->getMollie()->locale);
-            $this->getModel()->setAmount($this->getMollie()->amount->value);
-            $this->getModel()->setMethod($this->getMollie()->method);
-            $this->getModel()->setCurrency($this->getMollie()->amount->currency);
-            $this->getModel()->setOrderId($this->getMollie()->id);
-            $this->getModel()->setStatus($this->getMollie()->status);
+            $this->getModel()->cOrderId = $this->getMollie()->id;
+            $this->getModel()->cLocale = $this->getMollie()->locale;
+            $this->getModel()->fAmount = $this->getMollie()->amount->value;
+            $this->getModel()->cMethod = $this->getMollie()->method;
+            $this->getModel()->cCurrency = $this->getMollie()->amount->currency;
+            $this->getModel()->cStatus = $this->getMollie()->status;
         }
-        $this->getModel()->setBestellung($this->getBestellung()->kBestellung ?: null);
-        $this->getModel()->setBestellNr($this->getBestellung()->cBestellNr);
-        $this->getModel()->setSynced($this->getModel()->getSynced() !== null ? $this->getModel()->getSynced() : self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
+        $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: AbstractModel::NULL;
+        $this->getModel()->cBestellNr = $this->getBestellung()->cBestellNr;
+        $this->getModel()->bSynced = $this->getModel()->bSynced ?? (self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
         return $this;
     }
 
     abstract public function getMollie($force = false);
-
-    /**
-     * @return Bestellung
-     * @throws Exception
-     */
-    public function getBestellung(): ?Bestellung
-    {
-        if (!$this->oBestellung && $this->getModel()->getBestellung()) {
-            $this->oBestellung = new Bestellung($this->getModel()->getBestellung(), true);
-        }
-        return $this->oBestellung;
-    }
 
     /**
      * @return stdClass
@@ -345,13 +341,13 @@ abstract class AbstractCheckout
      */
     public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
     {
-        if ($oBestellung->cAbgeholt === 'Y' && !$model->getSynced()) {
+        if ($oBestellung->cAbgeholt === 'Y' && !$model->bSynced) {
             Shop::Container()->getDB()->update('tbestellung', 'kBestellung', (int)$oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
-            $model->setSynced(true);
+            $model->bSynced = true;
             try {
-                return $model->save(['synced']);
+                return $model->save();
             } catch (Exception $e) {
-                Shop::Container()->getLogService()->error(sprintf("Fehler beim speichern des Models: %s / Bestellung: %s", $model->getId(), $oBestellung->cBestellNr));
+                Shop::Container()->getLogService()->error(sprintf("Fehler beim speichern des Models: %s / Bestellung: %s", $model->kId, $oBestellung->cBestellNr));
             }
         }
         return false;
@@ -387,19 +383,18 @@ abstract class AbstractCheckout
         return new static($oBestellung, $api);
     }
 
-    public static function fromBestellung($kBestellung): AbstractCheckout
+    public static function fromBestellung($kBestellung, $fill = true): AbstractCheckout
     {
-        $model = OrderModel::loadByAttributes([
-            'bestellung' => $kBestellung,
-        ], Shop::Container()->getDB(), DataModel::ON_NOTEXISTS_FAIL);
-        $oBestellung = new Bestellung($model->getBestellung(), true);
+        $model = OrderModel::fromID($kBestellung, 'kBestellung', true);
+
+        $oBestellung = new Bestellung($model->kBestellung, $fill);
         if (!$oBestellung->kBestellung) {
             throw new Exception(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
         }
-        if (strpos($model->getOrderId(), 'tr_') !== false) {
-            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->getTest()));
+        if (strpos($model->cOrderId, 'tr_') !== false) {
+            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
         } else {
-            $self = new OrderCheckout($oBestellung, new MollieAPI($model->getTest()));
+            $self = new OrderCheckout($oBestellung, new MollieAPI($model->bTest));
         }
         $self->setModel($model);
         return $self;
@@ -437,34 +432,34 @@ abstract class AbstractCheckout
      * @return bool
      * @throws Exception
      */
-    public static function sendReminder($kID): bool
+    public static function sendReminder($kId): bool
     {
 
-        $order = OrderModel::loadByAttributes(['id' => $kID], Shop::Container()->getDB(), OrderModel::ON_NOTEXISTS_FAIL);
+        $order = OrderModel::fromID($kId, 'kId', true);
 
-        $oBestellung = new Bestellung($order->getBestellung());
-        $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->getId() . '-' . $order->getBestellung());
+        $oBestellung = new Bestellung($order->kBestellung);
+        $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->kId . '-' . $order->kBestellung);
 
         $data = new stdClass();
         $data->tkunde = new Customer($oBestellung->kKunde);
         if (!$data->tkunde->kKunde) {
-            $order->setReminder(date('Y-m-d H:i:s'));
-            $order->save(['reminder']);
+            $order->dReminder = date('Y-m-d H:i:s');
+            $order->save();
             throw new Exception("Kunde '{$oBestellung->kKunde}' nicht gefunden.");
         }
         $data->Bestellung = $oBestellung;
         $data->PayURL = $repayURL;
-        $data->Amount = Preise::getLocalizedPriceString($order->getAmount(), Currency::fromISO($order->getCurrency()), false);
+        $data->Amount = Preise::getLocalizedPriceString($order->fAmount, Currency::fromISO($order->cCurrency), false);
 
         $mailer = Shop::Container()->get(Mailer::class);
         $mail = new Mail();
         $mail->createFromTemplateID('kPlugin_' . self::Plugin()->getID() . '_zahlungserinnerung', $data);
 
-        $order->setReminder(date('Y-m-d H:i:s'));
-        $order->save(['reminder']);
+        $order->dReminder = date('Y-m-d H:i:s');
+        $order->save();
 
         if (!$mailer->send($mail)) {
-            throw new Exception($mail->getError() . "\n" . print_r([$data, $order->rawArray()], 1));
+            throw new Exception($mail->getError() . "\n" . print_r([$data, $order->jsonSerialize()], 1));
         }
         return true;
     }
@@ -545,8 +540,8 @@ abstract class AbstractCheckout
      */
     public function getHash(): string
     {
-        if ($this->getModel()->getHash()) {
-            return $this->getModel()->getHash();
+        if ($this->getModel()->cHash) {
+            return $this->getModel()->cHash;
         }
         if (!$this->hash) {
             $this->hash = $this->getPaymentMethod()->generateHash($this->getBestellung());

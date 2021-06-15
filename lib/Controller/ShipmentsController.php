@@ -31,7 +31,7 @@ class ShipmentsController extends AbstractController
 
         $checkout = OrderCheckout::fromID($data->orderId);
 
-        if ($checkout->getModel()->getBestellung()) {
+        if ($checkout->getModel()->kBestellung) {
             $shipment = new Shipment((int)$data->kLieferschein, $checkout);
 
             $oKunde = new Kunde($checkout->getBestellung()->kKunde);
