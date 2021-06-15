@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Plugin\ws5_mollie;
+namespace Plugin\ws5_mollie\lib;
 
 
 use RuntimeException;

@@ -217,7 +217,7 @@
                         <Option value="N" sort="3">Nein</Option>
                     </SelectboxOptions>
                 </Setting>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -239,7 +239,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -251,7 +251,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Apple Pay.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -273,7 +273,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>PAYPAL</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -285,7 +285,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit PayPal.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -307,7 +307,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>INVOICE</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -332,7 +332,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>FINANCING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -357,7 +357,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -369,7 +369,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit SOFORT.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -391,7 +391,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -403,7 +403,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -425,7 +425,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>GIROPAY</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -437,7 +437,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Giropay.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -459,7 +459,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -471,7 +471,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit iDeal.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -493,7 +493,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -505,7 +505,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit eps.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -527,7 +527,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -539,7 +539,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Bancontact.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -573,7 +573,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem per Überweisung.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -595,7 +595,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -607,7 +607,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Belfius.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -629,7 +629,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -641,7 +641,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit KBC.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -663,7 +663,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -675,7 +675,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit MyBank.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -697,7 +697,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -709,7 +709,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit paysafe card.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>

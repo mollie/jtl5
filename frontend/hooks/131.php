@@ -2,8 +2,8 @@
 
 use JTL\Helpers\Request;
 use JTL\Shop;
-use Plugin\ws5_mollie\ExclusiveLock;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\ExclusiveLock;
 use Plugin\ws5_mollie\lib\Queue;
 
 try {

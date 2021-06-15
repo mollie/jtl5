@@ -14,6 +14,8 @@ class ApplePay extends PaymentMethod
 {
     public const METHOD = \Mollie\Api\Types\PaymentMethod::APPLEPAY;
 
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
     public function isSelectable(): bool
     {
         return \Plugin\ws5_mollie\lib\Hook\ApplePay::isAvailable() && parent::isSelectable();

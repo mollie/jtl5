@@ -93,7 +93,7 @@ class Queue
      */
     private static function getOpen($limit): ?Generator
     {
-        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE dDone IS NULL ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
+        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE dDone IS NULL AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%') AND dCreated < DATE_SUB(NOW(), INTERVAL 3 MINUTE)) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
             ':LIMIT' => $limit
         ], 2);
 

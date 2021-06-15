@@ -277,7 +277,6 @@ abstract class PaymentMethod extends Method
         try {
 
             $orderId = $args['id'];
-            $checkout = null;
             if (strpos($orderId, 'tr_') === 0) {
                 $checkout = PaymentCheckout::factory($order);
             } else {

@@ -143,8 +143,7 @@ abstract class AbstractCheckout
                             }
                             $checkout = new $checkoutClass($order, $api);
                         }
-                        $checkout->setMollie($mollie)
-                            ->updateOrderNumber()
+                        $checkout->updateOrderNumber()
                             ->handleNotification($sessionHash);
 
                     } else {
@@ -284,8 +283,8 @@ abstract class AbstractCheckout
             $this->getModel()->setOrderId($this->getMollie()->id);
             $this->getModel()->setStatus($this->getMollie()->status);
         }
-        $this->getModel()->setBestellung($this->oBestellung->kBestellung);
-        $this->getModel()->setBestellNr($this->oBestellung->cBestellNr);
+        $this->getModel()->setBestellung($this->getBestellung()->kBestellung ?: null);
+        $this->getModel()->setBestellNr($this->getBestellung()->cBestellNr);
         $this->getModel()->setSynced($this->getModel()->getSynced() !== null ? $this->getModel()->getSynced() : self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
         return $this;
     }
@@ -357,11 +356,6 @@ abstract class AbstractCheckout
         }
         return false;
     }
-
-    /**
-     * @return $this
-     */
-    abstract protected function updateOrderNumber();
 
     /**
      * @param int $kBestellung
@@ -592,6 +586,11 @@ abstract class AbstractCheckout
             }
         }*/
     }
+
+    /**
+     * @return $this
+     */
+    abstract protected function updateOrderNumber();
 
     /**
      * @param Order|Payment $model
