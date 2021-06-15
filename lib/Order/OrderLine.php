@@ -61,9 +61,10 @@ class OrderLine implements \JsonSerializable
 
         $orderLine->type = self::getType($oPosition->nPosTyp);
         // TODO: FktAttr? $orderLine->category
+
         $orderLine->name = $oPosition->cName;
-        if (!$orderLine->name) {
-            $orderLine->name = '(null)';
+        if (!$orderLine->name || !is_string($orderLine->name)) {
+            $orderLine->name = $oPosition->cArtNr ?: '(null)';
         }
 
         $_vatRate = (float)$oPosition->fMwSt / 100;

@@ -164,7 +164,10 @@ class OrderCheckout extends AbstractCheckout
         }
 
         $lines = [];
-        foreach ($this->getBestellung()->Positionen as $oPosition) {
+
+        $Positionen = $this->getPaymentMethod()->duringCheckout ? $_SESSION['Warenkorb']->PositionenArr : $this->getBestellung()->Positionen;
+
+        foreach ($Positionen as $oPosition) {
             $lines[] = WSOrderLine::factory($oPosition, $this->getBestellung()->Waehrung);
         }
 

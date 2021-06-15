@@ -4,8 +4,6 @@
 namespace Plugin\ws5_mollie\lib\Model;
 
 
-use JTL\Services\JTL\Validation\Rules\DateTime;
-
 /**
  * Class QueueModel
  * @package Plugin\ws5_mollie\lib\Model
@@ -17,6 +15,7 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @property string $dDone
  * @property string $dCreated
  * @property string $dModified
+ * @property bool $bLock
  *
  */
 class QueueModel extends AbstractModel
@@ -34,6 +33,7 @@ class QueueModel extends AbstractModel
     {
         $this->cResult = $result;
         $this->dDone = $date ?? date('Y-m-d H:i:s');
+        $this->bLock = self::NULL;
         return $this->save();
     }
 

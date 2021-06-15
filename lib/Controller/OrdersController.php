@@ -5,7 +5,6 @@ namespace Plugin\ws5_mollie\lib\Controller;
 
 
 use JTL\Checkout\Bestellung;
-use JTL\Model\DataModel;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
@@ -39,7 +38,7 @@ class OrdersController extends AbstractController
 
             foreach ($lieferschien_arr as $lieferschein) {
 
-                $shipmentsModel = ShipmentsModel::fromID('kLieferschein', (int)$lieferschein->kLieferschein, false);
+                $shipmentsModel = ShipmentsModel::fromID((int)$lieferschein->kLieferschein, 'kLieferschein', false);
 
                 $response[] = (object)[
                     'kLieferschein' => $lieferschein->kLieferschein,

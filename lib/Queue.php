@@ -33,6 +33,11 @@ class Queue
         /** @var QueueModel $todo */
         foreach (self::getOpen($limit) as $todo) {
 
+            if (!self::lock($todo)) {
+                continue;
+            }
+
+
             if ((list($type, $id) = explode(':', $todo->cType))) {
                 try {
                     switch ($type) {
@@ -50,6 +55,8 @@ class Queue
                     $todo->done("{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}");
                 }
             }
+
+            self::unlock($todo);
         }
     }
 
@@ -96,7 +103,7 @@ class Queue
      */
     protected static function handleHook(int $hook, QueueModel $todo): bool
     {
-        $data = unserialize($todo->getData()); //, [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
+        $data = unserialize($todo->cData); //, [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
         if (array_key_exists('kBestellung', $data)) {
             switch ($hook) {
                 case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
@@ -194,5 +201,30 @@ class Queue
         }
         return true;
     }
+
+
+    /**
+     * @param $todo
+     * @return bool
+     */
+    protected static function lock($todo): bool
+    {
+        return $todo->kId && Shop::Container()->getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NOW() WHERE `bLock` IS NULL AND kId = :kId', QueueModel::TABLE), [
+                'kId' => $todo->kId
+            ], 3) >= 1;
+
+    }
+
+    /**
+     * @param $todo
+     * @return bool
+     */
+    protected static function unlock($todo): bool
+    {
+        return $todo->kId && Shop::Container()->getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NULL WHERE kId = :kId', QueueModel::TABLE), [
+                'kId' => $todo->kId
+            ], 3) >= 1;
+    }
+
 
 }

@@ -163,9 +163,9 @@ abstract class AbstractCheckout
 
     /**
      * @param $id
-     * @param MollieAPI|null $api
+     * @param bool $bFill
+     * @param Bestellung|null $order
      * @return AbstractCheckout
-     * @throws Exception
      */
     public static function fromID($id, $bFill = true, Bestellung $order = null)
     {
