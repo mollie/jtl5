@@ -61,6 +61,30 @@
                     <ValueName>autoRefund</ValueName>
                 </Setting>
 
+                <Setting type="zahl" initialValue="0" sort="45" conf="Y">
+                    <Name>Unbezahlte Bestellungen stornieren</Name>
+                    <Description>Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden
+                        nach Bestellung. (0 = deaktiviert)
+                    </Description>
+                    <ValueName>autoStorno</ValueName>
+                </Setting>
+                <Setting type="selectbox" initialValue="Y" sort="46" conf="Y">
+                    <Name>Versand bei Mollie</Name>
+                    <Description>Soll Versandinformation fr OrderAPI Methoden an Mollie gesendet werden?.</Description>
+                    <ValueName>shippingActive</ValueName>
+                    <SelectboxOptions>
+                        <Option value="Y" sort="1"><![CDATA[Ja]]></Option>
+                        <Option value="K" sort="2"><![CDATA[Nur Kunden & Komplettversand]]></Option>
+                        <Option value="N" sort="3"><![CDATA[Nein, ich mache alles manuell.]]></Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="text" initialValue="Order {orderNumber}" sort="47" conf="Y">
+                    <Name>Payment API Beschreibung</Name>
+                    <Description>Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung:
+                        {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}
+                    </Description>
+                    <ValueName>paymentDescTpl</ValueName>
+                </Setting>
                 <Setting type="checkbox" initialValue="on" sort="50" conf="Y">
                     <Name>Nur bezahlte Bestellungen in die WAWI übertragen</Name>
                     <Description>Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI

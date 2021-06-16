@@ -92,7 +92,7 @@ class PaymentCheckout extends AbstractCheckout
 
         parent::loadRequest($options);
 
-        $this->description = 'Order ' . $this->getBestellung()->cBestellNr;
+        $this->description = $this->getDescription();
 
         foreach ($options as $key => $value) {
             $this->$key = $value;
@@ -151,10 +151,13 @@ class PaymentCheckout extends AbstractCheckout
         return $this;
     }
 
+    /**
+     * @return array|string|string[]
+     * @throws Exception
+     */
     public function getDescription()
     {
-        // TODO: SETTING
-        $descTemplate = "Order {orderNumber}"; // trim(Helper::getSetting('paymentDescTpl')) ?: "Order {orderNumber}";
+        $descTemplate = trim(self::Plugin()->getConfig()->getValue('paymentDescTpl')) ?: "Order {orderNumber}";
         $oKunde = $this->getBestellung()->oKunde ?: $_SESSION['Kunde'];
         return str_replace([
             '{orderNumber}',

@@ -7,6 +7,9 @@ namespace Plugin\ws5_mollie\lib\Checkout;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use JTL\Cart\CartItem;
+use JTL\Helpers\Tax;
+use JTL\Helpers\Text;
 use JTL\Session\Frontend;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Order;
@@ -165,7 +168,10 @@ class OrderCheckout extends AbstractCheckout
 
         $lines = [];
 
-        $Positionen = $this->getPaymentMethod()->duringCheckout ? $_SESSION['Warenkorb']->PositionenArr : $this->getBestellung()->Positionen;
+        //$Positionen = $this->getPaymentMethod()->duringCheckout ? $_SESSION['Warenkorb']->PositionenArr : $this->getBestellung()->Positionen;
+
+        $Positionen = $this->getPositionen();
+
 
         foreach ($Positionen as $oPosition) {
             $lines[] = WSOrderLine::factory($oPosition, $this->getBestellung()->Waehrung);
@@ -190,6 +196,56 @@ class OrderCheckout extends AbstractCheckout
 
         return $this;
 
+    }
+
+    public function getPositionen()
+    {
+        if ($this->getPaymentMethod()->duringCheckout) {
+
+            $conf = Shop::getSettings([CONF_GLOBAL]);
+            $oPositionenArr = [];
+
+            if (is_array($_SESSION['Warenkorb']->PositionenArr) && count($_SESSION['Warenkorb']->PositionenArr) > 0) {
+                $productFilter = (int)$conf['global']['artikel_artikelanzeigefilter'];
+                /** @var CartItem $item */
+                foreach ($_SESSION['Warenkorb']->PositionenArr as $item) {
+
+                    $item->cName = Text::unhtmlentities(is_array($item->cName)
+                        ? $item->cName[$_SESSION['cISOSprache']]
+                        : $item->cName);
+
+                    $item->fMwSt = Tax::getSalesTax($item->kSteuerklasse);
+                    if (is_array($item->WarenkorbPosEigenschaftArr) && count($item->WarenkorbPosEigenschaftArr) > 0) {
+                        $idx = Shop::getLanguageCode();
+                        // Bei einem Varkombikind dürfen nur FREIFELD oder PFLICHT-FREIFELD gespeichert werden,
+                        // da sonst eventuelle Aufpreise in der Wawi doppelt berechnet werden
+                        if (isset($item->Artikel->kVaterArtikel) && $item->Artikel->kVaterArtikel > 0) {
+                            foreach ($item->WarenkorbPosEigenschaftArr as $o => $WKPosEigenschaft) {
+                                if ($WKPosEigenschaft->cTyp === 'FREIFELD' || $WKPosEigenschaft->cTyp === 'PFLICHT-FREIFELD') {
+                                    $WKPosEigenschaft->kWarenkorbPos = $item->kWarenkorbPos;
+                                    $WKPosEigenschaft->cEigenschaftName = $WKPosEigenschaft->cEigenschaftName[$idx];
+                                    $WKPosEigenschaft->cEigenschaftWertName = $WKPosEigenschaft->cEigenschaftWertName[$idx];
+                                    $WKPosEigenschaft->cFreifeldWert = $WKPosEigenschaft->cEigenschaftWertName;
+                                }
+                            }
+                        } else {
+                            foreach ($item->WarenkorbPosEigenschaftArr as $o => $WKPosEigenschaft) {
+                                $WKPosEigenschaft->kWarenkorbPos = $item->kWarenkorbPos;
+                                $WKPosEigenschaft->cEigenschaftName = $WKPosEigenschaft->cEigenschaftName[$idx];
+                                $WKPosEigenschaft->cEigenschaftWertName = $WKPosEigenschaft->cEigenschaftWertName[$idx];
+                                if ($WKPosEigenschaft->cTyp === 'FREIFELD' || $WKPosEigenschaft->cTyp === 'PFLICHT-FREIFELD') {
+                                    $WKPosEigenschaft->cFreifeldWert = $WKPosEigenschaft->cEigenschaftWertName;
+                                }
+                            }
+                        }
+                    }
+
+                    $oPositionenArr[] = $item;
+                }
+            }
+            return $oPositionenArr;
+        }
+        return $this->getBestellung()->Positionen;
     }
 
     /**
