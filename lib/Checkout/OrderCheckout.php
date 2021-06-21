@@ -82,7 +82,7 @@ class OrderCheckout extends AbstractCheckout
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
             $this->getPaymentMethod()->doLog(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
-            throw new RuntimeException('Order konnte nicht angelegt werden.');
+            throw new RuntimeException(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()));
         }
         return $this->order;
     }
