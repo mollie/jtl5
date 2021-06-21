@@ -3,15 +3,18 @@
 
 namespace Plugin\ws5_mollie\lib\Checkout;
 
-
 use Exception;
 use JTL\Catalog\Currency;
+use JTL\Catalog\Product\Artikel;
+use JTL\Catalog\Product\EigenschaftWert;
 use JTL\Catalog\Product\Preise;
 use JTL\Checkout\Bestellung;
 use JTL\Checkout\ZahlungsLog;
 use JTL\Customer\Customer;
+use JTL\DB\ReturnType;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Helpers\Product;
 use JTL\Mail\Mail\Mail;
 use JTL\Mail\Mailer;
 use JTL\Plugin\Payment\FallbackMethod;
@@ -437,6 +440,9 @@ abstract class AbstractCheckout
 
         $order = OrderModel::fromID($kId, 'kId', true);
 
+        if(!$order->kBestellung){
+            return true;
+        }
         $oBestellung = new Bestellung($order->kBestellung);
         $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->kId . '-' . $order->kBestellung);
 
@@ -462,30 +468,6 @@ abstract class AbstractCheckout
             throw new Exception($mail->getError() . "\n" . print_r([$data, $order->jsonSerialize()], 1));
         }
         return true;
-    }
-
-    /**
-     * @param $msg
-     * @param int $level
-     * @return $this
-     * @throws CircularReferenceException
-     * @throws ServiceNotFoundException
-     */
-    public function Log($msg, $level = LOGLEVEL_NOTICE)
-    {
-        try {
-            $data = '';
-            if ($this->getBestellung()) {
-                $data .= '#' . $this->getBestellung()->kBestellung;
-            }
-            if ($this->getMollie()) {
-                $data .= '$' . $this->getMollie()->id;
-            }
-            ZahlungsLog::add($this->getPaymentMethod()->moduleID, "[" . microtime(true) . " - " . $_SERVER['PHP_SELF'] . "] " . $msg, $data, $level);
-        } catch (Exception $e) {
-            Shop::Container()->getLogService()->error(sprintf("Error while Logging: %s\nPrevious Error: %s", $e->getMessage(), $msg));
-        }
-        return $this;
     }
 
     /**
@@ -557,17 +539,16 @@ abstract class AbstractCheckout
 
     /**
      * @throws Exception
-     * @todo
      */
     public function storno(): void
     {
-        /*if (in_array((int)$this->getBestellung()->cStatus, [BESTELLUNG_STATUS_OFFEN, BESTELLUNG_STATUS_IN_BEARBEITUNG], true)) {
+        if (in_array((int)$this->getBestellung()->cStatus, [BESTELLUNG_STATUS_OFFEN, BESTELLUNG_STATUS_IN_BEARBEITUNG], true)) {
+
+            require_once PFAD_ROOT . PFAD_INCLUDES . 'bestellabschluss_inc.php';
 
             $log = [];
-
-            $conf = Shop::getSettings([CONF_GLOBAL, CONF_TRUSTEDSHOPS]);
+            $conf = Shop::getSettings([CONF_GLOBAL]);
             $nArtikelAnzeigefilter = (int)$conf['global']['artikel_artikelanzeigefilter'];
-
             foreach ($this->getBestellung()->Positionen as $pos) {
                 if ($pos->kArtikel && $pos->Artikel && $pos->Artikel->cLagerBeachten === 'Y') {
                     $log[] = sprintf('Reset stock of "%s" by %d', $pos->Artikel->cArtNr, -1 * $pos->nAnzahl);
@@ -576,10 +557,100 @@ abstract class AbstractCheckout
             }
             $log[] = sprintf("Cancel order '%s'.", $this->getBestellung()->cBestellNr);
 
-            if (Shop::DB()->executeQueryPrepared('UPDATE tbestellung SET cAbgeholt = "N", cStatus = :cStatus WHERE kBestellung = :kBestellung', [':cStatus' => '-1', ':kBestellung' => $this->getBestellung()->kBestellung], 3)) {
+            if (Shop::Container()->getDB()->executeQueryPrepared('UPDATE tbestellung SET cAbgeholt = "N", cStatus = :cStatus WHERE kBestellung = :kBestellung', [':cStatus' => '-1', ':kBestellung' => $this->getBestellung()->kBestellung], 3)) {
                 $this->Log(implode('\n', $log));
             }
-        }*/
+        }
+    }
+
+    protected static function aktualisiereLagerbestand(Artikel $product, $amount, $attributeValues, int $productFilter = 1)
+    {
+        $inventory = (float)$product->fLagerbestand;
+        $db = Shop::Container()->getDB();
+        if ($product->cLagerBeachten !== 'Y') {
+            return $inventory;
+        }
+        if ($product->cLagerVariation === 'Y'
+            && is_array($attributeValues)
+            && count($attributeValues) > 0
+        ) {
+            foreach ($attributeValues as $value) {
+                $EigenschaftWert = new EigenschaftWert($value->kEigenschaftWert);
+                if ($EigenschaftWert->fPackeinheit == 0) {
+                    $EigenschaftWert->fPackeinheit = 1;
+                }
+                $db->queryPrepared(
+                    'UPDATE teigenschaftwert
+                    SET fLagerbestand = fLagerbestand - :inv
+                    WHERE kEigenschaftWert = :aid',
+                    [
+                        'aid' => (int)$value->kEigenschaftWert,
+                        'inv' => $amount * $EigenschaftWert->fPackeinheit
+                    ],
+                    ReturnType::DEFAULT
+                );
+            }
+            updateStock($product->kArtikel, $amount, $product->fPackeinheit);
+        } elseif ($product->fPackeinheit > 0) {
+            if ($product->kStueckliste > 0) {
+                $inventory = aktualisiereStuecklistenLagerbestand($product, $amount);
+            } else {
+                updateStock($product->kArtikel, $amount, $product->fPackeinheit);
+                $tmpProduct = $db->select(
+                    'tartikel',
+                    'kArtikel',
+                    (int)$product->kArtikel,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    'fLagerbestand'
+                );
+                if ($tmpProduct !== null) {
+                    $inventory = (float)$tmpProduct->fLagerbestand;
+                }
+                // Stücklisten Komponente
+                if (Product::isStuecklisteKomponente($product->kArtikel)) {
+                    aktualisiereKomponenteLagerbestand(
+                        $product->kArtikel,
+                        $inventory,
+                        $product->cLagerKleinerNull === 'Y'
+                    );
+                }
+            }
+            // Aktualisiere Merkmale in tartikelmerkmal vom Vaterartikel
+            if ($product->kVaterArtikel > 0) {
+                Artikel::beachteVarikombiMerkmalLagerbestand($product->kVaterArtikel, $productFilter);
+                updateStock($product->kVaterArtikel, $amount, $product->fPackeinheit);
+            }
+        }
+
+        return $inventory;
+    }
+
+    /**
+     * @param $msg
+     * @param int $level
+     * @return $this
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public function Log($msg, $level = LOGLEVEL_NOTICE)
+    {
+        try {
+            $data = '';
+            if ($this->getBestellung()) {
+                $data .= '#' . $this->getBestellung()->kBestellung;
+            }
+            if ($this->getMollie()) {
+                $data .= '$' . $this->getMollie()->id;
+            }
+            ZahlungsLog::add($this->getPaymentMethod()->moduleID, "[" . microtime(true) . " - " . $_SERVER['PHP_SELF'] . "] " . $msg, $data, $level);
+        } catch (Exception $e) {
+            Shop::Container()->getLogService()->error(sprintf("Error while Logging: %s\nPrevious Error: %s", $e->getMessage(), $msg));
+        }
+        return $this;
     }
 
     /**

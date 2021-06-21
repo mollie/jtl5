@@ -39,15 +39,13 @@ try {
         }
     }
 
-    // TODO: DOKU
     ifndef('MOLLIE_REMINDER_PROP', 10);
     /** @noinspection PhpUndefinedConstantInspection */
     if (random_int(1, MOLLIE_REMINDER_PROP) % MOLLIE_REMINDER_PROP === 0) {
         $lock = new ExclusiveLock('mollie_reminder', PFAD_ROOT . PFAD_COMPILEDIR);
         if ($lock->lock()) {
             AbstractCheckout::sendReminders();
-            // TODO: SETTING
-            // Queue::storno((int)$oPlugin->getConfig()->getValue('autoStorno'));
+            Queue::storno((int)$oPlugin->getConfig()->getValue('autoStorno'));
         }
     }
 
