@@ -10,10 +10,10 @@ use stdClass;
 abstract class AbstractModel implements JsonSerializable
 {
 
-    const TABLE = NULL;
-    const PRIMARY = NULL;
+    public const TABLE = NULL;
+    public const PRIMARY = NULL;
 
-    const NULL = '_DBNULL_';
+    public const NULL = '_DBNULL_';
 
     protected $new = false;
 

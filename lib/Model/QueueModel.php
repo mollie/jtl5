@@ -21,8 +21,8 @@ namespace Plugin\ws5_mollie\lib\Model;
 class QueueModel extends AbstractModel
 {
 
-    const TABLE = "xplugin_ws5_mollie_queue";
-    const PRIMARY = 'kId';
+    public const TABLE = "xplugin_ws5_mollie_queue";
+    public const PRIMARY = 'kId';
 
     /**
      * @param string $result

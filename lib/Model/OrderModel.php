@@ -4,8 +4,6 @@
 namespace Plugin\ws5_mollie\lib\Model;
 
 
-use JTL\Services\JTL\Validation\Rules\DateTime;
-
 /**
  * Class OrderModel
  * @package ws5_mollie\Model
@@ -33,6 +31,16 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
 final class OrderModel extends AbstractModel
 {
 
-    const TABLE = "xplugin_ws5_mollie_orders";
-    const PRIMARY = "kId";
+    public const TABLE = "xplugin_ws5_mollie_orders";
+    public const PRIMARY = "kId";
+
+    public function save(): bool
+    {
+        if (!$this->dCreated || $this->dCreated === '0000-00-00 00:00:00') {
+            $this->dCreated = date("Y-m-d H:i:s");
+        }
+        $this->dModified = date("Y-m-d H:i:s");
+        return parent::save();
+    }
+
 }

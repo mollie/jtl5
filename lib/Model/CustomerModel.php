@@ -15,7 +15,7 @@ namespace Plugin\ws5_mollie\lib\Model;
 final class CustomerModel extends AbstractModel
 {
 
-    const TABLE = "xplugin_ws5_mollie_kunde";
-    const PRIMARY = 'kKunde';
+    public const TABLE = "xplugin_ws5_mollie_kunde";
+    public const PRIMARY = 'kKunde';
 
 }
