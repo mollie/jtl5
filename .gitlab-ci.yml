@@ -3,7 +3,7 @@ image: registry.webstollen.com:443/docker/jtl-plugin-ci:master
 stages:
 - test
 - build
-- finalize
+- release
 - publish
 
 sast:
@@ -67,7 +67,8 @@ node:
     - adminmenu/app/build
 
 pack:
-  stage: finalize
+  stage: release
+  needs: ["node", "composer"]
   only:
   - tags
   - master
@@ -84,6 +85,10 @@ pack:
 
 upload:
   stage: publish
+  needs: ["pack"]
+  artifacts:
+    paths:
+    - $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip
   only:
   - tags
   - master
@@ -91,3 +96,4 @@ upload:
   - aws configure set region eu-central-1
   - if [ $SKIP_COMPILE = 1 ]; then export SRC_PREFIX="-src"; fi
   - aws s3 cp $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip s3://$S3_BUCKET/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip
+  - echo "DOWNLOAD URL https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip"
