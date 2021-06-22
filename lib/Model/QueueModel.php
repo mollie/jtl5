@@ -5,6 +5,8 @@
 
 namespace Plugin\ws5_mollie\lib\Model;
 
+use JTL\Shop;
+
 /**
  * Class QueueModel
  * @package Plugin\ws5_mollie\lib\Model
@@ -24,8 +26,15 @@ class QueueModel extends AbstractModel
     public const TABLE   = 'xplugin_ws5_mollie_queue';
     public const PRIMARY = 'kId';
 
+    public static function cleanUp(): void
+    {
+        // TODO: DOKU
+        ifndef('MOLLIE_CLEANUP_DAYS', 30);
+        Shop::Container()->getDB()->executeQueryPrepared(sprintf('DELETE FROM %s WHERE dDone IS NOT NULL AND (bLock IS NULL OR bLock = "0000-00-00 00:00:00") AND dCreated < DATE_SUB(NOW(), INTERVAL %d DAY)', self::TABLE, MOLLIE_CLEANUP_DAYS));
+    }
+
     /**
-     * @param string      $result
+     * @param string $result
      * @param null|string $date
      * @return bool
      */
