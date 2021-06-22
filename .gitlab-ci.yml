@@ -90,9 +90,11 @@ release_job:
   release:
     tag_name: $CI_COMMIT_TAG
     ref: $CI_COMMIT_SHA
-    links:
+    description: 'Release $CI_COMMIT_TAG'
+    assets:
+      links:
       - name: 'CDN'
-      - url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
+        url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
 
 
 upload:
