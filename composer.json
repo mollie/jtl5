@@ -11,6 +11,7 @@
     "mollie/mollie-api-php": "^2.31.1"
   },
   "require-dev": {
+    "thibautselingue/local-php-security-checker-installer": "^1.0.3",
     "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "^8.5",
     "phpmetrics/phpmetrics": "^2.7",
@@ -31,9 +32,13 @@
     "analyze": "phpmetrics --report-html=report ./",
     "test": "phpunit",
     "sniff": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/ --ignore=adminmenu/app ./lib",
+    "sniff:fix": "phpcbf -p ./lib",
     "csfix": "php-cs-fixer fix",
     "phpstan": "phpstan analyse lib",
     "psalm": "psalm",
-    "psalm:fix": "psalm --alter --issues=MissingReturnType,InvalidReturnType,MissingClosureReturnType,LessSpecificReturnType,MissingParamType"
+    "psalm:fix": "psalm --alter --issues=MissingReturnType,InvalidReturnType,MissingClosureReturnType,LessSpecificReturnType,MissingParamType",
+    "post-install-cmd": [
+      "local-php-security-checker-installer && local-php-security-checker"
+    ]
   }
 }

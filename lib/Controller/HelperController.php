@@ -135,7 +135,7 @@ class HelperController extends AbstractController
      */
     public static function product(stdClass $data): Response
     {
-        $fill = function (int $kArtikel, $options = null): Artikel {
+        $fill    = function (int $kArtikel, $options = null): Artikel {
             $product = new Artikel();
             $product->fuelleArtikel($kArtikel, $options, $data->customerGroupID ?? 0, $data->langID ?? 0, $data->noCache ?? false);
             if (!$product->getID()) {

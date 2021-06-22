@@ -53,7 +53,7 @@ class OrdersController extends AbstractController
     public static function all(stdClass $data): Response
     {
         if (self::Plugin()->getConfig()->getValue('hideCompleted') === 'on') {
-            $query = 'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme '
+            $query       = 'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme '
                 . 'FROM xplugin_ws5_mollie_orders o '
                 . 'JOIN tbestellung b ON b.kbestellung = o.kBestellung '
                 . "WHERE !(o.cStatus = 'completed' AND b.cStatus = '4')"

@@ -53,8 +53,7 @@ class Address implements \JsonSerializable
         $this->city            = $address->cOrt;
         $this->country         = $address->cLand;
 
-        if (
-            isset($adresse->cAdressZusatz)
+        if (isset($adresse->cAdressZusatz)
             && trim($adresse->cAdressZusatz) !== ''
         ) {
             $this->streetAdditional = trim($adresse->cAdressZusatz);

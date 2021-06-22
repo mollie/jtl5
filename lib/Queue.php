@@ -132,8 +132,7 @@ class Queue
                             return $todo->done("Bestellung noch nicht versendet: {$checkout->getBestellung()->cStatus}");
                         }
 
-                        if (
-                            (int)$data['status']
+                        if ((int)$data['status']
                             && array_key_exists('status', $data)
                             && $checkout->getPaymentMethod()
                             && (strpos($checkout->getModel()->cOrderId, 'tr_') === false)
@@ -143,8 +142,7 @@ class Queue
                             $checkout->handleNotification();
                             if ($checkout->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
                                 $result = 'Mollie Status already ' . $checkout->getMollie()->status;
-                            } elseif (
-                                $checkout->getMollie()->isCreated()
+                            } elseif ($checkout->getMollie()->isCreated()
                                 || $checkout->getMollie()->isPaid()
                                 || $checkout->getMollie()->isAuthorized()
                                 || $checkout->getMollie()->isShipping()

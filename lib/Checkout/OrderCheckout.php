@@ -167,8 +167,7 @@ class OrderCheckout extends AbstractCheckout
             $this->shippingAddress = Address::factory($this->getBestellung()->Lieferadresse);
         }
 
-        if (
-            !empty(Frontend::getCustomer()->dGeburtstag)
+        if (!empty(Frontend::getCustomer()->dGeburtstag)
             && Frontend::getCustomer()->dGeburtstag !== '0000-00-00'
             && preg_match('/^\d{4}-\d{2}-\d{2}$/', trim(Frontend::getCustomer()->dGeburtstag))
         ) {
