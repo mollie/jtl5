@@ -85,6 +85,8 @@ pack:
 
 release_job:
   image: registry.gitlab.com/gitlab-org/release-cli:latest
+  only:
+  - tags
   script:
     - if [ $SKIP_COMPILE = 1 ]; then export SRC_PREFIX="-src"; fi
   release:
