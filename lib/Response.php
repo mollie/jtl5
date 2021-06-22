@@ -1,15 +1,16 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib;
 
-
 class Response implements \JsonSerializable
 {
-
     protected $data = [];
 
-    public function __construct($data = []){
+    public function __construct($data = [])
+    {
         $this->data = $data;
     }
 
@@ -30,10 +31,10 @@ class Response implements \JsonSerializable
 
     public function jsonSerialize()
     {
-        if(is_array($this->data)){
+        if (is_array($this->data)) {
             return $this->data;
         }
+
         return (object)$this->data;
     }
-
 }

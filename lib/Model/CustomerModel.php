@@ -1,8 +1,9 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib\Model;
-
 
 /**
  * Class CustomerModel
@@ -14,8 +15,6 @@ namespace Plugin\ws5_mollie\lib\Model;
  */
 final class CustomerModel extends AbstractModel
 {
-
-    public const TABLE = "xplugin_ws5_mollie_kunde";
+    public const TABLE   = 'xplugin_ws5_mollie_kunde';
     public const PRIMARY = 'kKunde';
-
 }

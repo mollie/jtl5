@@ -1,4 +1,4 @@
-{if $redirect != ''}
+{if isset($redirect) && $redirect != ''}
   {row}
     {col md=4 lg=3 xl=2}
       {button block=true type="link" href={$redirect} variant="primary"}

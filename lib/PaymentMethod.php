@@ -1,7 +1,6 @@
 <?php
-
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
  */
 
 namespace Plugin\ws5_mollie\lib;
@@ -13,7 +12,6 @@ use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Plugin\Helper as PluginHelper;
 use JTL\Plugin\Payment\Method;
-use JTL\Plugin\Payment\MethodInterface;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
@@ -24,6 +22,7 @@ use Shop;
 
 abstract class PaymentMethod extends Method
 {
+    use Plugin;
 
     public const ALLOW_AUTO_STORNO = true;
 
@@ -32,25 +31,27 @@ abstract class PaymentMethod extends Method
     public const METHOD = '';
 
     /**
-     * @var string
+     * @var int
      */
-    protected $pluginID;
-
-    use Plugin;
+    protected $kPlugin;
 
     /**
      * @param int $nAgainCheckout
-     * @return $this|Method|MethodInterface|PaymentMethod
+     *
+     * @return static
      */
-    public function init($nAgainCheckout = 0)
+    public function init(int $nAgainCheckout = 0)
     {
         parent::init($nAgainCheckout);
 
-        $this->pluginID = PluginHelper::getIDByModuleID($this->moduleID);
+        $this->kPlugin = PluginHelper::getIDByModuleID($this->moduleID);
 
         return $this;
     }
 
+    /**
+     * @return true
+     */
     public function canPayAgain(): bool
     {
         return true;
@@ -77,7 +78,7 @@ abstract class PaymentMethod extends Method
         } else {
             $selectable = trim(self::Plugin()->getConfig()->getValue('apiKey')) !== '';
             if (!$selectable) {
-                $this->doLog("Live API Key missing!", LOGLEVEL_ERROR);
+                $this->doLog('Live API Key missing!', LOGLEVEL_ERROR);
             }
         }
         if ($selectable) {
@@ -98,57 +99,61 @@ abstract class PaymentMethod extends Method
                 $selectable = false;
             }
         }
+
         return $selectable && parent::isSelectable();
     }
 
     /**
-     * @param string $cISOSprache
-     * @param string|null $country
+     * @param string      $cISOSprache
+     * @param null|string $country
      * @return string
      */
     public static function getLocale(string $cISOSprache, string $country = null): string
     {
         switch ($cISOSprache) {
-            case "ger":
-                if ($country === "AT") {
-                    return "de_AT";
+            case 'ger':
+                if ($country === 'AT') {
+                    return 'de_AT';
                 }
-                if ($country === "CH") {
-                    return "de_CH";
+                if ($country === 'CH') {
+                    return 'de_CH';
                 }
-                return "de_DE";
-            case "fre":
-                if ($country === "BE") {
-                    return "fr_BE";
+
+                return 'de_DE';
+            case 'fre':
+                if ($country === 'BE') {
+                    return 'fr_BE';
                 }
-                return "fr_FR";
-            case "dut":
-                if ($country === "BE") {
-                    return "nl_BE";
+
+                return 'fr_FR';
+            case 'dut':
+                if ($country === 'BE') {
+                    return 'nl_BE';
                 }
-                return "nl_NL";
-            case "spa":
-                return "es_ES";
-            case "ita":
-                return "it_IT";
-            case "pol":
-                return "pl_PL";
-            case "hun":
-                return "hu_HU";
-            case "por":
-                return "pt_PT";
-            case "nor":
-                return "nb_NO";
-            case "swe":
-                return "sv_SE";
-            case "fin":
-                return "fi_FI";
-            case "dan":
-                return "da_DK";
-            case "ice":
-                return "is_IS";
+
+                return 'nl_NL';
+            case 'spa':
+                return 'es_ES';
+            case 'ita':
+                return 'it_IT';
+            case 'pol':
+                return 'pl_PL';
+            case 'hun':
+                return 'hu_HU';
+            case 'por':
+                return 'pt_PT';
+            case 'nor':
+                return 'nb_NO';
+            case 'swe':
+                return 'sv_SE';
+            case 'fin':
+                return 'fi_FI';
+            case 'dan':
+                return 'da_DK';
+            case 'ice':
+                return 'is_IS';
             default:
-                return "en_US";
+                return 'en_US';
         }
     }
 
@@ -158,13 +163,12 @@ abstract class PaymentMethod extends Method
      * @param $billingCountry
      * @param $currency
      * @param $amount
-     * @return bool
      * @throws ApiException
      * @throws IncompatiblePlatform
+     * @return bool
      */
-    protected static function isMethodPossible($method, $locale, $billingCountry, $currency, $amount): bool
+    protected static function isMethodPossible($method, string $locale, $billingCountry, $currency, $amount): bool
     {
-
         $api = new MollieAPI(MollieAPI::getMode());
 
         if (!array_key_exists('mollie_possibleMethods', $_SESSION)) {
@@ -177,10 +181,10 @@ abstract class PaymentMethod extends Method
                 'locale' => $locale,
                 'amount' => [
                     'currency' => $currency,
-                    'value' => number_format($amount, 2, ".", "")
+                    'value'    => number_format($amount, 2, '.', '')
                 ],
                 'billingCountry' => $billingCountry,
-                'resource' => 'orders',
+                'resource'       => 'orders',
                 'includeWallets' => 'applepay',
             ]);
         }
@@ -196,7 +200,6 @@ abstract class PaymentMethod extends Method
         }
 
         return false;
-
     }
 
     /**
@@ -204,19 +207,19 @@ abstract class PaymentMethod extends Method
      */
     public function preparePaymentProcess(Bestellung $order): void
     {
-
         parent::preparePaymentProcess($order);
 
         try {
-
             if ($this->duringCheckout && !static::ALLOW_PAYMENT_BEFORE_ORDER) {
-                $this->doLog("Zahlung vor Bestellabschluss nicht unterstützt!", LOGLEVEL_ERROR);
+                $this->doLog('Zahlung vor Bestellabschluss nicht unterstützt!', LOGLEVEL_ERROR);
+
                 return;
             }
 
             $payable = (float)$order->fGesamtsumme > 0;
             if (!$payable) {
                 $this->doLog(sprintf("Bestellung '%s': Gesamtsumme %.2f, keine Zahlung notwendig!", $order->cBestellNr, $order->fGesamtsumme), LOGLEVEL_NOTICE);
+
                 return;
             }
 
@@ -232,12 +235,12 @@ abstract class PaymentMethod extends Method
 
             if ($api === 'payment') {
                 $checkout = PaymentCheckout::factory($order);
-                $payment = $checkout->create($paymentOptions);
-                $url = $payment->getCheckoutUrl();
+                $payment  = $checkout->create($paymentOptions);
+                $url      = $payment->getCheckoutUrl();
             } else {
                 $checkout = OrderCheckout::factory($order);
-                $mOrder = $checkout->create($paymentOptions);
-                $url = $mOrder->getCheckoutUrl();
+                $mOrder   = $checkout->create($paymentOptions);
+                $url      = $mOrder->getCheckoutUrl();
             }
 
             ifndef('MOLLIE_REDIRECT_DELAY', 3);
@@ -247,15 +250,12 @@ abstract class PaymentMethod extends Method
             if ($checkoutMode === 'Y' && !headers_sent()) {
                 header('Location: ' . $url);
             }
-
-
         } catch (Exception $e) {
-
             $this->doLog('mollie::preparePaymentProcess: ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_ERROR);
 
             Shop::Container()->getAlertService()->addAlert(
                 Alert::TYPE_ERROR,
-                self::Plugin()->getLocalization()->getTranslation("error_create"),
+                self::Plugin()->getLocalization()->getTranslation('error_create'),
                 'paymentFailed'
             );
         }
@@ -265,8 +265,8 @@ abstract class PaymentMethod extends Method
 
     /**
      * @param Bestellung $order
-     * @param string $hash
-     * @param array $args
+     * @param string     $hash
+     * @param array      $args
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
      */
@@ -275,7 +275,6 @@ abstract class PaymentMethod extends Method
         parent::handleNotification($order, $hash, $args);
 
         try {
-
             $orderId = $args['id'];
             if (strpos($orderId, 'tr_') === 0) {
                 $checkout = PaymentCheckout::factory($order);
@@ -283,11 +282,9 @@ abstract class PaymentMethod extends Method
                 $checkout = OrderCheckout::factory($order);
             }
             $checkout->handleNotification($hash);
-
         } catch (Exception $e) {
             $this->doLog("mollie::handleNotification: Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
             Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
     }
-
 }

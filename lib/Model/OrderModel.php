@@ -1,15 +1,16 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib\Model;
-
 
 /**
  * Class OrderModel
  * @package ws5_mollie\Model
  *
  * @property int $kId
- * @property int|null $kBestellung
+ * @property null|int $kBestellung
  * @property string $cOrderId
  * @property string $cTransactionId
  * @property string $cThirdId
@@ -30,17 +31,16 @@ namespace Plugin\ws5_mollie\lib\Model;
  */
 final class OrderModel extends AbstractModel
 {
-
-    public const TABLE = "xplugin_ws5_mollie_orders";
-    public const PRIMARY = "kId";
+    public const TABLE   = 'xplugin_ws5_mollie_orders';
+    public const PRIMARY = 'kId';
 
     public function save(): bool
     {
         if (!$this->dCreated || $this->dCreated === '0000-00-00 00:00:00') {
-            $this->dCreated = date("Y-m-d H:i:s");
+            $this->dCreated = date('Y-m-d H:i:s');
         }
-        $this->dModified = date("Y-m-d H:i:s");
+        $this->dModified = date('Y-m-d H:i:s');
+
         return parent::save();
     }
-
 }

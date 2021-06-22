@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 use JTL\Helpers\Form;
 use Plugin\ws5_mollie\lib\API;
@@ -12,7 +15,6 @@ if ($_SERVER['HTTP_HOST'] === 'localhost') {
 require_once __DIR__ . '/../../../admin/includes/admininclude.php';
 
 try {
-
     ob_start();
 
     if (strtolower($_SERVER['REQUEST_METHOD']) === 'options') {
@@ -35,7 +37,6 @@ try {
         throw new \RuntimeException('Invalid JSON.', 400);
     }
     ob_end_clean();
-
 } catch (Exception $e) {
     AdminIO::getInstance()->respondAndExit(new IOError($e->getMessage(), $e->getCode()));
 }

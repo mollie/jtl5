@@ -1,8 +1,9 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib;
-
 
 use Exception;
 use JTL\Checkout\Lieferschein;
@@ -23,21 +24,19 @@ use Shop;
  * Class Shipment
  * @package Plugin\ws5_mollie\lib
  *
- * @property array|null $lines
- * @property string|null $tracking
+ * @property null|array $lines
+ * @property null|string $tracking
  *
  */
 class Shipment
 {
+    use Plugin;
+    use RequestData;
 
     /**
-     * @var int|null
+     * @var null|int
      */
     protected $kLieferschein;
-
-    use Plugin;
-
-    use RequestData;
 
     /**
      * @var ShipmentsModel
@@ -70,34 +69,35 @@ class Shipment
         if (!count($this->getLieferschein()->oVersand_arr)) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Kein Versand gefunden!');
         }
-
-
     }
 
-    public function getLieferschein(): ?Lieferschein
+    public function getLieferschein(): Lieferschein
     {
         if (!$this->oLieferschein && $this->kLieferschein) {
             $this->oLieferschein = new Lieferschein($this->kLieferschein);
         }
+
         return $this->oLieferschein;
     }
 
     /**
      * @param int $kBestellung
-     * @return array
-     * @throws ApiException
+     *
      * @throws IncompatiblePlatform
      * @throws \JTL\Exceptions\CircularReferenceException
      * @throws \JTL\Exceptions\ServiceNotFoundException
+     * @throws ApiException
+     * @return (\Mollie\Api\Resources\Shipment|null|string)[]
+     *
+     *
+     * @psalm-return list<\Mollie\Api\Resources\Shipment|null|string>
      */
     public static function syncBestellung(OrderCheckout $checkout): array
     {
-
         $shipments = [];
         if ($checkout->getBestellung()->kBestellung) {
-
             $oKunde = $checkout->getBestellung()->oKunde ?? new \JTL\Customer\Customer($checkout->getBestellung()->kKunde);
-            
+
             $shippingActive = self::Plugin()->getConfig()->getValue('shippingActive');
             if ($shippingActive === 'N') {
                 throw new RuntimeException('Shipping deaktiviert');
@@ -109,10 +109,8 @@ class Shipment
 
             /** @var Lieferschein $oLieferschein */
             foreach ($checkout->getBestellung()->oLieferschein_arr as $oLieferschein) {
-
                 try {
-
-                    $shipment = new Shipment($oLieferschein->getLieferschein(), $checkout);
+                    $shipment = new self($oLieferschein->getLieferschein(), $checkout);
 
                     $mode = self::Plugin()->getConfig()->getValue('shippingMode');
                     switch ($mode) {
@@ -122,8 +120,8 @@ class Shipment
                                 throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                             }
                             $shipments[] = $shipment->getShipment();
-                            break;
 
+                            break;
                         case 'B':
                             // only ship if complete shipping
                             if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
@@ -131,8 +129,10 @@ class Shipment
                                     throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                                 }
                                 $shipments[] = $shipment->getShipment();
+
                                 break;
                             }
+
                             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Gastbestellung noch nicht komplett versendet!');
                     }
                 } catch (\Plugin\ws5_mollie\lib\Exception\APIException $e) {
@@ -143,18 +143,18 @@ class Shipment
                 }
             }
         }
+
         return $shipments;
     }
 
     /**
-     * @return bool
-     * @throws ApiException
      * @throws IncompatiblePlatform
      * @throws Exception
+     * @throws ApiException
+     * @return bool
      */
     public function send(): bool
     {
-
         if ($this->getShipment()) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschien bereits an Mollie übertragen: ' . $this->getShipment()->id);
         }
@@ -168,7 +168,6 @@ class Shipment
         $this->shipment = $api->shipments->createForId($this->checkout->getModel()->cOrderId, $this->loadRequest()->jsonSerialize());
 
         return $this->updateModel()->saveModel();
-
     }
 
     public function getShipment($force = false): ?\Mollie\Api\Resources\Shipment
@@ -176,12 +175,13 @@ class Shipment
         if (($force || !$this->shipment) && $this->getModel() && $this->getModel()->cShipmentId) {
             $this->shipment = $this->getCheckout()->getAPI()->getClient()->shipments->getForId($this->getModel()->cOrderId, $this->getModel()->cShipmentId);
         }
+
         return $this->shipment;
     }
 
     /**
-     * @return ShipmentsModel
      * @throws Exception
+     * @return ShipmentsModel
      */
     public function getModel(): ShipmentsModel
     {
@@ -192,27 +192,31 @@ class Shipment
             }
             $this->updateModel();
         }
+
         return $this->model;
     }
 
     /**
      * @throws Exception
+     *
+     * @return static
      */
     public function updateModel(): self
     {
         $this->getModel()->kLieferschein = $this->kLieferschein;
         if ($this->getCheckout()) {
-            $this->getModel()->cOrderId = $this->getCheckout()->getModel()->cOrderId;
+            $this->getModel()->cOrderId    = $this->getCheckout()->getModel()->cOrderId;
             $this->getModel()->kBestellung = $this->getCheckout()->getModel()->kBestellung;
         }
         if ($this->getShipment()) {
             $this->getModel()->cShipmentId = $this->getShipment()->id;
-            $this->getModel()->cUrl = $this->getShipment()->getTrackingUrl() ?? '';
+            $this->getModel()->cUrl        = $this->getShipment()->getTrackingUrl() ?? '';
         }
         if ($this->tracking) {
             $this->getModel()->cCarrier = $this->tracking['carrier'] ?? '';
-            $this->getModel()->cCode = $this->tracking['code'] ?? '';
+            $this->getModel()->cCode    = $this->tracking['code'] ?? '';
         }
+
         return $this;
     }
 
@@ -222,19 +226,21 @@ class Shipment
             //TODO evtl. load by lieferschien
             throw new Exception('Should not happen, but it did!');
         }
+
         return $this->checkout;
     }
 
-
+    /**
+     * @return static
+     */
     public function loadRequest(): self
     {
-
         /** @var Versand $oVersand */
         $oVersand = $this->getLieferschein()->oVersand_arr[0];
         if ($oVersand->getIdentCode() && $oVersand->getLogistik()) {
             $tracking = [
                 'carrier' => $oVersand->getLogistik(),
-                'code' => $oVersand->getIdentCode(),
+                'code'    => $oVersand->getIdentCode(),
             ];
             if ($oVersand->getLogistikVarUrl()) {
                 $tracking['url'] = $oVersand->getLogistikURL();
@@ -248,9 +254,15 @@ class Shipment
         } else {
             $this->lines = $this->getOrderLines();
         }
+
         return $this;
     }
 
+    /**
+     * @return (float|int|string)[][]
+     *
+     * @psalm-return list<array{id: string, quantity: float|int}>
+     */
     protected function getOrderLines(): array
     {
         $lines = [];
@@ -264,40 +276,36 @@ class Shipment
 
         /** @var Lieferscheinpos $oLieferschienPos */
         foreach ($this->getLieferschein()->oLieferscheinPos_arr as $oLieferschienPos) {
-
             $wkpos = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM twarenkorbpos WHERE kBestellpos = :kBestellpos', [
                 ':kBestellpos' => $oLieferschienPos->getBestellPos()
             ], 1);
 
             /** @var OrderLine $orderLine */
             foreach ($this->getCheckout()->getMollie()->lines as $orderLine) {
-
                 if ($orderLine->sku === $wkpos->cArtNr && !in_array($orderLine->id, $shippedOrderLines, true)) {
-
                     if ($quantity = min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity)) {
                         $lines[] = [
-                            'id' => $orderLine->id,
+                            'id'       => $orderLine->id,
                             'quantity' => $quantity
                         ];
                     }
                     $shippedOrderLines[] = $orderLine->id;
+
                     break;
                 }
-
             }
         }
-
 
         return $lines;
     }
 
     /**
-     * @return bool
      * @throws Exception
+     * @return true
+     *
      */
     public function saveModel(): bool
     {
         return $this->getModel()->save();
     }
-
 }

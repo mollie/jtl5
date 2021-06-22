@@ -1,15 +1,15 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\Migrations;
 
 use JTL\Plugin\Migration;
 use JTL\Update\IMigration;
 
-
 class Migration20201120155700 extends Migration implements IMigration
 {
-
     /**
      * @inheritDoc
      */
@@ -30,5 +30,4 @@ class Migration20201120155700 extends Migration implements IMigration
     {
         return 'Extend Order Plugin-Tables (Shop<->Mollie)';
     }
-
 }

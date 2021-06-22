@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
  */
 
 namespace Plugin\ws5_mollie\paymentmethod;
@@ -20,5 +20,4 @@ class KlarnaPayLater extends PaymentMethod
     {
         return [];
     }
-
 }

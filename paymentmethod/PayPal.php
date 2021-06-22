@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
  */
 
 namespace Plugin\ws5_mollie\paymentmethod;
@@ -31,8 +31,6 @@ class PayPal extends PaymentMethod
             $paymentOptions['description'] = 'Order ' . $order->cBestellNr;
         }
 
-
         return $paymentOptions;
     }
-
 }

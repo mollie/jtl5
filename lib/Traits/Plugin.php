@@ -1,8 +1,9 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib\Traits;
-
 
 use JTL\Plugin\Helper;
 use JTL\Plugin\PluginInterface;
@@ -10,7 +11,6 @@ use RuntimeException;
 
 trait Plugin
 {
-
     /**
      * @var PluginInterface
      */
@@ -24,6 +24,7 @@ trait Plugin
         if (!(self::$oPlugin = Helper::getPluginById('ws5_mollie'))) {
             throw new RuntimeException('Could not load Plugin!');
         }
+
         return self::$oPlugin;
     }
 }

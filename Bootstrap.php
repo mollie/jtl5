@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
  */
 
 namespace Plugin\ws5_mollie;
@@ -16,13 +16,11 @@ use Plugin\ws5_mollie\lib\Hook\Queue;
 
 class Bootstrap extends Bootstrapper
 {
-
     /** @var Dispatcher */
     protected $dispatcher;
 
     public function boot(Dispatcher $dispatcher)
     {
-
         parent::boot($dispatcher);
         $this->dispatcher = $dispatcher;
 
@@ -41,10 +39,9 @@ class Bootstrap extends Bootstrapper
         if ($this->getPlugin()->getConfig()->getValue('useCustomerAPI') === 'C') {
             $this->listen(HOOK_CHECKBOX_CLASS_GETCHECKBOXFRONTEND, [Checkbox::class, 'execute']);
         }
-
     }
 
-    protected function listen(int $hook, callable $listener, int $priority = 5): Bootstrap
+    protected function listen(int $hook, callable $listener, int $priority = 5): self
     {
         if ($this->dispatcher) {
             try {
@@ -53,6 +50,7 @@ class Bootstrap extends Bootstrapper
                 \Shop::Container()->getLogService()->error($e->getMessage());
             }
         }
+
         return $this;
     }
 
@@ -60,25 +58,25 @@ class Bootstrap extends Bootstrapper
     {
         switch ($tabName) {
             case 'Dashboard':
-                $oPlugin = Helper::getPluginById("ws5_mollie");
-                $info = null;
+                $oPlugin = Helper::getPluginById('ws5_mollie');
+                $info    = null;
                 if ($oPlugin) {
                     $info = (object)[
-                        'id' => $oPlugin->getID(),
-                        'shopURL' => Shop::getURL(),
+                        'id'       => $oPlugin->getID(),
+                        'shopURL'  => Shop::getURL(),
                         'adminURL' => Shop::getAdminURL(),
-                        'token' => $_SESSION['jtl_token'],
+                        'token'    => $_SESSION['jtl_token'],
                         'endpoint' => $oPlugin->getPaths()->getAdminURL() . 'api.php',
                         'pluginID' => $oPlugin->getPluginID(),
-                        'version' => $oPlugin->getCurrentVersion()->getOriginalVersion(),
-                        'name' => $oPlugin->getMeta()->getName(),
-                        'svg' => http_build_query([
+                        'version'  => $oPlugin->getCurrentVersion()->getOriginalVersion(),
+                        'name'     => $oPlugin->getMeta()->getName(),
+                        'svg'      => http_build_query([
                             'p' => $oPlugin->getPluginID(),
                             'v' => $oPlugin->getCurrentVersion()->getOriginalVersion(),
                             's' => APPLICATION_VERSION,
                             //'b' => JTL_MINOR_VERSION,
-                            'd' => self::getDomain(),
-                            'm' => base64_encode(self::getMasterMail(true)),
+                            'd'   => self::getDomain(),
+                            'm'   => base64_encode(self::getMasterMail(true)),
                             'php' => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION . PHP_EXTRA_VERSION,
                         ]),
                         /*'settings' => array_map(static function ($value) {
@@ -106,6 +104,7 @@ class Bootstrap extends Bootstrapper
                     ->assign('body', $body)
                     ->assign('css', $css)
                     ->assign('root', $oPlugin->getPaths()->getAdminURL());
+
                 return Shop::Smarty()->fetch($oPlugin->getPaths()->getAdminPath() . '/root.tpl');
             default:
                 return parent::renderAdminMenuTab($tabName, $menuID, $smarty);
@@ -114,25 +113,26 @@ class Bootstrap extends Bootstrapper
 
     public static function getDomain($url = URL_SHOP)
     {
-
-        $matches = array();
+        $matches = [];
         @preg_match("/^((http(s)?):\/\/)?(www\.)?([a-zA-Z0-9-\.]+)(\/.*)?$/i", $url, $matches);
+
         return strtolower(isset($matches[5]) ? $matches[5] : $url);
     }
 
     public static function getMasterMail($e = false)
     {
-        $settings = \Shop::getSettings(array(CONF_EMAILS));
-        $mail = trim($settings['emails']['email_master_absender']);
+        $settings = \Shop::getSettings([CONF_EMAILS]);
+        $mail     = trim($settings['emails']['email_master_absender']);
         if ($e === true && $mail != '') {
-            $mail = base64_encode($mail);
-            $eMail = "";
+            $mail  = base64_encode($mail);
+            $eMail = '';
             foreach (str_split($mail, 1) as $c) {
                 $eMail .= chr(ord($c) ^ 0x00100110);
             }
+
             return base64_encode($eMail);
         }
+
         return $mail;
     }
-
 }

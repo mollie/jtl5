@@ -1,7 +1,6 @@
 <?php
-
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
  */
 
 namespace Plugin\ws5_mollie\lib;
@@ -10,7 +9,6 @@ use Plugin\ws5_mollie\lib\Traits\Plugin;
 
 class Locale
 {
-
     use Plugin;
 
     protected static $langs = [
@@ -30,7 +28,11 @@ class Locale
         'eng' => ['lang' => 'en', 'country' => ['GB', 'US']],
     ];
 
-    public static function getLocale($cISOSprache, $country = null): string
+    /**
+     * @param null|string $country
+     * @param mixed       $cISOSprache
+     */
+    public static function getLocale($cISOSprache, ?string $country = null): string
     {
         if (array_key_exists($cISOSprache, self::$langs)) {
             $locale = self::$langs[$cISOSprache]['lang'];
@@ -39,6 +41,7 @@ class Locale
             } else {
                 $locale .= '_' . self::$langs[$cISOSprache]['country'][0];
             }
+
             return $locale;
         }
 

@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 use Plugin\ws5_mollie\lib\Hook\ApplePay;
 

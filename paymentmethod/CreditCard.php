@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
  */
 
 namespace Plugin\ws5_mollie\paymentmethod;
@@ -17,8 +17,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 class CreditCard extends PaymentMethod
 {
-    public const CACHE_PREFIX = 'creditcard';
-    public const CACHE_TOKEN = self::CACHE_PREFIX . ':token';
+    public const CACHE_PREFIX          = 'creditcard';
+    public const CACHE_TOKEN           = self::CACHE_PREFIX . ':token';
     public const CACHE_TOKEN_TIMESTAMP = self::CACHE_TOKEN . ':timestamp';
 
     public const METHOD = \Mollie\Api\Types\PaymentMethod::CREDITCARD;
@@ -33,13 +33,14 @@ class CreditCard extends PaymentMethod
     {
         $this->unsetCache(self::CACHE_TOKEN)
             ->unsetCache(self::CACHE_TOKEN_TIMESTAMP);
+
         return true;
     }
 
     public function handleAdditional(array $post): bool
     {
         $components = self::Plugin()->getConfig()->getValue($this->moduleID . '_components');
-        $profileId = self::Plugin()->getConfig()->getValue('profileId');
+        $profileId  = self::Plugin()->getConfig()->getValue('profileId');
 
         if ($components === 'N' || !$profileId || trim($profileId) === '') {
             return parent::handleAdditional($post);
@@ -55,12 +56,13 @@ class CreditCard extends PaymentMethod
         }
 
         try {
-            $trustBadge = (bool)self::Plugin()->getConfig()->getValue($this->moduleID . '_trustBadge');
-            $locale = self::getLocale(Session::getInstance()->getLanguage()->getIso(), Session::getCustomer()->cLand ?? null);
-            $mode = MollieAPI::getMode();
+            $trustBadge   = (bool)self::Plugin()->getConfig()->getValue($this->moduleID . '_trustBadge');
+            $locale       = self::getLocale(Session::getInstance()->getLanguage()->getIso(), Session::getCustomer()->cLand ?? null);
+            $mode         = MollieAPI::getMode();
             $errorMessage = json_encode(self::Plugin()->getLocalization()->getTranslation('mcErrorMessage'), JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             Shop::Container()->getLogService()->error($e->getMessage(), ['e' => $e]);
+
             return parent::handleAdditional($post);
         }
 
@@ -88,12 +90,12 @@ class CreditCard extends PaymentMethod
     {
         $this->addCache(self::CACHE_TOKEN, $token)
             ->addCache(self::CACHE_TOKEN_TIMESTAMP, time() + 3600);
+
         return true;
     }
 
     public function getPaymentOptions(Bestellung $order, $apiType): array
     {
-
         $paymentOptions = [];
 
         if ($apiType === 'payment') {
@@ -109,6 +111,7 @@ class CreditCard extends PaymentMethod
         if ((int)$this->getCache(self::CACHE_TOKEN_TIMESTAMP) > time() && ($token = trim($this->getCache(self::CACHE_TOKEN)))) {
             $paymentOptions['cardToken'] = $token;
         }
+
         return $paymentOptions;
     }
 }

@@ -1,8 +1,9 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib\Controller;
-
 
 use Kunde;
 use Mollie\Api\Exceptions\ApiException;
@@ -14,17 +15,14 @@ use stdClass;
 
 class ShipmentsController extends AbstractController
 {
-
-
     /**
      * @param stdClass $data
-     * @return Response
      * @throws ApiException
      * @throws IncompatiblePlatform
+     * @return Response
      */
     public static function sync(stdClass $data): Response
     {
-
         if (!$data->kBestellung || !$data->kLieferschein || !$data->orderId) {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung, Liefererschien oder Mollie OrderId fehlen.');
         }
@@ -43,26 +41,24 @@ class ShipmentsController extends AbstractController
                     if (!$shipment->send() && !$shipment->getShipment()) {
                         throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                     }
-                    return new Response(true);
 
+                    return new Response(true);
                 case 'B':
                     // only ship if complete shipping
                     if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
                         if (!$shipment->send() && !$shipment->getShipment()) {
                             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
                         }
+
                         return new Response(true);
                     }
+
                     throw new \Plugin\ws5_mollie\lib\Exception\APIException('Gastbestellung noch nicht komplett versendet!');
             }
-
         } else {
             throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung konnte nicht geladen werden');
         }
 
-
         return new Response($shipment);
-
     }
-
 }

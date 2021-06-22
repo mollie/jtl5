@@ -1,8 +1,9 @@
 <?php
-
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib\Hook;
-
 
 use Exception;
 use JTL\Alert\Alert;
@@ -13,16 +14,13 @@ use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use RuntimeException;
 
-
 class Queue extends AbstractHook
 {
-
     public static function bestellungInDB(array $args_arr): void
     {
         if (self::Plugin()->getConfig()->getValue('onlyPaid') === 'on'
             && array_key_exists('oBestellung', $args_arr)
             && AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)) {
-
             $args_arr['oBestellung']->cAbgeholt = 'Y';
             Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr['oBestellung']->kBestellung, 1));
         }
@@ -33,21 +31,27 @@ class Queue extends AbstractHook
         if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
             self::saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS . ':' . (int)$args_arr['oBestellung']->kBestellung, [
                 'kBestellung' => $args_arr['oBestellung']->kBestellung,
-                'status' => (int)$args_arr['status']
+                'status'      => (int)$args_arr['status']
             ]);
         }
     }
 
-    public static function saveToQueue($hook, $args_arr, $type = 'hook'): bool
+    /**
+     * @param (int|mixed)[] $args_arr
+     * @param string        $type
+     */
+    public static function saveToQueue(string $hook, array $args_arr, string $type = 'hook'): bool
     {
-        $mQueue = new QueueModel();
-        $mQueue->cType = $type . ':' . $hook;
-        $mQueue->cData = serialize($args_arr);
+        $mQueue           = new QueueModel();
+        $mQueue->cType    = $type . ':' . $hook;
+        $mQueue->cData    = serialize($args_arr);
         $mQueue->dCreated = date('Y-m-d H:i:s');
+
         try {
             return $mQueue->save();
         } catch (Exception $e) {
             Shop::Container()->getLogService()->error('mollie::saveToQueue: ' . $e->getMessage() . ' - ' . print_r($args_arr, 1));
+
             return false;
         }
     }
@@ -62,7 +66,6 @@ class Queue extends AbstractHook
     public static function headPostGet(): void
     {
         if (array_key_exists('mollie', $_REQUEST) && (int)$_REQUEST['mollie'] === 1 && array_key_exists('id', $_REQUEST)) {
-
             if (array_key_exists('hash', $_REQUEST) && $hash = trim(\StringHandler::htmlentities(\StringHandler::filterXSS($_REQUEST['hash'])), '_')) {
                 AbstractCheckout::finalizeOrder($hash, $_REQUEST['id'], array_key_exists('test', $_REQUEST));
             } else {
@@ -98,11 +101,10 @@ class Queue extends AbstractHook
                 }
 
                 $mollie = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);
-                $url = $mollie->getCheckoutUrl();
+                $url    = $mollie->getCheckoutUrl();
 
                 header('Location: ' . $url);
                 exit();
-
             } catch (RuntimeException $e) {
                 $alertHelper = Shop::Container()->getAlertService();
                 $alertHelper->addAlert(Alert::TYPE_ERROR, $e->getMessage(), 'mollie_repay', ['dismissable' => true]);
@@ -111,5 +113,4 @@ class Queue extends AbstractHook
             }
         }
     }
-
 }

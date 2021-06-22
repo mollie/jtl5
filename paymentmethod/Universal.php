@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
  */
 
 namespace Plugin\ws5_mollie\paymentmethod;
@@ -12,7 +12,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 class Universal extends PaymentMethod
 {
-
     public const ALLOW_AUTO_STORNO = false;
 
     public const METHOD = '';
@@ -21,5 +20,4 @@ class Universal extends PaymentMethod
     {
         return [];
     }
-
 }

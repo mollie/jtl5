@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright 2021 WebStollen GmbH
+ */
 
 namespace Plugin\ws5_mollie\lib\Model;
 
@@ -9,9 +12,8 @@ use stdClass;
 
 abstract class AbstractModel implements JsonSerializable
 {
-
-    public const TABLE = NULL;
-    public const PRIMARY = NULL;
+    public const TABLE   = null;
+    public const PRIMARY = null;
 
     public const NULL = '_DBNULL_';
 
@@ -29,24 +31,29 @@ abstract class AbstractModel implements JsonSerializable
 
     /**
      * @param $id
-     * @param null $col
-     * @param false $failIfNotExists
+     * @param null|string $col
+     * @param false       $failIfNotExists
+     * @param int|string  $id
+     *
      * @return static
      */
-    public static function fromID($id, $col = self::PRIMARY, $failIfNotExists = false)
+    public static function fromID($id, $col = self::PRIMARY, bool $failIfNotExists = false): self
     {
-        if ($payment = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM " . static::TABLE . " WHERE `$col` = :id",
-            [':id' => $id], 1)) {
+        if (
+        $payment = Shop::Container()->getDB()
+            ->executeQueryPrepared('SELECT * FROM ' . static::TABLE . " WHERE `$col` = :id", [':id' => $id], 1)
+        ) {
             return new static($payment);
         }
         if ($failIfNotExists) {
             throw new RuntimeException(sprintf('Model %s in %s nicht gefunden!', $id, static::TABLE));
         }
+
         return new static();
     }
 
     /**
-     * @return mixed|stdClass|null
+     * @return null|mixed|stdClass
      */
     public function jsonSerialize()
     {
@@ -58,6 +65,7 @@ abstract class AbstractModel implements JsonSerializable
         if (isset($this->data->$name)) {
             return $this->data->$name;
         }
+
         return null;
     }
 
@@ -75,7 +83,7 @@ abstract class AbstractModel implements JsonSerializable
     }
 
     /**
-     * @return bool
+     * @return true
      */
     public function save(): bool
     {
@@ -86,11 +94,11 @@ abstract class AbstractModel implements JsonSerializable
         if ($this->new) {
             Shop::Container()->getDB()->insertRow(static::TABLE, $this->data);
             $this->new = false;
+
             return true;
         }
         Shop::Container()->getDB()->updateRow(static::TABLE, static::PRIMARY, $this->data->{static::PRIMARY}, $this->data);
+
         return true;
     }
-
-
 }
