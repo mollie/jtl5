@@ -7,28 +7,33 @@
     "sort-packages": true
   },
   "require": {
-    "php": ">=7.2.0",
-    "mollie/mollie-api-php": "^2.18.0"
+    "php": ">=7.3.0",
+    "mollie/mollie-api-php": "^2.31.1"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-master",
+    "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "^8.5",
     "phpmetrics/phpmetrics": "^2.7",
     "squizlabs/php_codesniffer": "3.*",
-    "friendsofphp/php-cs-fixer": "^2.16"
+    "friendsofphp/php-cs-fixer": "^2.16",
+    "phpstan/phpstan": "^0.12.90",
+    "vimeo/psalm": "^4.8.1",
+    "phpmd/phpmd": "^2.10.1"
   },
   "authors": [
     {
-      "email": "proske@wrebstollen.de",
+      "email": "proske@webstollen.de",
       "name": "Christian Proske | WebStollen",
-      "homepage": "https://www.webstollen.de",
-      "role": "CTO"
+      "homepage": "https://www.webstollen.de"
     }
   ],
   "scripts": {
     "analyze": "phpmetrics --report-html=report ./",
     "test": "phpunit",
-    "sniff": "phpcs --standard=PSR12 --ignore=vendor/ ./lib",
-    "csfix": "php-cs-fixer fix"
+    "sniff": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/ --ignore=adminmenu/app ./lib",
+    "csfix": "php-cs-fixer fix",
+    "phpstan": "phpstan analyse lib",
+    "psalm": "psalm",
+    "psalm:fix": "psalm --alter --issues=MissingReturnType,InvalidReturnType,MissingClosureReturnType,LessSpecificReturnType,MissingParamType"
   }
 }
