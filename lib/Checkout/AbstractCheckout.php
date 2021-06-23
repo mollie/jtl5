@@ -275,6 +275,7 @@ abstract class AbstractCheckout
 
     /**
      * @return MollieAPI
+     * @throws Exception
      */
     public function getAPI(): MollieAPI
     {
@@ -345,6 +346,9 @@ abstract class AbstractCheckout
         return $this->paymentMethod;
     }
 
+    /**
+     * @return bool
+     */
     public function completlyPaid(): bool
     {
         if (

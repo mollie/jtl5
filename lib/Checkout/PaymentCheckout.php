@@ -74,6 +74,7 @@ class PaymentCheckout extends AbstractCheckout
      * @param mixed $force
      * @throws Exception
      * @return Payment
+     * @throws Exception
      */
     public function getMollie($force = false): ?Payment
     {
@@ -106,6 +107,10 @@ class PaymentCheckout extends AbstractCheckout
         return $this;
     }
 
+    /**
+     * @return stdClass|null
+     * @throws Exception
+     */
     public function getIncomingPayment(): ?stdClass
     {
         if (in_array($this->getMollie()->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {

@@ -10,6 +10,10 @@ use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use Plugin\ws5_mollie\lib\Traits\Jsonable;
 
+/**
+ * Class Customer
+ * @package Plugin\ws5_mollie\lib
+ */
 class Customer
 {
     use Jsonable;
