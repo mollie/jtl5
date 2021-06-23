@@ -42,7 +42,7 @@
     "phpstan": "phpstan analyse lib",
     "psalm": "psalm",
     "psalm:fix": "psalm --alter --issues=MissingReturnType,InvalidReturnType,MissingClosureReturnType,LessSpecificReturnType,MissingParamType",
-    "post-install-cmd": [
+    "post-status-cmd": [
       "local-php-security-checker-installer && local-php-security-checker"
     ]
   }

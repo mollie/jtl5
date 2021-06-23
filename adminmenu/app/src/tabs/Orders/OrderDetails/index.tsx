@@ -22,8 +22,6 @@ const OrderDetails = (props: OrderDetailsProps) => {
   const [data, setData] = useState<null | Record<string, any>>(null)
   const [error, setError] = useState<ApiError | null>(null)
   const [loading, setLoading] = useState(false)
-  const [showShipments, setShowShipments] = useState(false)
-
   const api = useApi()
 
   const loadOrder = useCallback(() => {

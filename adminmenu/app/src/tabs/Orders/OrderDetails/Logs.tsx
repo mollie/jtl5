@@ -39,9 +39,9 @@ const Logs = ({ kBestellung, orderId }: LogsProps) => {
       data: (row) =>
         row.nLevel === 1 ? (
           <Label color="red">ERROR</Label>
-        ) : row.nLevel == 2 ? (
+        ) : row.nLevel === 2 ? (
           <Label color="blue">NOTICE</Label>
-        ) : row.nLevel == 3 ? (
+        ) : row.nLevel === 3 ? (
           <Label color="gray">DEBUG</Label>
         ) : (
           row.nLevel
