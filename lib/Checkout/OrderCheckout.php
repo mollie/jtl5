@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -75,7 +76,7 @@ class OrderCheckout extends AbstractCheckout
                     return $this->getMollie(true);
                 }
             } catch (Exception $e) {
-                $this->getPaymentMethod()->doLog(sprintf("OrderCheckout::create: Letzte Order '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->orderId, $e->getMessage()), LOGLEVEL_ERROR);
+                $this->Log(sprintf("OrderCheckout::create: Letzte Order '%s' konnte nicht geladen werden: %s, versuche neue zu erstellen.", $this->getModel()->cOrderId, $e->getMessage()), LOGLEVEL_ERROR);
             }
         }
 
@@ -83,8 +84,7 @@ class OrderCheckout extends AbstractCheckout
             $this->order = $this->getAPI()->getClient()->orders->create($this->loadRequest($paymentOptions)->jsonSerialize());
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
-            $this->getPaymentMethod()->doLog(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
-
+            $this->Log(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
             throw new RuntimeException(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()));
         }
 
@@ -152,7 +152,7 @@ class OrderCheckout extends AbstractCheckout
     /**
      * @param array $options
      * @throws Exception
-     * @return $this
+     * @return self
      */
     public function loadRequest(array &$options = [])
     {
@@ -167,7 +167,8 @@ class OrderCheckout extends AbstractCheckout
             $this->shippingAddress = Address::factory($this->getBestellung()->Lieferadresse);
         }
 
-        if (!empty(Frontend::getCustomer()->dGeburtstag)
+        if (
+            !empty(Frontend::getCustomer()->dGeburtstag)
             && Frontend::getCustomer()->dGeburtstag !== '0000-00-00'
             && preg_match('/^\d{4}-\d{2}-\d{2}$/', trim(Frontend::getCustomer()->dGeburtstag))
         ) {
@@ -267,11 +268,13 @@ class OrderCheckout extends AbstractCheckout
     {
         /** @var Payment $payment */
         foreach ($this->getMollie()->payments() as $payment) {
-            if (in_array(
-                $payment->status,
-                [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID],
-                true
-            )) {
+            if (
+                in_array(
+                    $payment->status,
+                    [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID],
+                    true
+                )
+            ) {
                 $this->mollie = $payment;
 
                 return (object)[

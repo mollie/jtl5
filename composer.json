@@ -21,6 +21,11 @@
     "vimeo/psalm": "^4.8.1",
     "phpmd/phpmd": "^2.10.1"
   },
+  "autoload": {
+    "psr-4": {
+      "Plugin\\ws5_mollie\\lib\\": "./lib"
+    }
+  },
   "authors": [
     {
       "email": "proske@webstollen.de",
@@ -31,8 +36,8 @@
   "scripts": {
     "analyze": "phpmetrics --report-html=report ./",
     "test": "phpunit",
-    "sniff": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/ --ignore=adminmenu/app ./lib",
-    "sniff:fix": "phpcbf -p ./lib",
+    "sniff": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
+    "sniff:fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
     "csfix": "php-cs-fixer fix",
     "phpstan": "phpstan analyse lib",
     "psalm": "psalm",

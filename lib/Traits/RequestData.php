@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -11,16 +12,6 @@ trait RequestData
      * @var array
      */
     protected $requestData;
-
-    /**
-     * @return array
-     *
-     * @deprecated
-     */
-    public function getRequestData(): array
-    {
-        return $this->requestData;
-    }
 
     /**
      * @return array

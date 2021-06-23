@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -283,7 +284,7 @@ abstract class PaymentMethod extends Method
             }
             $checkout->handleNotification($hash);
         } catch (Exception $e) {
-            $this->doLog("mollie::handleNotification: Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
+            $this->doLog("ERROR: mollie::handleNotification: Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
             Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
     }

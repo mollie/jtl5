@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -80,24 +81,24 @@ abstract class AbstractCheckout
 
     /**
      * AbstractCheckout constructor.
-     * @param Bestellung     $oBestellung
+     * @param Bestellung $oBestellung
      * @param null|MollieAPI $api
      */
     public function __construct(Bestellung $oBestellung, MollieAPI $api = null)
     {
         $this->oBestellung = $oBestellung;
-        $this->api         = $api;
+        $this->api = $api;
     }
 
     /**
      * @param string $sessionHash
      * @param string $id
-     * @param bool   $test
-     *
-     * @throws CircularReferenceException
-     * @throws ServiceNotFoundException
+     * @param bool $test
      *
      * @return void
+     * @throws ServiceNotFoundException
+     *
+     * @throws CircularReferenceException
      */
     public static function finalizeOrder(string $sessionHash, string $id, bool $test): void
     {
@@ -113,13 +114,15 @@ abstract class AbstractCheckout
                     $session = Frontend::getInstance(false, false);
                 }
 
-                if ((!isset($_SESSION['Warenkorb']->PositionenArr, $paymentSession->nBezahlt, $paymentSession->kBestellung)
+                if (
+                    (!isset($_SESSION['Warenkorb']->PositionenArr, $paymentSession->nBezahlt, $paymentSession->kBestellung)
                         || !($paymentSession->nBezahlt && $paymentSession->kBestellung))
-                    && count($_SESSION['Warenkorb']->PositionenArr)) {
+                    && count($_SESSION['Warenkorb']->PositionenArr)
+                ) {
                     $paymentSession->cNotifyID = $id;
-                    $paymentSession->dNotify   = 'NOW()';
+                    $paymentSession->dNotify = 'NOW()';
 
-                    $api    = new MollieAPI($test);
+                    $api = new MollieAPI($test);
                     $mollie = strpos($id, 'tr_') === 0 ?
                         $api->getClient()->payments->get($id) :
                         $api->getClient()->orders->get($id);
@@ -129,7 +132,7 @@ abstract class AbstractCheckout
                         require_once PFAD_ROOT . PFAD_INCLUDES . 'mailTools.php';
                         $order = finalisiereBestellung();
                         $session->cleanUp();
-                        $paymentSession->nBezahlt     = 1;
+                        $paymentSession->nBezahlt = 1;
                         $paymentSession->dZeitBezahlt = 'now()';
                     } else {
                         throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
@@ -166,13 +169,13 @@ abstract class AbstractCheckout
     }
 
     /**
-     * @param $id
-     * @param bool            $bFill
+     * @param string $id
+     * @param bool $bFill
      * @param null|Bestellung $order
      *
      * @return static
      */
-    public static function fromID(string $id, $bFill = true, Bestellung $order = null): self
+    public static function fromID(string $id, bool $bFill = true, Bestellung $order = null): self
     {
         /** @var OrderModel $model */
         $model = OrderModel::fromID($id, 'cOrderId', true);
@@ -197,11 +200,11 @@ abstract class AbstractCheckout
     /**
      * @param null|mixed $hash
      *
-     * @throws CircularReferenceException
+     * @return void
      * @throws ServiceNotFoundException
      * @throws Exception
      *
-     * @return void
+     * @throws CircularReferenceException
      */
     public function handleNotification($hash = null): void
     {
@@ -218,14 +221,14 @@ abstract class AbstractCheckout
                     $this::makeFetchable($this->getBestellung(), $this->getModel());
                     $this->getPaymentMethod()->deletePaymentHash($hash);
 
-                    $this->getPaymentMethod()->doLog(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_NOTICE);
+                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO));
 
                     $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
                     if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
                         $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
                     }
                 } else {
-                    $this->getPaymentMethod()->doLog(sprintf("Checkout::handleNotification: Bestellung '%s': nicht komplett bezahlt: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_ERROR);
+                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s': nicht komplett bezahlt: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_ERROR);
                 }
             }
         }
@@ -234,13 +237,13 @@ abstract class AbstractCheckout
     /**
      * Lädt das Model falls vorhanden, oder gibt eun neues leeres zurück
      *
-     * @throws Exception
      * @return OrderModel
+     * @throws Exception
      */
     public function getModel(): OrderModel
     {
         if (!$this->model) {
-            $this->model        = OrderModel::fromID($this->getBestellung()->kBestellung, 'kBestellung');
+            $this->model = OrderModel::fromID($this->getBestellung()->kBestellung, 'kBestellung');
             $this->model->bTest = $this->getAPI()->isTest();
         }
 
@@ -258,8 +261,8 @@ abstract class AbstractCheckout
     }
 
     /**
-     * @throws Exception
      * @return Bestellung
+     * @throws Exception
      */
     public function getBestellung(): Bestellung
     {
@@ -289,9 +292,9 @@ abstract class AbstractCheckout
     /**
      * Speichert das Model
      *
+     * @return true
      * @throws Exception
      *
-     * @return true
      */
     public function saveModel(): bool
     {
@@ -304,16 +307,16 @@ abstract class AbstractCheckout
     public function updateModel(): self
     {
         if ($this->getMollie()) {
-            $this->getModel()->cOrderId  = $this->getMollie()->id;
-            $this->getModel()->cLocale   = $this->getMollie()->locale;
-            $this->getModel()->fAmount   = $this->getMollie()->amount->value;
-            $this->getModel()->cMethod   = $this->getMollie()->method;
+            $this->getModel()->cOrderId = $this->getMollie()->id;
+            $this->getModel()->cLocale = $this->getMollie()->locale;
+            $this->getModel()->fAmount = $this->getMollie()->amount->value;
+            $this->getModel()->cMethod = $this->getMollie()->method;
             $this->getModel()->cCurrency = $this->getMollie()->amount->currency;
-            $this->getModel()->cStatus   = $this->getMollie()->status;
+            $this->getModel()->cStatus = $this->getMollie()->status;
         }
         $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: AbstractModel::NULL;
-        $this->getModel()->cBestellNr  = $this->getBestellung()->cBestellNr;
-        $this->getModel()->bSynced     = $this->getModel()->bSynced ?? (self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
+        $this->getModel()->cBestellNr = $this->getBestellung()->cBestellNr;
+        $this->getModel()->bSynced = $this->getModel()->bSynced ?? (self::Plugin()->getConfig()->getValue('onlyPaid') !== 'on');
 
         return $this;
     }
@@ -326,8 +329,8 @@ abstract class AbstractCheckout
     abstract public function getIncomingPayment(): ?stdClass;
 
     /**
-     * @throws Exception
      * @return FallbackMethod|MethodInterface|PaymentMethod|\Plugin\ws5_mollie\lib\PaymentMethod
+     * @throws Exception
      */
     public function getPaymentMethod()
     {
@@ -344,10 +347,12 @@ abstract class AbstractCheckout
 
     public function completlyPaid(): bool
     {
-        if ($row = Shop::Container()->getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
+        if (
+        $row = Shop::Container()->getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
             ':kBestellung' => $this->oBestellung->kBestellung
-        ], 1)) {
-            return $row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * (float)$this->oBestellung->fWaehrungsFaktor);
+        ], 1)
+        ) {
+            return (float)$row->fBetragSumme >= $this->oBestellung->fGesamtsummeKundenwaehrung;
         }
 
         return false;
@@ -356,9 +361,9 @@ abstract class AbstractCheckout
     /**
      * @param Bestellung $oBestellung
      * @param OrderModel $model
-     * @throws CircularReferenceException
-     * @throws ServiceNotFoundException
      * @return bool
+     * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
      */
     public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
     {
@@ -377,7 +382,32 @@ abstract class AbstractCheckout
     }
 
     /**
-     * @param int  $kBestellung
+     * @param $msg
+     * @param int $level
+     * @return $this
+     * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
+     */
+    public function Log(string $msg, $level = LOGLEVEL_NOTICE)
+    {
+        try {
+            $data = '';
+            if ($this->getBestellung()) {
+                $data .= '#' . $this->getBestellung()->kBestellung;
+            }
+            if ($this->getMollie()) {
+                $data .= '$' . $this->getMollie()->id;
+            }
+            ZahlungsLog::add($this->getPaymentMethod()->moduleID, '[' . microtime(true) . ' - ' . $_SERVER['PHP_SELF'] . '] ' . $msg, $data, $level);
+        } catch (Exception $e) {
+            Shop::Container()->getLogService()->error(sprintf("Error while Logging: %s\nPrevious Error: %s", $e->getMessage(), $msg));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param int $kBestellung
      * @param bool $checkZA
      * @return bool
      */
@@ -386,7 +416,7 @@ abstract class AbstractCheckout
         if ($checkZA) {
             $res = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId LIKE :cModulId AND kZahlungsart = :kZahlungsart', [
                 ':kZahlungsart' => $kBestellung,
-                ':cModulId'     => 'kPlugin_' . self::Plugin()->getID() . '%'
+                ':cModulId' => 'kPlugin_' . self::Plugin()->getID() . '%'
             ], 1);
 
             return $res ? true : false;
@@ -398,7 +428,7 @@ abstract class AbstractCheckout
     }
 
     /**
-     * @param Bestellung     $oBestellung
+     * @param Bestellung $oBestellung
      * @param null|MollieAPI $api
      * @return static
      */
@@ -461,9 +491,9 @@ abstract class AbstractCheckout
      * @param $kID
      * @param mixed $kId
      *
+     * @return true
      * @throws Exception
      *
-     * @return true
      */
     public static function sendReminder($kId): bool
     {
@@ -473,9 +503,9 @@ abstract class AbstractCheckout
             return true;
         }
         $oBestellung = new Bestellung($order->kBestellung);
-        $repayURL    = Shop::getURL() . '/?m_pay=' . md5($order->kId . '-' . $order->kBestellung);
+        $repayURL = Shop::getURL() . '/?m_pay=' . md5($order->kId . '-' . $order->kBestellung);
 
-        $data         = new stdClass();
+        $data = new stdClass();
         $data->tkunde = new Customer($oBestellung->kKunde);
         if (!$data->tkunde->kKunde) {
             $order->dReminder = date('Y-m-d H:i:s');
@@ -484,11 +514,11 @@ abstract class AbstractCheckout
             throw new Exception("Kunde '{$oBestellung->kKunde}' nicht gefunden.");
         }
         $data->Bestellung = $oBestellung;
-        $data->PayURL     = $repayURL;
-        $data->Amount     = Preise::getLocalizedPriceString($order->fAmount, Currency::fromISO($order->cCurrency), false);
+        $data->PayURL = $repayURL;
+        $data->Amount = Preise::getLocalizedPriceString($order->fAmount, Currency::fromISO($order->cCurrency), false);
 
         $mailer = Shop::Container()->get(Mailer::class);
-        $mail   = new Mail();
+        $mail = new Mail();
         $mail->createFromTemplateID('kPlugin_' . self::Plugin()->getID() . '_zahlungserinnerung', $data);
 
         $order->dReminder = date('Y-m-d H:i:s');
@@ -509,25 +539,30 @@ abstract class AbstractCheckout
     abstract public function cancelOrRefund(): string;
 
     /**
+     * @param array $options
+     * @return self
      * @throws Exception
-     *
-     * @return void
      */
     public function loadRequest(array &$options = [])
     {
         if ($this->getBestellung()) {
-            $oKunde = !$this->getBestellung()->oKunde && $this->getPaymentMethod()->duringCheckout ? $_SESSION['Kunde'] : $this->getBestellung()->oKunde;
+            $oKunde = !$this->getBestellung()->oKunde && $this->getPaymentMethod()->duringCheckout
+                ? $_SESSION['Kunde']
+                : $this->getBestellung()->oKunde;
 
-            $this->amount   = new Amount($this->getBestellung()->fGesamtsumme, $this->getBestellung()->Waehrung, true, true);
+            $this->amount = new Amount($this->getBestellung()
+                ->fGesamtsummeKundenwaehrung, $this->getBestellung()->Waehrung, true);
             $this->metadata = [
-                'kBestellung'   => $this->getBestellung()->kBestellung,
-                'kKunde'        => $oKunde->kKunde,
+                'kBestellung' => $this->getBestellung()->kBestellung,
+                'kKunde' => $oKunde->kKunde,
                 'kKundengruppe' => $oKunde->kKundengruppe,
-                'cHash'         => $this->getHash(),
+                'cHash' => $this->getHash(),
             ];
 
-            if (defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
-                && (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())) {
+            if (
+                defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
+                && (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())
+            ) {
                 $this->method = $this->getPaymentMethod()::METHOD;
             }
 
@@ -535,19 +570,17 @@ abstract class AbstractCheckout
                 Shop::getURL() . '/bestellabschluss.php?' . http_build_query(['hash' => $this->getHash()]) :
                 $this->getPaymentMethod()->getReturnURL($this->getBestellung());
 
-            $this->webhookUrl = Shop::getURL(true) . '/?' . http_build_query([
-                    'mollie' => 1,
-                    'hash'   => $this->getHash(),
-                    'test'   => $this->getAPI()->isTest() ?: null,
-                ]);
+            $this->webhookUrl = $this->getWebhookUrl();
         }
 
         $this->locale = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), Frontend::getCustomer()->cLand);
+
+        return $this;
     }
 
     /**
-     * @throws Exception
      * @return string
+     * @throws Exception
      */
     public function getHash(): string
     {
@@ -559,6 +592,23 @@ abstract class AbstractCheckout
         }
 
         return $this->hash;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    protected function getWebhookUrl(): string
+    {
+        $query = [
+            'mollie' => 1,
+        ];
+        if ($this->getPaymentMethod()->duringCheckout) {
+            $query['hash'] = $this->getHash();
+            $query['test'] = $this->getAPI()->isTest() ?: null;
+        }
+
+        return Shop::getURL(true) . '/?' . http_build_query($query);
     }
 
     /**
@@ -575,8 +625,8 @@ abstract class AbstractCheckout
         if (in_array((int)$this->getBestellung()->cStatus, [BESTELLUNG_STATUS_OFFEN, BESTELLUNG_STATUS_IN_BEARBEITUNG], true)) {
             require_once PFAD_ROOT . PFAD_INCLUDES . 'bestellabschluss_inc.php';
 
-            $log                   = [];
-            $conf                  = Shop::getSettings([CONF_GLOBAL]);
+            $log = [];
+            $conf = Shop::getSettings([CONF_GLOBAL]);
             $nArtikelAnzeigefilter = (int)$conf['global']['artikel_artikelanzeigefilter'];
             foreach ($this->getBestellung()->Positionen as $pos) {
                 if ($pos->kArtikel && $pos->Artikel && $pos->Artikel->cLagerBeachten === 'Y') {
@@ -595,11 +645,12 @@ abstract class AbstractCheckout
     protected static function aktualisiereLagerbestand(Artikel $product, int $amount, array $attributeValues, int $productFilter = 1)
     {
         $inventory = (float)$product->fLagerbestand;
-        $db        = Shop::Container()->getDB();
+        $db = Shop::Container()->getDB();
         if ($product->cLagerBeachten !== 'Y') {
             return $inventory;
         }
-        if ($product->cLagerVariation === 'Y'
+        if (
+            $product->cLagerVariation === 'Y'
             && is_array($attributeValues)
             && count($attributeValues) > 0
         ) {
@@ -656,31 +707,6 @@ abstract class AbstractCheckout
         }
 
         return $inventory;
-    }
-
-    /**
-     * @param $msg
-     * @param int $level
-     * @throws CircularReferenceException
-     * @throws ServiceNotFoundException
-     * @return $this
-     */
-    public function Log(string $msg, $level = LOGLEVEL_NOTICE)
-    {
-        try {
-            $data = '';
-            if ($this->getBestellung()) {
-                $data .= '#' . $this->getBestellung()->kBestellung;
-            }
-            if ($this->getMollie()) {
-                $data .= '$' . $this->getMollie()->id;
-            }
-            ZahlungsLog::add($this->getPaymentMethod()->moduleID, '[' . microtime(true) . ' - ' . $_SERVER['PHP_SELF'] . '] ' . $msg, $data, $level);
-        } catch (Exception $e) {
-            Shop::Container()->getLogService()->error(sprintf("Error while Logging: %s\nPrevious Error: %s", $e->getMessage(), $msg));
-        }
-
-        return $this;
     }
 
     /**

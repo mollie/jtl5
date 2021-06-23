@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -28,8 +29,10 @@ try {
         if ($paymentSession && $paymentSession->kBestellung) {
             $oBestellung = new \JTL\Checkout\Bestellung($paymentSession->kBestellung);
 
-            if (\JTL\Shopsetting::getInstance()
-                    ->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlusseite') === 'A') {
+            if (
+                \JTL\Shopsetting::getInstance()
+                    ->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlusseite') === 'A'
+            ) {
                 $oBestellID = Shop::Container()->getDB()
                     ->select('tbestellid', 'kBestellung', $paymentSession->kBestellung);
                 if ($oBestellID) {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -13,6 +14,7 @@ if ($_SERVER['HTTP_HOST'] === 'localhost') {
 
 /** @global \JTL\Backend\AdminAccount $oAccount */
 require_once __DIR__ . '/../../../admin/includes/admininclude.php';
+ini_set('display_errors', 0);
 
 try {
     ob_start();

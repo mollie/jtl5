@@ -21,7 +21,7 @@ const Orders = () => {
 
     const reWebhook = (id: string) => {
         setLoading(true);
-        fetch(pluginInfo.shopURL + `?mollie=1&id=${id}`, {
+        fetch(pluginInfo.shopURL + `?mollie=1&id=${id}&admin=1`, {
             mode: 'no-cors',
             method: 'GET'
         })

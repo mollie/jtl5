@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -132,7 +133,8 @@ class Queue
                             return $todo->done("Bestellung noch nicht versendet: {$checkout->getBestellung()->cStatus}");
                         }
 
-                        if ((int)$data['status']
+                        if (
+                            (int)$data['status']
                             && array_key_exists('status', $data)
                             && $checkout->getPaymentMethod()
                             && (strpos($checkout->getModel()->cOrderId, 'tr_') === false)
@@ -142,7 +144,8 @@ class Queue
                             $checkout->handleNotification();
                             if ($checkout->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
                                 $result = 'Mollie Status already ' . $checkout->getMollie()->status;
-                            } elseif ($checkout->getMollie()->isCreated()
+                            } elseif (
+                                $checkout->getMollie()->isCreated()
                                 || $checkout->getMollie()->isPaid()
                                 || $checkout->getMollie()->isAuthorized()
                                 || $checkout->getMollie()->isShipping()
@@ -152,10 +155,10 @@ class Queue
                                     if ($shipments = Shipment::syncBestellung($checkout)) {
                                         foreach ($shipments as $shipment) {
                                             if (is_string($shipment)) {
-                                                $checkout->getPaymentMethod()->doLog("Shipping-Error: {$shipment}");
+                                                $checkout->Log("Shipping-Error: {$shipment}");
                                                 $result .= "Shipping-Error: {$shipment}\n";
                                             } else {
-                                                $checkout->getPaymentMethod()->doLog("Order shipped: {$shipment->id}");
+                                                $checkout->Log("Order shipped: {$shipment->id}");
                                                 $result .= "Order shipped: {$shipment->id}\n";
                                             }
                                         }

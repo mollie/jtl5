@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -38,11 +39,11 @@ class OrdersController extends AbstractController
                 $shipmentsModel = ShipmentsModel::fromID((int)$lieferschein->kLieferschein, 'kLieferschein', false);
 
                 $response[] = (object)[
-                    'kLieferschein'   => $lieferschein->kLieferschein,
+                    'kLieferschein' => $lieferschein->kLieferschein,
                     'cLieferscheinNr' => $lieferschein->cLieferscheinNr,
-                    'cHinweis'        => $lieferschein->cHinweis,
-                    'dErstellt'       => date('Y-m-d H:i:s', $lieferschein->dErstellt),
-                    'shipment'        => $shipmentsModel->kBestellung ? $shipmentsModel : null,
+                    'cHinweis' => $lieferschein->cHinweis,
+                    'dErstellt' => date('Y-m-d H:i:s', $lieferschein->dErstellt),
+                    'shipment' => $shipmentsModel->kBestellung ? $shipmentsModel : null,
                 ];
             }
         }
@@ -53,7 +54,7 @@ class OrdersController extends AbstractController
     public static function all(stdClass $data): Response
     {
         if (self::Plugin()->getConfig()->getValue('hideCompleted') === 'on') {
-            $query       = 'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme '
+            $query = 'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme '
                 . 'FROM xplugin_ws5_mollie_orders o '
                 . 'JOIN tbestellung b ON b.kbestellung = o.kBestellung '
                 . "WHERE !(o.cStatus = 'completed' AND b.cStatus = '4')"
@@ -75,15 +76,15 @@ class OrdersController extends AbstractController
 
         $checkout->updateModel()->saveModel();
 
-        $result['mollie']     = $checkout->getMollie();
-        $result['order']      = $checkout->getModel()->jsonSerialize();
+        $result['mollie'] = $checkout->getMollie();
+        $result['order'] = $checkout->getModel()->jsonSerialize();
         $result['bestellung'] = $checkout->getBestellung();
-        $result['logs']       = Shop::Container()->getDB()
+        $result['logs'] = Shop::Container()->getDB()
             ->executeQueryPrepared(
                 'SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook',
                 [
                     ':cTypeWebhook' => "%{$checkout->getModel()->cOrderId}%",
-                    ':cTypeHook'    => "%:{$checkout->getModel()->kBestellung}%"
+                    ':cTypeHook' => "%:{$checkout->getModel()->kBestellung}%"
                 ],
                 2
             );
@@ -94,5 +95,17 @@ class OrdersController extends AbstractController
     public static function reminder(stdClass $data): Response
     {
         return new Response(AbstractCheckout::sendReminder($data->id));
+    }
+
+    public static function zalog(stdClass $data)
+    {
+        if ($data->id && $data->kBestellung) {
+            $logs = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM tzahlungslog WHERE cLogData LIKE :cLogData1 OR cLogData LIKE :cLogData2 ORDER BY dDatum DESC", [
+                ':cLogData1' => sprintf('%%#%d%%', (int)$data->kBestellung),
+                ':cLogData2' => sprintf('%%$%s%%', trim($data->id))
+            ], 2);
+            return new Response($logs);
+        }
+        return new Response([]);
     }
 }

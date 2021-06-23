@@ -2178,10 +2178,10 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@webstollen/react-jtl-plugin@^2.0.14":
-  version "2.1.0"
-  resolved "https://gitlab.webstollen.com/api/v4/projects/444/packages/npm/@webstollen/react-jtl-plugin/-/@webstollen/react-jtl-plugin-2.1.0.tgz#e200ae1aa6bd278d4a8e408398ee86489b91af3e"
-  integrity sha1-4gCuGqa9J41KjkCDmO6GSJuRrz4=
+"@webstollen/react-jtl-plugin@^2.1.1":
+  version "2.1.1"
+  resolved "https://gitlab.webstollen.com/api/v4/projects/444/packages/npm/@webstollen/react-jtl-plugin/-/@webstollen/react-jtl-plugin-2.1.1.tgz#4b7b8e5b1550f6a0b42dd042827b557cfc957f21"
+  integrity sha1-S3uOWxVQ9qC0LdBCgntVfPyVfyE=
   dependencies:
     autoprefixer "^9.8.6"
     axios "^0.21.0"

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -16,8 +17,10 @@ class ApplePay extends AbstractHook
         }
 
         // Reset CreditCard-Token after Order!
-        if (($key  = sprintf('kPlugin_%d_creditcard', self::Plugin()->getID()))
-            && array_key_exists($key, $_SESSION) && !array_key_exists('Zahlungsart', $_SESSION)) {
+        if (
+            ($key  = sprintf('kPlugin_%d_creditcard', self::Plugin()->getID()))
+            && array_key_exists($key, $_SESSION) && !array_key_exists('Zahlungsart', $_SESSION)
+        ) {
             unset($_SESSION[$key]);
         }
 

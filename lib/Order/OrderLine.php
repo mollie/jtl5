@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  */
@@ -46,9 +47,9 @@ class OrderLine implements \JsonSerializable
 
     /**
      * @param CartItem|stdClass $oPosition
-     * @param Currency          $currency
-     * @throws Exception
+     * @param Currency $currency
      * @return OrderLine
+     * @throws Exception
      */
     public static function factory($oPosition, Currency $currency): self
     {
@@ -108,10 +109,10 @@ class OrderLine implements \JsonSerializable
             /** @var CartItemProperty $eigenschaft */
             foreach ($oPosition->WarenkorbPosEigenschaftArr as $eigenschaft) {
                 $metadata['properties'][] = [
-                    'kEigenschaft'     => $eigenschaft->kEigenschaft,
+                    'kEigenschaft' => $eigenschaft->kEigenschaft,
                     'kEigenschaftWert' => $eigenschaft->kEigenschaftWert,
-                    'name'             => $eigenschaft->cEigenschaftName,
-                    'value'            => $eigenschaft->cEigenschaftWertName,
+                    'name' => $eigenschaft->cEigenschaftName,
+                    'value' => $eigenschaft->cEigenschaftWertName,
                 ];
                 if (strlen(json_encode($metadata)) > 1000) {
                     array_pop($metadata['properties']);
@@ -127,8 +128,8 @@ class OrderLine implements \JsonSerializable
 
     /**
      * @param $nPosTyp
-     * @throws Exception
      * @return string
+     * @throws Exception
      */
     protected static function getType($nPosTyp): string
     {
@@ -156,8 +157,8 @@ class OrderLine implements \JsonSerializable
 
     /**
      * @param OrderLine[] $orderLines
-     * @param Amount      $amount
-     * @param Currency    $currency
+     * @param Amount $amount
+     * @param Currency $currency
      * @return null|OrderLine
      */
     public static function getRoundingCompensation(array $orderLines, Amount $amount, Currency $currency): ?self
@@ -169,15 +170,14 @@ class OrderLine implements \JsonSerializable
         if (abs($sum - (float)$amount->value) > 0) {
             $diff = (round((float)$amount->value - $sum, 2));
             if ($diff !== 0.0) {
-                $line            = new self();
-                $line->type      = $diff > 0 ? OrderLineType::TYPE_SURCHARGE : OrderLineType::TYPE_DISCOUNT;
-                $line->name      = 'Rundungsausgleich';
-                $line->quantity  = 1;
-                $line->unitPrice = new Amount($diff, $currency, false, false);
-
-                $line->totalAmount = new Amount($diff, $currency, false, false);
+                $line              = new self();
+                $line->type        = $diff > 0 ? OrderLineType::TYPE_SURCHARGE : OrderLineType::TYPE_DISCOUNT;
+                $line->name        = 'Rundungsausgleich';
+                $line->quantity    = 1;
+                $line->unitPrice   = new Amount($diff, $currency, false);
+                $line->totalAmount = new Amount($diff, $currency, false);
                 $line->vatRate     = '0.00';
-                $line->vatAmount   = new Amount(0, $currency, false, false);
+                $line->vatAmount   = new Amount(0, $currency, false);
 
                 return $line;
             }
@@ -197,16 +197,16 @@ class OrderLine implements \JsonSerializable
         $line->name        = 'Guthaben';
         $line->quantity    = 1;
         $line->unitPrice   = (object)[
-            'value'    => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
+            'value' => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
         $line->totalAmount = (object)[
-            'value'    => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
+            'value' => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
         $line->vatRate     = '0.00';
         $line->vatAmount   = (object)[
-            'value'    => number_format(0, 2, '.', ''),
+            'value' => number_format(0, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
 
