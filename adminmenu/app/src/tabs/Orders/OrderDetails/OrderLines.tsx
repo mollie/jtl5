@@ -1,7 +1,7 @@
-import React from "react";
-import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/Table";
-import {formatAmount} from "@webstollen/react-jtl-plugin/lib";
-import {mollieOrderLineTypeLabel, molliePaymentStatusLabel, OrderLineType} from "../../../helper";
+import React from 'react'
+import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
+import { formatAmount } from '@webstollen/react-jtl-plugin/lib'
+import { mollieOrderLineTypeLabel, molliePaymentStatusLabel, OrderLineType } from '../../../helper'
 
 export type OrderLinesProps = {
   mollie: Record<string, any>
@@ -14,61 +14,75 @@ type Variation = {
   kEigenschaftWert: number
 }
 
-const OrderLines = ({mollie}: OrderLinesProps) => {
-
+const OrderLines = ({ mollie }: OrderLinesProps) => {
   const template = {
     id: {
       header: () => 'ID',
-      data: row => row.id ?? '-',
+      data: (row) => row.id ?? '-',
     },
     status: {
       header: () => 'Status',
-      data: row => row.status ? molliePaymentStatusLabel(row.status) : '-',
-      align: "center"
+      data: (row) => (row.status ? molliePaymentStatusLabel(row.status) : '-'),
+      align: 'center',
     },
     sku: {
       header: () => 'SKU',
-      data: row => row.sku,
+      data: (row) => row.sku,
     },
     name: {
       header: () => 'Name',
-      data: row => <>{row.name ?? '-'}
-        {row.metadata?.properties?.length ? row.metadata?.properties.map((prop: Variation) => <>
-          <br/><b>{JSON.stringify(prop.name)}</b>: <i>{JSON.stringify(prop.value)}</i></>) : null}</>,
+      data: (row) => (
+        <>
+          {row.name ?? '-'}
+          {row.metadata?.properties?.length
+            ? row.metadata?.properties.map((prop: Variation) => (
+                <>
+                  <br />
+                  <b>{JSON.stringify(prop.name)}</b>: <i>{JSON.stringify(prop.value)}</i>
+                </>
+              ))
+            : null}
+        </>
+      ),
     },
     type: {
       header: () => 'Typ',
-      data: row => row.type ? mollieOrderLineTypeLabel(row.type as OrderLineType) : '-',
-      align: "center"
+      data: (row) => (row.type ? mollieOrderLineTypeLabel(row.type as OrderLineType) : '-'),
+      align: 'center',
     },
     quantity: {
       header: () => 'Anzahl',
-      data: row => row.quantity ?? '-',
-      align: "center"
+      data: (row) => row.quantity ?? '-',
+      align: 'center',
     },
     vatRate: {
       header: () => 'MwSt.',
-      data: row => `${parseFloat(row.vatRate)}%`,
-      align: "center"
+      data: (row) => `${parseFloat(row.vatRate)}%`,
+      align: 'center',
     },
     vatAmount: {
       header: () => 'Steuer',
-      data: row => formatAmount(row.vatAmount.value, 2, row.vatAmount.currency),
-      align: "right"
+      data: (row) => formatAmount(row.vatAmount.value, 2, row.vatAmount.currency),
+      align: 'right',
     },
     netto: {
       header: () => 'Netto',
-      data: row => formatAmount(row.totalAmount.value - row.vatAmount.value, 2, row.totalAmount.currency),
-      align: "right"
+      data: (row) => formatAmount(row.totalAmount.value - row.vatAmount.value, 2, row.totalAmount.currency),
+      align: 'right',
     },
     brutto: {
       header: () => 'Brutto',
-      data: row => <b>{formatAmount(row.totalAmount.value, 2, row.totalAmount.currency)}</b>,
-      align: "right"
-    }
-  } as Record<string, ItemTemplate<Record<string, any>>>;
+      data: (row) => <b>{formatAmount(row.totalAmount.value, 2, row.totalAmount.currency)}</b>,
+      align: 'right',
+    },
+  } as Record<string, ItemTemplate<Record<string, any>>>
 
-  return <Table template={template} items={mollie.lines}/>;
+  return (
+    <div className="mt-4">
+      <h3 className="font-bold text-2xl mb-1">Positionen</h3>
+      <Table template={template} items={mollie.lines} />
+    </div>
+  )
 }
 
-export default OrderLines;
+export default OrderLines

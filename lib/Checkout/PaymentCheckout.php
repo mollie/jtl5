@@ -36,7 +36,6 @@ class PaymentCheckout extends AbstractCheckout
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId);
                 if ($this->payment->status === PaymentStatus::STATUS_OPEN) {
                     $this->updateModel()->updateModel();
-
                     return $this->payment;
                 }
             } catch (Exception $e) {

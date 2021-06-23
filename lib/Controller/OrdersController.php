@@ -94,6 +94,7 @@ class OrdersController extends AbstractController
 
     public static function reminder(stdClass $data): Response
     {
+
         return new Response(AbstractCheckout::sendReminder($data->id));
     }
 
@@ -108,4 +109,5 @@ class OrdersController extends AbstractController
         }
         return new Response([]);
     }
+
 }

@@ -1,50 +1,72 @@
-import React, {useState} from "react";
-import Table, {ItemTemplate} from "@webstollen/react-jtl-plugin/lib/components/Table";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faChevronDoubleDown, faChevronDoubleLeft} from "@fortawesome/pro-regular-svg-icons";
+import React, { useCallback, useEffect, useState } from 'react'
+import { Label, useAPI } from '@webstollen/react-jtl-plugin/lib'
+import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
+import { faChevronDoubleDown, faChevronDoubleLeft } from '@fortawesome/pro-regular-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-type LogsProps = {
-    data: Array<Record<string, any>>
+export type LogsProps = {
+  kBestellung: number
+  orderId: string
 }
 
-const Logs = ({data}: LogsProps) => {
+const Logs = ({ kBestellung, orderId }: LogsProps) => {
+  const api = useAPI()
+  const [logs, setLogs] = useState<null | any[]>(null)
+  const [showLogs, setShowLogs] = useState(false)
 
-    const [showLogs, setShowLogs] = useState(false);
+  const loadLogs = useCallback(() => {
+    setLogs(null)
+    api
+      .run('orders', 'zalog', {
+        kBestellung: kBestellung,
+        id: orderId,
+      })
+      .then((result) => {
+        setLogs(result.data)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [api, kBestellung, orderId])
 
-    const template = {
-        kId: {
-            header: () => 'ID',
-            data: row => row.kId
-        },
-        cType: {
-            header: () => 'Typ',
-            data: row => row.cType
-        },
-        cResult: {
-            header: () => 'Result',
-            data: row => <pre>{row.cResult ?? 'n/a'}</pre>
-        },
-        dDone: {
-            header: () => 'Status',
-            data: row => !row.dDone ? 'PENDING' : 'DONE',
-            align: 'center'
-        },
-        dCreated: {
-            header: () => 'Erstellt',
-            data: row => row.dCreated,
-            align: 'right'
-        }
-    } as Record<string, ItemTemplate<Record<string, any>>>;
+  useEffect(() => {
+    loadLogs()
+  }, [loadLogs])
 
-    return <div className="mt-4">
-        <h3 className="font-bold text-2xl mb-1 cursor-pointer"
-            onClick={() => setShowLogs(prev => !prev)}>
-            Queue {data.length ? <>({data.length})</> : null}
-            <FontAwesomeIcon className=" float-right"
-                             icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft}/>
-        </h3>
-        {data.length ? <Table template={template} items={data}/> : <div>Keine Daten</div>}
-    </div>;
+  const template = {
+    nLevel: {
+      header: () => 'Level',
+      data: (row) =>
+        row.nLevel === 1 ? (
+          <Label color="red">ERROR</Label>
+        ) : row.nLevel == 2 ? (
+          <Label color="blue">NOTICE</Label>
+        ) : row.nLevel == 3 ? (
+          <Label color="gray">DEBUG</Label>
+        ) : (
+          row.nLevel
+        ),
+    },
+    cLog: {
+      header: () => 'Log',
+      data: (row) => row.cLog,
+    },
+    dDatum: {
+      header: () => 'Timestamp',
+      data: (row) => row.dDatum,
+    },
+  } as Record<string, ItemTemplate<Record<string, any>>>
+
+  return (
+    <div className="mt-4">
+      <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowLogs((prev) => !prev)}>
+        Logs
+        <FontAwesomeIcon className="float-right" icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft} />
+      </h3>
+      {showLogs &&
+        (!logs ? <>Loading...</> : !logs.length ? <>No Data!</> : <Table striped template={template} items={logs} />)}
+    </div>
+  )
 }
 
-export default Logs;
+export default Logs
