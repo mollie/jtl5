@@ -31,7 +31,7 @@ try {
 
             if (
                 \JTL\Shopsetting::getInstance()
-                    ->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlusseite') === 'A'
+                    ->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlussseite') === 'A'
             ) {
                 $oBestellID = Shop::Container()->getDB()
                     ->select('tbestellid', 'kBestellung', $paymentSession->kBestellung);
