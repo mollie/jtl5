@@ -13,12 +13,12 @@ use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Plugin\Helper as PluginHelper;
 use JTL\Plugin\Payment\Method;
+use JTL\Session\Frontend;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Traits\Plugin;
-use Session;
 use Shop;
 
 abstract class PaymentMethod extends Method
@@ -84,16 +84,16 @@ abstract class PaymentMethod extends Method
         }
         if ($selectable) {
             try {
-                $locale = self::getLocale($_SESSION['cISOSprache'], $_SESSION['Kunde']->cLand);
-                $amount = Session::getCart()->gibGesamtsummeWaren(true) * Session::getCurrency()->getConversionFactor();
+                $locale = self::getLocale(Frontend::getInstance()->getLanguage()->gibISO(), Frontend::getCustomer()->cLand);
+                $amount = Frontend::getCart()->gibGesamtsummeWaren(true) * Frontend::getCurrency()->getConversionFactor();
                 if ($amount <= 0) {
                     $amount = 0.01;
                 }
                 $selectable = self::isMethodPossible(
                     static::METHOD,
                     $locale,
-                    Session::getCustomer()->cLand,
-                    Session::getCurrency()->getCode(),
+                    Frontend::getCustomer()->cLand,
+                    Frontend::getCurrency()->getCode(),
                     $amount
                 );
             } catch (Exception $e) {
@@ -105,7 +105,7 @@ abstract class PaymentMethod extends Method
     }
 
     /**
-     * @param string      $cISOSprache
+     * @param string $cISOSprache
      * @param null|string $country
      * @return string
      */
@@ -164,15 +164,16 @@ abstract class PaymentMethod extends Method
      * @param $billingCountry
      * @param $currency
      * @param $amount
-     * @throws ApiException
-     * @throws IncompatiblePlatform
      * @return bool
+     * @throws IncompatiblePlatform
+     * @throws ApiException
      */
     protected static function isMethodPossible($method, string $locale, $billingCountry, $currency, $amount): bool
     {
         $api = new MollieAPI(MollieAPI::getMode());
 
         if (!array_key_exists('mollie_possibleMethods', $_SESSION)) {
+            //Frontend::set('mollie_possibleMethods', []);
             $_SESSION['mollie_possibleMethods'] = [];
         }
 
@@ -182,10 +183,10 @@ abstract class PaymentMethod extends Method
                 'locale' => $locale,
                 'amount' => [
                     'currency' => $currency,
-                    'value'    => number_format($amount, 2, '.', '')
+                    'value' => number_format($amount, 2, '.', '')
                 ],
                 'billingCountry' => $billingCountry,
-                'resource'       => 'orders',
+                'resource' => 'orders',
                 'includeWallets' => 'applepay',
             ]);
         }
@@ -226,7 +227,7 @@ abstract class PaymentMethod extends Method
 
             $paymentOptions = [];
 
-            if ((int)Session::getCustomer()->nRegistriert && ($customerID = Customer::createOrUpdate(Session::getCustomer()))) {
+            if ((int)Frontend::getCustomer()->nRegistriert && ($customerID = Customer::createOrUpdate(Frontend::getCustomer()))) {
                 $paymentOptions['customerId'] = $customerID;
             }
 
@@ -236,12 +237,12 @@ abstract class PaymentMethod extends Method
 
             if ($api === 'payment') {
                 $checkout = PaymentCheckout::factory($order);
-                $payment  = $checkout->create($paymentOptions);
-                $url      = $payment->getCheckoutUrl();
+                $payment = $checkout->create($paymentOptions);
+                $url = $payment->getCheckoutUrl();
             } else {
                 $checkout = OrderCheckout::factory($order);
-                $mOrder   = $checkout->create($paymentOptions);
-                $url      = $mOrder->getCheckoutUrl();
+                $mOrder = $checkout->create($paymentOptions);
+                $url = $mOrder->getCheckoutUrl();
             }
 
             ifndef('MOLLIE_REDIRECT_DELAY', 3);
@@ -266,8 +267,8 @@ abstract class PaymentMethod extends Method
 
     /**
      * @param Bestellung $order
-     * @param string     $hash
-     * @param array      $args
+     * @param string $hash
+     * @param array $args
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
      */
