@@ -356,7 +356,7 @@ abstract class AbstractCheckout
             ':kBestellung' => $this->oBestellung->kBestellung
         ], 1)
         ) {
-            return (float)$row->fBetragSumme >= $this->oBestellung->fGesamtsummeKundenwaehrung;
+            return (float)$row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor);
         }
 
         return false;
@@ -555,7 +555,7 @@ abstract class AbstractCheckout
                 : $this->getBestellung()->oKunde;
 
             $this->amount = new Amount($this->getBestellung()
-                ->fGesamtsummeKundenwaehrung, $this->getBestellung()->Waehrung, true);
+                ->fGesamtsumme  * $this->getBestellung()->fWaehrungsFaktor, $this->getBestellung()->Waehrung, true);
             $this->metadata = [
                 'kBestellung' => $this->getBestellung()->kBestellung,
                 'kKunde' => $oKunde->kKunde,
