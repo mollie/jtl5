@@ -159,12 +159,12 @@ class OrderCheckout extends AbstractCheckout
         parent::loadRequest($options);
 
         $this->orderNumber    = $this->getBestellung()->cBestellNr;
-        $this->billingAddress = Address::factory($this->getBestellung()->oRechnungsadresse);
+        $this->billingAddress = new Address($this->getBestellung()->oRechnungsadresse);
         if ($this->getBestellung()->Lieferadresse !== null) {
             if (!$this->getBestellung()->Lieferadresse->cMail) {
                 $this->getBestellung()->Lieferadresse->cMail = $this->getBestellung()->oRechnungsadresse->cMail;
             }
-            $this->shippingAddress = Address::factory($this->getBestellung()->Lieferadresse);
+            $this->shippingAddress = new Address($this->getBestellung()->Lieferadresse);
         }
 
         if (

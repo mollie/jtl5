@@ -60,13 +60,4 @@ class Address extends \Plugin\ws5_mollie\lib\Payment\Address
         }
     }
 
-    /**
-     * @param \JTL\Checkout\Adresse|\stdClass $address
-     * @return Address
-     * @deprecated
-     */
-    public static function factory($address): self
-    {
-        return new self($address);
-    }
 }

@@ -62,13 +62,4 @@ class Address implements \JsonSerializable
         }
     }
 
-    /**
-     * @param Adresse|\stdClass $address
-     * @return static
-     * @deprecated
-     */
-    public static function factory($address): self
-    {
-        return new static($address);
-    }
 }

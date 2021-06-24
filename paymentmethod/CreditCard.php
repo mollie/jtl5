@@ -104,10 +104,10 @@ class CreditCard extends PaymentMethod
                 if (!$order->Lieferadresse->cMail) {
                     $order->Lieferadresse->cMail = $order->oRechnungsadresse->cMail;
                 }
-                $paymentOptions['shippingAddress'] = Address::factory($order->Lieferadresse);
+                $paymentOptions['shippingAddress'] = new Address($order->Lieferadresse);
             }
 
-            $paymentOptions['billingAddress'] = Address::factory($order->oRechnungsadresse);
+            $paymentOptions['billingAddress'] = new Address($order->oRechnungsadresse);
         }
         if ((int)$this->getCache(self::CACHE_TOKEN_TIMESTAMP) > time() && ($token = trim($this->getCache(self::CACHE_TOKEN)))) {
             $paymentOptions['cardToken'] = $token;

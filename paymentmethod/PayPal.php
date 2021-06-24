@@ -27,7 +27,7 @@ class PayPal extends PaymentMethod
                 if (!$order->Lieferadresse->cMail) {
                     $order->Lieferadresse->cMail = $order->oRechnungsadresse->cMail;
                 }
-                $paymentOptions['shippingAddress'] = Address::factory($order->Lieferadresse);
+                $paymentOptions['shippingAddress'] = new Address($order->Lieferadresse);
             }
             $paymentOptions['description'] = 'Order ' . $order->cBestellNr;
         }
