@@ -179,7 +179,7 @@ abstract class PaymentMethod extends Method
 
         $key = md5(serialize([$locale, $billingCountry, $currency, $amount]));
         if (!array_key_exists($key, $_SESSION['mollie_possibleMethods'])) {
-            $_SESSION['mollie_possibleMethods'][$key] = $api->getClient()->methods->allActive([
+            $active = $api->getClient()->methods->allActive([
                 'locale' => $locale,
                 'amount' => [
                     'currency' => $currency,
@@ -189,6 +189,10 @@ abstract class PaymentMethod extends Method
                 'resource' => 'orders',
                 'includeWallets' => 'applepay',
             ]);
+            foreach ($active as $a) {
+                $_SESSION['mollie_possibleMethods'][$key][] = (object)['id' => $a->id];
+            }
+
         }
 
         if ($method !== '') {
