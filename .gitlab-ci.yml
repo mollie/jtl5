@@ -1,4 +1,4 @@
-image: gitlab.webstollen.de:5050/docker/jtl-plugin-ci:master
+image: registry.webstollen.de:5050/docker/jtl-plugin-ci:master
 
 stages:
 - test
