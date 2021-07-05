@@ -1,4 +1,4 @@
-image: registry.webstollen.com:443/docker/jtl-plugin-ci:master
+image: gitlab.webstollen.de:5050/docker/jtl-plugin-ci:master
 
 stages:
 - test
@@ -12,7 +12,7 @@ include:
 - template: Security/SAST.gitlab-ci.yml
 
 phpunit:
-  image: registry.webstollen.com:443/docker/jtl-plugin-ci:php73
+  image: gitlab.webstollen.de:5050/docker/jtl-plugin-ci:php73
   stage: test
   only:
     - tags
@@ -54,10 +54,10 @@ node:
   script:
   - npm config set "@fortawesome:registry" https://npm.fontawesome.com/
   - npm config set -- '//npm.fontawesome.com/:_authToken' "${FONT_AWESOME_TOKEN}"
-  - npm config set "@dash.bar:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
-  - npm config set "@webstollen:registry" https://gitlab.webstollen.com/api/v4/packages/npm/
-  - npm config set -- '//gitlab.webstollen.com/api/v4/packages/npm/:_authToken' "${CI_JOB_TOKEN}"
-  - npm config set -- '//gitlab.webstollen.com/api/v4/projects/444/packages/npm/:_authToken' "${CI_JOB_TOKEN}"
+  - npm config set "@dash.bar:registry" https://gitlab.webstollen.de/api/v4/packages/npm/
+  - npm config set "@webstollen:registry" https://gitlab.webstollen.de/api/v4/packages/npm/
+  - npm config set -- '//gitlab.webstollen.de/api/v4/packages/npm/:_authToken' "${CI_JOB_TOKEN}"
+  - npm config set -- '//gitlab.webstollen.de/api/v4/projects/444/packages/npm/:_authToken' "${CI_JOB_TOKEN}"
     $CI_JOB_TOKEN
   - if [ -f "adminmenu/app/package.json" ]; then cd adminmenu/app && yarn install --frozen-lockfile --cache-folder .yarn-cache && yarn build; else echo "Skipped Yarn build, no packages.json"; fi
   artifacts:

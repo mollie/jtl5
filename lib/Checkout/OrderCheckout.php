@@ -311,6 +311,8 @@ class OrderCheckout extends AbstractCheckout
 
     /**
      * @return static
+     * @throws \JTL\Exceptions\CircularReferenceException
+     * @throws \JTL\Exceptions\ServiceNotFoundException
      */
     protected function updateOrderNumber()
     {
