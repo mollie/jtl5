@@ -192,7 +192,6 @@ abstract class PaymentMethod extends Method
             foreach ($active as $a) {
                 $_SESSION['mollie_possibleMethods'][$key][] = (object)['id' => $a->id];
             }
-
         }
 
         if ($method !== '') {

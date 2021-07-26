@@ -174,29 +174,4 @@ class PaymentCheckout extends AbstractCheckout
 
         return $this;
     }
-
-    /**
-     * @throws Exception
-     *
-     * @return string
-     */
-    public function getDescription(): string
-    {
-        $descTemplate = trim(self::Plugin()->getConfig()->getValue('paymentDescTpl')) ?: 'Order {orderNumber}';
-        $oKunde       = $this->getBestellung()->oKunde ?: $_SESSION['Kunde'];
-
-        return str_replace([
-            '{orderNumber}',
-            '{storeName}',
-            '{customer.firstname}',
-            '{customer.lastname}',
-            '{customer.company}',
-        ], [
-            $this->getBestellung()->cBestellNr,
-            Shopsetting::getInstance()->getValue(CONF_GLOBAL, 'global_shopname'),  //Shop::getSettings([CONF_GLOBAL])['global']['global_shopname'],
-            $oKunde->cVorname,
-            $oKunde->cNachname,
-            $oKunde->cFirma
-        ], $descTemplate);
-    }
 }

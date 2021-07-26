@@ -25,9 +25,11 @@ use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Plugin\Payment\MethodInterface;
 use JTL\Session\Frontend;
 use JTL\Shop;
+use JTL\Shopsetting;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\OrderStatus;
+use Mollie\Api\Types\PaymentStatus;
 use PaymentMethod;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\Model\AbstractModel;
@@ -125,7 +127,7 @@ abstract class AbstractCheckout
                     $api = new MollieAPI($test);
                     $mollie = strpos($id, 'tr_') === 0 ?
                         $api->getClient()->payments->get($id) :
-                        $api->getClient()->orders->get($id);
+                        $api->getClient()->orders->get($id, ['embed' => 'payments']);
 
                     if (in_array($mollie->status, [OrderStatus::STATUS_PENDING, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PAID], true)) {
                         require_once PFAD_ROOT . PFAD_INCLUDES . 'bestellabschluss_inc.php';
@@ -152,6 +154,17 @@ abstract class AbstractCheckout
                             }
                             $checkout = new $checkoutClass($order, $api);
                         }
+
+                        if (strpos($mollie->id, 'ord_') === 0) {
+                            /** @var Payment $payment */
+                            foreach ($mollie->payments() as $payment) {
+                                if (in_array($payment->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID, PaymentStatus::STATUS_PENDING])) {
+                                    $checkout->getModel()->cTransactionId = $payment->id;
+                                    $checkout->getModel()->save();
+                                }
+                            }
+                        }
+
                         $checkout->updateOrderNumber()
                             ->handleNotification($sessionHash);
                     } else {
@@ -195,43 +208,6 @@ abstract class AbstractCheckout
         $self->setModel($model);
 
         return $self;
-    }
-
-    /**
-     * @param null|mixed $hash
-     *
-     * @return void
-     * @throws ServiceNotFoundException
-     * @throws Exception
-     *
-     * @throws CircularReferenceException
-     */
-    public function handleNotification($hash = null): void
-    {
-        if (!$hash) {
-            $hash = $this->getModel()->cHash;
-        }
-
-        $this->updateModel()->saveModel();
-        if (null === $this->getBestellung()->dBezahltDatum) {
-            if ($incoming = $this->getIncomingPayment()) {
-                $this->getPaymentMethod()->addIncomingPayment($this->getBestellung(), $incoming);
-                if ($this->completlyPaid()) {
-                    $this->getPaymentMethod()->setOrderStatusToPaid($this->getBestellung());
-                    $this::makeFetchable($this->getBestellung(), $this->getModel());
-                    $this->getPaymentMethod()->deletePaymentHash($hash);
-
-                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO));
-
-                    $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
-                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
-                        $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
-                    }
-                } else {
-                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s': nicht komplett bezahlt: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_ERROR);
-                }
-            }
-        }
     }
 
     /**
@@ -288,6 +264,43 @@ abstract class AbstractCheckout
         }
 
         return $this->api;
+    }
+
+    /**
+     * @param null|mixed $hash
+     *
+     * @return void
+     * @throws ServiceNotFoundException
+     * @throws Exception
+     *
+     * @throws CircularReferenceException
+     */
+    public function handleNotification($hash = null): void
+    {
+        if (!$hash) {
+            $hash = $this->getModel()->cHash;
+        }
+
+        $this->updateModel()->saveModel();
+        if (null === $this->getBestellung()->dBezahltDatum) {
+            if ($incoming = $this->getIncomingPayment()) {
+                $this->getPaymentMethod()->addIncomingPayment($this->getBestellung(), $incoming);
+                if ($this->completlyPaid()) {
+                    $this->getPaymentMethod()->setOrderStatusToPaid($this->getBestellung());
+                    $this::makeFetchable($this->getBestellung(), $this->getModel());
+                    $this->getPaymentMethod()->deletePaymentHash($hash);
+
+                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO));
+
+                    $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
+                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
+                        $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
+                    }
+                } else {
+                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s': nicht komplett bezahlt: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_ERROR);
+                }
+            }
+        }
     }
 
     /**
@@ -352,9 +365,9 @@ abstract class AbstractCheckout
     public function completlyPaid(): bool
     {
         if (
-        $row = Shop::Container()->getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
+            $row = Shop::Container()->getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
             ':kBestellung' => $this->oBestellung->kBestellung
-        ], 1)
+            ], 1)
         ) {
             return (float)$row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor);
         }
@@ -556,7 +569,7 @@ abstract class AbstractCheckout
                 : $this->getBestellung()->oKunde;
 
             $this->amount = new Amount($this->getBestellung()
-                ->fGesamtsumme  * $this->getBestellung()->fWaehrungsFaktor, $this->getBestellung()->Waehrung, true);
+                    ->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor, $this->getBestellung()->Waehrung, true);
             $this->metadata = [
                 'kBestellung' => $this->getBestellung()->kBestellung,
                 'kKunde' => $oKunde->kKunde,
@@ -712,6 +725,31 @@ abstract class AbstractCheckout
         }
 
         return $inventory;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     *
+     */
+    public function getDescription(): string
+    {
+        $descTemplate = trim(self::Plugin()->getConfig()->getValue('paymentDescTpl')) ?: 'Order {orderNumber}';
+        $oKunde = $this->getBestellung()->oKunde ?: $_SESSION['Kunde'];
+
+        return str_replace([
+            '{orderNumber}',
+            '{storeName}',
+            '{customer.firstname}',
+            '{customer.lastname}',
+            '{customer.company}',
+        ], [
+            $this->getBestellung()->cBestellNr,
+            Shopsetting::getInstance()->getValue(CONF_GLOBAL, 'global_shopname'),  //Shop::getSettings([CONF_GLOBAL])['global']['global_shopname'],
+            $oKunde->cVorname,
+            $oKunde->cNachname,
+            $oKunde->cFirma
+        ], $descTemplate);
     }
 
     /**

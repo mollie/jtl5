@@ -61,5 +61,4 @@ class Address implements \JsonSerializable
             $this->streetAdditional = trim($adresse->cAdressZusatz);
         }
     }
-
 }

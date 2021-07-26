@@ -59,5 +59,4 @@ class Address extends \Plugin\ws5_mollie\lib\Payment\Address
             $this->organizationName = $organizationName;
         }
     }
-
 }

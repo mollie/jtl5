@@ -63,7 +63,8 @@ class QueueModel extends AbstractModel
         return parent::save();
     }
 
-    public static function saveToQueue(string $hook, array $args_arr, string $type = 'hook'): bool {
+    public static function saveToQueue(string $hook, array $args_arr, string $type = 'hook'): bool
+    {
         $mQueue = new self();
         $mQueue->cType = $type . ':' . $hook;
         $mQueue->cData = serialize($args_arr);
