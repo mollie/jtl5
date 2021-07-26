@@ -194,8 +194,16 @@ class OrderCheckout extends AbstractCheckout
         }
         $this->lines = $lines;
 
+        if(!defined('MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT')){
+            define('MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT', 100);
+        }
+
+        if(!defined('MOLLIE_KLARNA_MAX_EXPIRY_LIMIT')){
+            define('MOLLIE_KLARNA_MAX_EXPIRY_LIMIT', 28);
+        }
+
         if (($dueDays = (int)self::Plugin()->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) && $dueDays > 0) {
-            $max             = $this->method && strpos($this->method, 'klarna') !== false ? 28 : 100;
+            $max             = $this->method && strpos($this->method, 'klarna') !== false ? MOLLIE_KLARNA_MAX_EXPIRY_LIMIT : MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT;
             $date            = new DateTime(sprintf('+%d DAYS', min($dueDays, $max)), new DateTimeZone('UTC'));
             $this->expiresAt = $date->format('Y-m-d');
         }
