@@ -20,7 +20,7 @@ class OrdersController extends AbstractController
 {
     public static function fetchable(stdClass $data): Response
     {
-        $orderModel = OrderModel::fromID('cOrderId', $data->id, true);
+        $orderModel = OrderModel::fromID( $data->id, 'cOrderId',true);
 
         $oBestellung = new Bestellung($orderModel->kBestellung);
 
