@@ -503,7 +503,8 @@ abstract class AbstractCheckout
     {
         $order = OrderModel::fromID($kId, 'kId', true);
 
-        if (!$order->kBestellung) {
+        // filter paid and storno
+        if (!$order->kBestellung || (int)$order->cStatus > BESTELLUNG_STATUS_IN_BEARBEITUNG || (int)$order->cStatus < 0) {
             return true;
         }
         $oBestellung = new Bestellung($order->kBestellung);
