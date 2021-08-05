@@ -1,7 +1,7 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib;
@@ -15,8 +15,8 @@ use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
-use Plugin\ws5_mollie\lib\Traits\Plugin;
 use RuntimeException;
+use WS\JTL5\Traits\Plugin;
 
 class Queue
 {
@@ -180,7 +180,7 @@ class Queue
 
                     return $todo->done('kBestellung missing');
                 case HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO:
-                    if (self::Plugin()->getConfig()->getValue('autoRefund') !== 'on') {
+                    if (self::Plugin('ws5_mollie')->getConfig()->getValue('autoRefund') !== 'on') {
                         throw new RuntimeException('Auto-Refund disabled');
                     }
 

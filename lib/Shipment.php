@@ -1,7 +1,7 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib;
@@ -10,16 +10,18 @@ use Exception;
 use JTL\Checkout\Lieferschein;
 use JTL\Checkout\Lieferscheinpos;
 use JTL\Checkout\Versand;
-use Mollie\Api\Exceptions\ApiException;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
-use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
 use Shop;
+use WS\JTL5\Exception\APIException;
+use WS\JTL5\Traits\Plugin;
 
 /**
  * Class Shipment
@@ -56,6 +58,11 @@ class Shipment
      */
     protected $oLieferschein;
 
+    /**
+     * Shipment constructor.
+     * @param int                $kLieferschein
+     * @param null|OrderCheckout $checkout
+     */
     public function __construct(int $kLieferschein, OrderCheckout $checkout = null)
     {
         $this->kLieferschein = $kLieferschein;
@@ -64,14 +71,17 @@ class Shipment
         }
 
         if (!$this->getLieferschein() || !$this->getLieferschein()->getLieferschein()) {
-            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschein konnte nicht geladen werden');
+            throw new APIException('Lieferschein konnte nicht geladen werden');
         }
 
         if (!count($this->getLieferschein()->oVersand_arr)) {
-            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Kein Versand gefunden!');
+            throw new APIException('Kein Versand gefunden!');
         }
     }
 
+    /**
+     * @return Lieferschein
+     */
     public function getLieferschein(): Lieferschein
     {
         if (!$this->oLieferschein && $this->kLieferschein) {
@@ -82,16 +92,10 @@ class Shipment
     }
 
     /**
-     * @param int $kBestellung
-     *
-     * @throws IncompatiblePlatform
-     * @throws \JTL\Exceptions\CircularReferenceException
-     * @throws \JTL\Exceptions\ServiceNotFoundException
-     * @throws ApiException
-     * @return (\Mollie\Api\Resources\Shipment|null|string)[]
-     *
-     *
-     * @psalm-return list<\Mollie\Api\Resources\Shipment|null|string>
+     * @param OrderCheckout $checkout
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     * @return array (\Mollie\Api\Resources\Shipment|null|string)[]
      */
     public static function syncBestellung(OrderCheckout $checkout): array
     {
@@ -99,7 +103,7 @@ class Shipment
         if ($checkout->getBestellung()->kBestellung) {
             $oKunde = $checkout->getBestellung()->oKunde ?? new \JTL\Customer\Customer($checkout->getBestellung()->kKunde);
 
-            $shippingActive = self::Plugin()->getConfig()->getValue('shippingActive');
+            $shippingActive = self::Plugin('ws5_mollie')->getConfig()->getValue('shippingActive');
             if ($shippingActive === 'N') {
                 throw new RuntimeException('Shipping deaktiviert');
             }
@@ -113,12 +117,12 @@ class Shipment
                 try {
                     $shipment = new self($oLieferschein->getLieferschein(), $checkout);
 
-                    $mode = self::Plugin()->getConfig()->getValue('shippingMode');
+                    $mode = self::Plugin('ws5_mollie')->getConfig()->getValue('shippingMode');
                     switch ($mode) {
                         case 'A':
                             // ship directly
                             if (!$shipment->send() && !$shipment->getShipment()) {
-                                throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
+                                throw new APIException('Shipment konnte nicht gespeichert werden.');
                             }
                             $shipments[] = $shipment->getShipment();
 
@@ -127,16 +131,16 @@ class Shipment
                             // only ship if complete shipping
                             if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
                                 if (!$shipment->send() && !$shipment->getShipment()) {
-                                    throw new \Plugin\ws5_mollie\lib\Exception\APIException('Shipment konnte nicht gespeichert werden.');
+                                    throw new APIException('Shipment konnte nicht gespeichert werden.');
                                 }
                                 $shipments[] = $shipment->getShipment();
 
                                 break;
                             }
 
-                            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Gastbestellung noch nicht komplett versendet!');
+                            throw new APIException('Gastbestellung noch nicht komplett versendet!');
                     }
-                } catch (\Plugin\ws5_mollie\lib\Exception\APIException $e) {
+                } catch (APIException $e) {
                     $shipments[] = $e->getMessage();
                 } catch (Exception $e) {
                     $shipments[] = $e->getMessage();
@@ -157,11 +161,11 @@ class Shipment
     public function send(): bool
     {
         if ($this->getShipment()) {
-            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Lieferschien bereits an Mollie übertragen: ' . $this->getShipment()->id);
+            throw new APIException('Lieferschien bereits an Mollie übertragen: ' . $this->getShipment()->id);
         }
 
         if ($this->getCheckout()->getMollie(true)->status === OrderStatus::STATUS_COMPLETED) {
-            throw new \Plugin\ws5_mollie\lib\Exception\APIException('Bestellung bei Mollie bereits abgeschlossen!');
+            throw new APIException('Bestellung bei Mollie bereits abgeschlossen!');
         }
 
         $api = $this->getCheckout()->getAPI()->getClient();

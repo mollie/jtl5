@@ -1,7 +1,7 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib;
@@ -18,8 +18,8 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
-use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Shop;
+use WS\JTL5\Traits\Plugin;
 
 abstract class PaymentMethod extends Method
 {
@@ -75,9 +75,9 @@ abstract class PaymentMethod extends Method
     public function isSelectable(): bool
     {
         if (MollieAPI::getMode()) {
-            $selectable = trim(self::Plugin()->getConfig()->getValue('test_apiKey')) !== '';
+            $selectable = trim(self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey')) !== '';
         } else {
-            $selectable = trim(self::Plugin()->getConfig()->getValue('apiKey')) !== '';
+            $selectable = trim(self::Plugin('ws5_mollie')->getConfig()->getValue('apiKey')) !== '';
             if (!$selectable) {
                 $this->doLog('Live API Key missing!', LOGLEVEL_ERROR);
             }
@@ -105,7 +105,7 @@ abstract class PaymentMethod extends Method
     }
 
     /**
-     * @param string $cISOSprache
+     * @param string      $cISOSprache
      * @param null|string $country
      * @return string
      */
@@ -164,9 +164,9 @@ abstract class PaymentMethod extends Method
      * @param $billingCountry
      * @param $currency
      * @param $amount
-     * @return bool
      * @throws IncompatiblePlatform
      * @throws ApiException
+     * @return bool
      */
     protected static function isMethodPossible($method, string $locale, $billingCountry, $currency, $amount): bool
     {
@@ -183,10 +183,10 @@ abstract class PaymentMethod extends Method
                 'locale' => $locale,
                 'amount' => [
                     'currency' => $currency,
-                    'value' => number_format($amount, 2, '.', '')
+                    'value'    => number_format($amount, 2, '.', '')
                 ],
                 'billingCountry' => $billingCountry,
-                'resource' => 'orders',
+                'resource'       => 'orders',
                 'includeWallets' => 'applepay',
             ]);
             foreach ($active as $a) {
@@ -234,22 +234,22 @@ abstract class PaymentMethod extends Method
                 $paymentOptions['customerId'] = $customerID;
             }
 
-            $api = self::Plugin()->getConfig()->getValue($this->moduleID . '_api');
+            $api = self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_api');
 
             $paymentOptions = array_merge($paymentOptions, $this->getPaymentOptions($order, $api));
 
             if ($api === 'payment') {
                 $checkout = PaymentCheckout::factory($order);
-                $payment = $checkout->create($paymentOptions);
-                $url = $payment->getCheckoutUrl();
+                $payment  = $checkout->create($paymentOptions);
+                $url      = $payment->getCheckoutUrl();
             } else {
                 $checkout = OrderCheckout::factory($order);
-                $mOrder = $checkout->create($paymentOptions);
-                $url = $mOrder->getCheckoutUrl();
+                $mOrder   = $checkout->create($paymentOptions);
+                $url      = $mOrder->getCheckoutUrl();
             }
 
             ifndef('MOLLIE_REDIRECT_DELAY', 3);
-            $checkoutMode = self::Plugin()->getConfig()->getValue('checkoutMode');
+            $checkoutMode = self::Plugin('ws5_mollie')->getConfig()->getValue('checkoutMode');
             Shop::Smarty()->assign('redirect', $url)
                 ->assign('checkoutMode', $checkoutMode);
             if ($checkoutMode === 'Y' && !headers_sent()) {
@@ -260,7 +260,7 @@ abstract class PaymentMethod extends Method
 
             Shop::Container()->getAlertService()->addAlert(
                 Alert::TYPE_ERROR,
-                self::Plugin()->getLocalization()->getTranslation('error_create'),
+                self::Plugin('ws5_mollie')->getLocalization()->getTranslation('error_create'),
                 'paymentFailed'
             );
         }
@@ -270,8 +270,8 @@ abstract class PaymentMethod extends Method
 
     /**
      * @param Bestellung $order
-     * @param string $hash
-     * @param array $args
+     * @param string     $hash
+     * @param array      $args
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
      */

@@ -1,7 +1,7 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Model;
@@ -23,7 +23,7 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @property DateTime $dCreated
  *
  */
-final class ShipmentsModel extends AbstractModel
+final class ShipmentsModel extends \WS\JTL5\Model\AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_shipments';
     public const PRIMARY = 'kId';

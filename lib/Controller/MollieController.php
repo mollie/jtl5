@@ -1,7 +1,7 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Controller;
@@ -9,29 +9,32 @@ namespace Plugin\ws5_mollie\lib\Controller;
 use JTL\Plugin\Helper;
 use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Shop;
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Types\PaymentMethod;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Response;
+use stdClass;
 
-class MollieController extends AbstractController
+class MollieController extends \WS\JTL5\Backend\Controller\AbstractController
 {
     /**
-     * @param \stdClass $data
-     * @throws \Mollie\Api\Exceptions\ApiException
-     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @param stdClass $data
+     * @throws IncompatiblePlatform
+     * @throws ApiException
      * @return Response
      */
-    public static function methods(\stdClass $data)
+    public static function methods(stdClass $data)
     {
         $test = false;
-        if (self::Plugin()->getConfig()->getValue('apiKey') === '' && self::Plugin()->getConfig()->getValue('test_apiKey') !== '') {
+        if (self::Plugin('ws5_mollie')->getConfig()->getValue('apiKey') === '' && self::Plugin()->getConfig()->getValue('test_apiKey') !== '') {
             $test = true;
         }
         $api = new MollieAPI($test);
 
         $_methods = $api->getClient()->methods->allAvailable([/*'includeWallets' => 'applepay', 'resource' => 'orders'*/]);
         $methods  = [];
-        $oPlugin  = self::Plugin();
+        $oPlugin  = self::Plugin('ws5_mollie');
 
         foreach ($_methods as $method) {
             if (in_array($method->id, ['voucher', PaymentMethod::DIRECTDEBIT, PaymentMethod::GIFTCARD], true)) {
@@ -71,10 +74,10 @@ WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
     }
 
     /**
-     * @param \stdClass $data
+     * @param stdClass $data
      * @return Response
      */
-    public static function statistics(\stdClass $data)
+    public static function statistics(stdClass $data)
     {
         $id = 'kPlugin_' . Helper::getIDByPluginID('ws5_mollie') . '_%';
 

@@ -1,7 +1,7 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Model;
@@ -30,7 +30,7 @@ namespace Plugin\ws5_mollie\lib\Model;
  * @property string $dReminder
  *
  */
-final class OrderModel extends AbstractModel
+final class OrderModel extends \WS\JTL5\Model\AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_orders';
     public const PRIMARY = 'kId';

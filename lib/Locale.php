@@ -1,12 +1,12 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib;
 
-use Plugin\ws5_mollie\lib\Traits\Plugin;
+use WS\JTL5\Traits\Plugin;
 
 class Locale
 {
@@ -46,6 +46,6 @@ class Locale
             return $locale;
         }
 
-        return self::Plugin()->getConfig()->getValue('fallbackLocale');
+        return self::Plugin('ws5_mollie')->getConfig()->getValue('fallbackLocale');
     }
 }

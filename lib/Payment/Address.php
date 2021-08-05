@@ -1,13 +1,12 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Payment;
 
-use JTL\Checkout\Adresse;
-use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use WS\JTL5\Traits\Jsonable;
 
 class Address implements \JsonSerializable
 {

@@ -1,7 +1,7 @@
 <?php
-
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Hook;
@@ -10,7 +10,7 @@ use JTL\Language\LanguageHelper;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use Session;
 
-class Checkbox extends AbstractHook
+class Checkbox extends \WS\JTL5\Hook\AbstractHook
 {
     /**
      * @param $args_arr
@@ -18,7 +18,7 @@ class Checkbox extends AbstractHook
      */
     public static function execute(&$args_arr): void
     {
-        if (!Session::get('Zahlungsart') || strpos(Session::get('Zahlungsart')->cModulId, 'kPlugin_' . self::Plugin()->getID() . '_') === false) {
+        if (!Session::get('Zahlungsart') || strpos(Session::get('Zahlungsart')->cModulId, 'kPlugin_' . self::Plugin('ws5_mollie')->getID() . '_') === false) {
             return;
         }
 
@@ -46,8 +46,8 @@ class Checkbox extends AbstractHook
             $langs = LanguageHelper::getAllLanguages(1);
             foreach ($langs as $kSprache => $lang) {
                 $checkbox->oCheckBoxSprache_arr[$kSprache] = (object)[
-                    'cText'         => self::Plugin()->getLocalization()->getTranslation('checkboxText', $lang->getIso()),
-                    'cBeschreibung' => self::Plugin()->getLocalization()->getTranslation('checkboxDescr', $lang->getIso()),
+                    'cText'         => self::Plugin('ws5_mollie')->getLocalization()->getTranslation('checkboxText', $lang->getIso()),
+                    'cBeschreibung' => self::Plugin('ws5_mollie')->getLocalization()->getTranslation('checkboxDescr', $lang->getIso()),
                     'kSprache'      => $kSprache,
                     'kCheckbox'     => -1
                 ];

@@ -72,7 +72,8 @@ return (new \PhpCsFixer\Config())
         'combine_consecutive_unsets' => true,
         'header_comment' => [
             'commentType' => 'PHPDoc',
-            'separate' => 'bottom'
+            'separate' => 'bottom',
+            'header' => sprintf("@copyright %s WebStollen GmbH\n@link https://www.webstollen.de", date('Y'))
         ],
         'list_syntax' => ['syntax' => 'long'],
         'method_argument_space' => ['ensure_fully_multiline' => true],
