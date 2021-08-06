@@ -40,8 +40,8 @@ class CreditCard extends PaymentMethod
 
     public function handleAdditional(array $post): bool
     {
-        $components = self::Plugin()->getConfig()->getValue($this->moduleID . '_components');
-        $profileId  = self::Plugin()->getConfig()->getValue('profileId');
+        $components = self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_components');
+        $profileId  = self::Plugin('ws5_mollie')->getConfig()->getValue('profileId');
 
         if ($components === 'N' || !$profileId || trim($profileId) === '') {
             return parent::handleAdditional($post);
@@ -57,10 +57,10 @@ class CreditCard extends PaymentMethod
         }
 
         try {
-            $trustBadge   = (bool)self::Plugin()->getConfig()->getValue($this->moduleID . '_trustBadge');
+            $trustBadge   = (bool)self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_trustBadge');
             $locale       = self::getLocale(Session::getInstance()->getLanguage()->getIso(), Session::getCustomer()->cLand ?? null);
             $mode         = MollieAPI::getMode();
-            $errorMessage = json_encode(self::Plugin()->getLocalization()->getTranslation('mcErrorMessage'), JSON_THROW_ON_ERROR);
+            $errorMessage = json_encode(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('mcErrorMessage'), JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             Shop::Container()->getLogService()->error($e->getMessage(), ['e' => $e]);
 
@@ -82,7 +82,7 @@ class CreditCard extends PaymentMethod
             ->assign('token', $token ?? false)
             ->assign('testMode', $mode ?? false)
             ->assign('errorMessage', $errorMessage ?? 'Unexpected Error.')
-            ->assign('mollieLang', self::Plugin()->getLocalization()->getTranslations());
+            ->assign('mollieLang', self::Plugin('ws5_mollie')->getLocalization()->getTranslations());
 
         return false;
     }

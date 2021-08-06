@@ -55,7 +55,7 @@ class OrderCheckout extends AbstractCheckout
             try {
                 $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->orderId, ['embed' => 'payments']);
                 if (in_array($this->order->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
-                    throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
+                    throw new RuntimeException(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
                 if ($this->order->status === OrderStatus::STATUS_CREATED) {
                     if ($this->order->payments()) {
@@ -203,7 +203,7 @@ class OrderCheckout extends AbstractCheckout
             define('MOLLIE_KLARNA_MAX_EXPIRY_LIMIT', 28);
         }
 
-        if (($dueDays = (int)self::Plugin()->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) && $dueDays > 0) {
+        if (($dueDays = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) && $dueDays > 0) {
             $max             = $this->method && strpos($this->method, 'klarna') !== false ? MOLLIE_KLARNA_MAX_EXPIRY_LIMIT : MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT;
             $date            = new DateTime(sprintf('+%d DAYS', min($dueDays, $max)), new DateTimeZone('UTC'));
             $this->expiresAt = $date->format('Y-m-d');

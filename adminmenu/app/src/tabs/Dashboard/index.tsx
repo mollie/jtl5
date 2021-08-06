@@ -43,7 +43,7 @@ const Dashboard = () => {
     api
       .run('mollie', 'methods')
       .then((res) => {
-        setMethods(res.data)
+        setMethods(res.data.data)
         setSetup(false)
       })
       .catch(console.error)
@@ -56,7 +56,7 @@ const Dashboard = () => {
     setLoading('statistics', true)
     api
       .run('mollie', 'statistics')
-      .then((res) => setStatistics(res.data))
+      .then((res) => setStatistics(res.data.data))
       .catch(console.error)
       .finally(() => setLoading('statistics', false))
   }, [api])

@@ -23,8 +23,7 @@ const Shipments = ({ mollie, kBestellung }: ShipmentsProps) => {
         kBestellung: kBestellung,
       })
       .then((result) => {
-        console.log(result)
-        setShipments(result.data)
+        setShipments(result.data.data)
       })
       .catch((err) => {
         console.log(err)

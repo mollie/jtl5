@@ -36,7 +36,7 @@ class ShipmentsController extends AbstractController
 
             $oKunde = new Kunde($checkout->getBestellung()->kKunde);
 
-            $mode = self::Plugin()->getConfig()->getValue('shippingMode');
+            $mode = self::Plugin('ws5_mollie')->getConfig()->getValue('shippingMode');
             switch ($mode) {
                 case 'A':
                     // ship directly

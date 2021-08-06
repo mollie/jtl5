@@ -22,7 +22,7 @@ const Logs = ({ kBestellung, orderId }: LogsProps) => {
         id: orderId,
       })
       .then((result) => {
-        setLogs(result.data)
+        setLogs(result.data.data)
       })
       .catch((err) => {
         console.log(err)

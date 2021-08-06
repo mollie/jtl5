@@ -229,13 +229,23 @@
             "source": {
                 "type": "git",
                 "url": "https://gitlab.webstollen.de/webstollen/composer/jtl5-plugin.git",
-                "reference": "db6b28110d0e34d90b496efa6a87820582571e3f"
+                "reference": "3229e905032abe496159e694315bf8aeedd4fe42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.webstollen.de/api/v4/projects/480/packages/composer/archives/webstollen/jtl5-plugin.zip?sha=db6b28110d0e34d90b496efa6a87820582571e3f",
-                "reference": "db6b28110d0e34d90b496efa6a87820582571e3f",
+                "url": "https://gitlab.webstollen.de/api/v4/projects/480/packages/composer/archives/webstollen/jtl5-plugin.zip?sha=3229e905032abe496159e694315bf8aeedd4fe42",
+                "reference": "3229e905032abe496159e694315bf8aeedd4fe42",
                 "shasum": ""
+            },
+            "archive": {
+                "name": "JTL5_Plugin",
+                "exclude": [
+                    "docker",
+                    "core",
+                    "tests",
+                    "docker-compose.yml",
+                    "phpunit.xml"
+                ]
             },
             "require": {
                 "ext-dom": "*",
@@ -718,16 +728,16 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "1.13.1",
+            "version": "1.13.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "e6e7b7d5b45a2f2abc5460cc6396480b2b1d321f"
+                "reference": "5b668aef16090008790395c02c893b1ba13f7e08"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/e6e7b7d5b45a2f2abc5460cc6396480b2b1d321f",
-                "reference": "e6e7b7d5b45a2f2abc5460cc6396480b2b1d321f",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/5b668aef16090008790395c02c893b1ba13f7e08",
+                "reference": "5b668aef16090008790395c02c893b1ba13f7e08",
                 "shasum": ""
             },
             "require": {
@@ -784,9 +794,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/annotations/issues",
-                "source": "https://github.com/doctrine/annotations/tree/1.13.1"
+                "source": "https://github.com/doctrine/annotations/tree/1.13.2"
             },
-            "time": "2021-05-16T18:07:53+00:00"
+            "time": "2021-08-05T19:00:23+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -5738,5 +5748,5 @@
         "php": ">=7.3.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.0.0"
 }

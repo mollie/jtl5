@@ -5,7 +5,9 @@
   "config": {
     "optimize-autoloader": true,
     "sort-packages": true,
-    "gitlab-domains": ["gitlab.webstollen.de"]
+    "gitlab-domains": [
+      "gitlab.webstollen.de"
+    ]
   },
   "require": {
     "php": ">=7.3.0",
@@ -28,6 +30,15 @@
       "Plugin\\ws5_mollie\\lib\\": "./lib"
     }
   },
+  "homepage": "https://www.webstollen.de",
+  "support": {
+    "email": "support@webstollen.de",
+    "source": "https://github.com/mollie/jtl5",
+    "wiki": "https://github.com/mollie/jtl5/wiki",
+    "issues": "https://github.com/mollie/jtl5/issues",
+    "forum": "https://ws-url.de/help",
+    "docs": "https://ws-url.de/doku-mollie"
+  },
   "authors": [
     {
       "email": "proske@webstollen.de",
@@ -36,7 +47,7 @@
     }
   ],
   "repositories": {
-    "202":{
+    "202": {
       "type": "composer",
       "url": "https://gitlab.webstollen.de/api/v4/group/202/-/packages/composer/packages.json"
     }

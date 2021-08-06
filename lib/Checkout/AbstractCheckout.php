@@ -347,10 +347,10 @@ abstract class AbstractCheckout
     public function getPaymentMethod()
     {
         if (!$this->paymentMethod) {
-            if ($this->getBestellung()->Zahlungsart && strpos($this->getBestellung()->Zahlungsart->cModulId, "kPlugin_{$this::Plugin()->getID()}_") !== false) {
+            if ($this->getBestellung()->Zahlungsart && strpos($this->getBestellung()->Zahlungsart->cModulId, "kPlugin_{$this::Plugin('ws5_mollie')->getID()}_") !== false) {
                 $this->paymentMethod = LegacyMethod::create($this->getBestellung()->Zahlungsart->cModulId);
             } else {
-                $this->paymentMethod = LegacyMethod::create("kPlugin_{$this::Plugin()->getID()}_mollie");
+                $this->paymentMethod = LegacyMethod::create("kPlugin_{$this::Plugin('ws5_mollie')->getID()}_mollie");
             }
         }
 
