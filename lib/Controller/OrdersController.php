@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  * @link https://www.webstollen.de
@@ -55,11 +56,11 @@ class OrdersController extends AbstractController
                 $shipmentsModel = ShipmentsModel::fromID((int)$lieferschein->kLieferschein, 'kLieferschein', false);
 
                 $response[] = (object)[
-                    'kLieferschein' => $lieferschein->kLieferschein,
+                    'kLieferschein'   => $lieferschein->kLieferschein,
                     'cLieferscheinNr' => $lieferschein->cLieferscheinNr,
-                    'cHinweis' => $lieferschein->cHinweis,
-                    'dErstellt' => date('Y-m-d H:i:s', $lieferschein->dErstellt),
-                    'shipment' => $shipmentsModel->kBestellung ? $shipmentsModel : null,
+                    'cHinweis'        => $lieferschein->cHinweis,
+                    'dErstellt'       => date('Y-m-d H:i:s', $lieferschein->dErstellt),
+                    'shipment'        => $shipmentsModel->kBestellung ? $shipmentsModel : null,
                 ];
             }
         }
@@ -87,8 +88,8 @@ class OrdersController extends AbstractController
 
     /**
      * @param stdClass $data
-     * @return AbstractResult
      * @throws Exception
+     * @return AbstractResult
      */
     public static function one(stdClass $data): AbstractResult
     {
@@ -101,15 +102,15 @@ class OrdersController extends AbstractController
 
         $checkout->updateModel()->saveModel();
 
-        $result['mollie'] = $checkout->getMollie();
-        $result['order'] = $checkout->getModel()->jsonSerialize();
+        $result['mollie']     = $checkout->getMollie();
+        $result['order']      = $checkout->getModel()->jsonSerialize();
         $result['bestellung'] = $checkout->getBestellung();
-        $result['logs'] = Shop::Container()->getDB()
+        $result['logs']       = Shop::Container()->getDB()
             ->executeQueryPrepared(
                 'SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook',
                 [
                     ':cTypeWebhook' => "%{$checkout->getModel()->cOrderId}%",
-                    ':cTypeHook' => "%:{$checkout->getModel()->kBestellung}%"
+                    ':cTypeHook'    => "%:{$checkout->getModel()->kBestellung}%"
                 ],
                 2
             );
@@ -119,8 +120,8 @@ class OrdersController extends AbstractController
 
     /**
      * @param stdClass $data
-     * @return AbstractResult
      * @throws Exception
+     * @return AbstractResult
      */
     public static function reminder(stdClass $data): AbstractResult
     {

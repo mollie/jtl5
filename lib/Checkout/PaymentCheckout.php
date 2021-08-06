@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  * @link https://www.webstollen.de
@@ -117,7 +118,7 @@ class PaymentCheckout extends AbstractCheckout
             $data             = [];
             $data['fBetrag']  = (float)$this->getMollie()->amount->value;
             $data['cISO']     = $this->getMollie()->amount->currency;
-            $data['cZahler']  = $this->getMollie()->details->paypalPayerId ?? $this->getMollie()->customerId;
+            $data['cZahler']  = $this->getMollie()->details->paypalPayerId   ?? $this->getMollie()->customerId;
             $data['cHinweis'] = $this->getMollie()->details->paypalReference ?? $this->getMollie()->id;
 
             return (object)$data;

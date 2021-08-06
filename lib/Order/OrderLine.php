@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  * @link https://www.webstollen.de
@@ -78,7 +79,7 @@ class OrderLine implements \JsonSerializable
 
         if (fmod($oPosition->nAnzahl, 1) !== 0.0) {
             $_netto *= $_amount;
-            $_amount          = 1;
+            $_amount = 1;
             $orderLine->name .= sprintf(' (%.2f %s)', (float)$oPosition->nAnzahl, $oPosition->cEinheit);
         }
 
@@ -192,11 +193,11 @@ class OrderLine implements \JsonSerializable
      */
     public static function getCredit(Bestellung $oBestellung): self
     {
-        $line              = new self();
-        $line->type        = OrderLineType::TYPE_STORE_CREDIT;
-        $line->name        = 'Guthaben';
-        $line->quantity    = 1;
-        $line->unitPrice   = (object)[
+        $line            = new self();
+        $line->type      = OrderLineType::TYPE_STORE_CREDIT;
+        $line->name      = 'Guthaben';
+        $line->quantity  = 1;
+        $line->unitPrice = (object)[
             'value'    => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
@@ -204,8 +205,8 @@ class OrderLine implements \JsonSerializable
             'value'    => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
-        $line->vatRate     = '0.00';
-        $line->vatAmount   = (object)[
+        $line->vatRate   = '0.00';
+        $line->vatAmount = (object)[
             'value'    => number_format(0, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];

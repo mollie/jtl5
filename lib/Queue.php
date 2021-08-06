@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  * @link https://www.webstollen.de
@@ -35,7 +36,7 @@ class Queue
                 continue;
             }
 
-            if ((list($type, $id) = explode(':', $todo->cType))) {
+            if (([$type, $id] = explode(':', $todo->cType))) {
                 try {
                     switch ($type) {
                         case 'webhook':
@@ -114,9 +115,9 @@ class Queue
     /**
      * @param int        $hook
      * @param QueueModel $todo
-     * @throws ServiceNotFoundException
      * @throws Exception
      * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return bool
      */
     protected static function handleHook(int $hook, QueueModel $todo): bool
@@ -206,6 +207,8 @@ class Queue
 
     /**
      * @param mixed $delay
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return true
      */
     public static function storno($delay): bool
@@ -234,9 +237,9 @@ class Queue
                     } else {
                         $checkout->Log('AutoStorno: bereits zur WAWI synchronisiert.', LOGLEVEL_ERROR);
                     }
-                } else {
+                }/* else {
                     $checkout->Log(sprintf('AutoStorno aktiv: %d (%s) - Method: %s', (int)$pm::ALLOW_AUTO_STORNO, $pm::METHOD, $checkout->getMollie()->method), LOGLEVEL_ERROR);
-                }
+                }*/
             } catch (Exception $e) {
                 Shop::Container()->getLogService()->error(sprintf('Fehler beim stornieren der Order: %s / Bestellung: %s: %s', $o->cBestellNr, $o->kId, $e->getMessage()));
             }

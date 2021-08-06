@@ -1,20 +1,25 @@
 <?php
 
+use PhpCsFixer\Config;
+
 $finder = PhpCsFixer\Finder::create()
     ->exclude('report')
     ->exclude('vendor')
-    ->in(__DIR__);
+    ->in(__DIR__ . '/lib')
+    ->in(__DIR__ . '/paymentmethod')
+    ->in(__DIR__ . '/frontend');
 
-return (new \PhpCsFixer\Config())
+return (new Config())
     ->setRiskyAllowed(true)
     ->setRules([
-        '@PSR2' => true,
+        '@PSR12' => true,
         'braces' => [
             'allow_single_line_closure' => false
         ],
         'cast_spaces' => [
             'space' => 'none'
         ],
+        'fully_qualified_strict_types' => true,
         'single_quote' => true,
         'is_null' => true,
         'no_php4_constructor' => true,
@@ -37,7 +42,7 @@ return (new \PhpCsFixer\Config())
         'no_alias_functions' => true,
         'blank_line_after_namespace' => true,
         'line_ending' => true,
-        'no_multiline_whitespace_before_semicolons' => true,
+        'multiline_whitespace_before_semicolons' => false,
         'single_import_per_statement' => true,
         'no_leading_namespace_whitespace' => true,
         'no_blank_lines_after_class_opening' => true,
@@ -45,14 +50,12 @@ return (new \PhpCsFixer\Config())
         'object_operator_without_whitespace' => true,
         'no_spaces_inside_parenthesis' => true,
         'binary_operator_spaces' => [
-            'align_double_arrow' => true,
-            'align_equals' => true
+            'default' => 'align_single_space_minimal'
         ],
         'phpdoc_align' => [
             'tags' => ['param']
         ],
         'no_leading_import_slash' => true,
-        'blank_line_before_return' => true,
         'self_accessor' => true,
         'single_blank_line_before_namespace' => true,
         'single_line_after_imports' => true,
@@ -71,27 +74,14 @@ return (new \PhpCsFixer\Config())
         'blank_line_before_statement' => true,
         'combine_consecutive_unsets' => true,
         'header_comment' => [
-            'commentType' => 'PHPDoc',
+            'comment_type' => 'PHPDoc',
             'separate' => 'bottom',
             'header' => sprintf("@copyright %s WebStollen GmbH\n@link https://www.webstollen.de", date('Y'))
         ],
-        'list_syntax' => ['syntax' => 'long'],
-        'method_argument_space' => ['ensure_fully_multiline' => true],
-        'no_extra_consecutive_blank_lines' => [
-            'tokens' => [
-                'break',
-                'continue',
-                'extra',
-                'return',
-                'throw',
-                'use',
-                'parenthesis_brace_block',
-                'square_brace_block',
-                'curly_brace_block'
-            ]
-        ],
+        'list_syntax' => ['syntax' => 'short'],
+        'phpdoc_trim_consecutive_blank_line_separation' => true,
         'no_null_property_initialization' => true,
-        'no_short_echo_tag' => true,
+        'echo_tag_syntax' => ['format' => 'short'],
         'no_useless_else' => true,
         'no_useless_return' => true,
         'ordered_class_elements' => false,

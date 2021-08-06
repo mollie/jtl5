@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright 2021 WebStollen GmbH
  * @link https://www.webstollen.de
@@ -219,7 +220,7 @@ class Shipment
         }
         if ($this->tracking) {
             $this->getModel()->cCarrier = $this->tracking['carrier'] ?? '';
-            $this->getModel()->cCode    = $this->tracking['code'] ?? '';
+            $this->getModel()->cCode    = $this->tracking['code']    ?? '';
         }
 
         return $this;

@@ -12,7 +12,7 @@
   "require": {
     "php": ">=7.3.0",
     "mollie/mollie-api-php": "^2.31.1",
-    "webstollen/jtl5-plugin": "dev-master"
+    "webstollen/jtl5-plugin": "^0.1"
   },
   "require-dev": {
     "thibautselingue/local-php-security-checker-installer": "^1.0.3",
@@ -20,7 +20,7 @@
     "phpunit/phpunit": "^8.5",
     "phpmetrics/phpmetrics": "^2.7",
     "squizlabs/php_codesniffer": "3.*",
-    "friendsofphp/php-cs-fixer": "^2.16",
+    "friendsofphp/php-cs-fixer": "^3.0",
     "phpstan/phpstan": "^0.12.90",
     "vimeo/psalm": "^4.8.1",
     "phpmd/phpmd": "^2.10.1"
@@ -53,12 +53,14 @@
     }
   },
   "scripts": {
-    "analyze": "phpmetrics --report-html=report ./",
+
     "test": "phpunit",
-    "sniff": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
-    "sniff:fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
-    "csfix": "php-cs-fixer fix",
+    "analyze": "phpmetrics --report-html=report ./",
+    "phpcs": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
+    "phpcbf": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
+    "php-cs-fixer": "php-cs-fixer fix",
     "phpstan": "phpstan analyse lib",
+    "fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./ && php-cs-fixer fix",
     "psalm": "psalm",
     "psalm:fix": "psalm --alter --issues=MissingReturnType,InvalidReturnType,MissingClosureReturnType,LessSpecificReturnType,MissingParamType",
     "post-status-cmd": [
