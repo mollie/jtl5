@@ -4,11 +4,15 @@
   "description": "JTL-Shop 5 Plugin Container",
   "config": {
     "optimize-autoloader": true,
-    "sort-packages": true
+    "sort-packages": true,
+    "gitlab-domains": [
+      "gitlab.webstollen.de"
+    ]
   },
   "require": {
     "php": ">=7.3.0",
-    "mollie/mollie-api-php": "^2.31.1"
+    "mollie/mollie-api-php": "^2.31.1",
+    "webstollen/jtl5-plugin": "^0.1"
   },
   "require-dev": {
     "thibautselingue/local-php-security-checker-installer": "^1.0.3",
@@ -16,7 +20,7 @@
     "phpunit/phpunit": "^8.5",
     "phpmetrics/phpmetrics": "^2.7",
     "squizlabs/php_codesniffer": "3.*",
-    "friendsofphp/php-cs-fixer": "^2.16",
+    "friendsofphp/php-cs-fixer": "^3.0",
     "phpstan/phpstan": "^0.12.90",
     "vimeo/psalm": "^4.8.1",
     "phpmd/phpmd": "^2.10.1"
@@ -26,6 +30,15 @@
       "Plugin\\ws5_mollie\\lib\\": "./lib"
     }
   },
+  "homepage": "https://www.webstollen.de",
+  "support": {
+    "email": "support@webstollen.de",
+    "source": "https://github.com/mollie/jtl5",
+    "wiki": "https://github.com/mollie/jtl5/wiki",
+    "issues": "https://github.com/mollie/jtl5/issues",
+    "forum": "https://ws-url.de/help",
+    "docs": "https://ws-url.de/doku-mollie"
+  },
   "authors": [
     {
       "email": "proske@webstollen.de",
@@ -33,13 +46,21 @@
       "homepage": "https://www.webstollen.de"
     }
   ],
+  "repositories": {
+    "202": {
+      "type": "composer",
+      "url": "https://gitlab.webstollen.de/api/v4/group/202/-/packages/composer/packages.json"
+    }
+  },
   "scripts": {
-    "analyze": "phpmetrics --report-html=report ./",
+
     "test": "phpunit",
-    "sniff": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
-    "sniff:fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
-    "csfix": "php-cs-fixer fix",
+    "analyze": "phpmetrics --report-html=report ./",
+    "phpcs": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
+    "phpcbf": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
+    "php-cs-fixer": "php-cs-fixer fix",
     "phpstan": "phpstan analyse lib",
+    "fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./ && php-cs-fixer fix",
     "psalm": "psalm",
     "psalm:fix": "psalm --alter --issues=MissingReturnType,InvalidReturnType,MissingClosureReturnType,LessSpecificReturnType,MissingParamType",
     "post-status-cmd": [

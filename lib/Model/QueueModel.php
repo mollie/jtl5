@@ -2,6 +2,7 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Model;
@@ -23,7 +24,7 @@ use JTL\Shop;
  * @property bool $bLock
  *
  */
-class QueueModel extends AbstractModel
+class QueueModel extends \WS\JTL5\Model\AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_queue';
     public const PRIMARY = 'kId';
@@ -40,7 +41,7 @@ class QueueModel extends AbstractModel
     }
 
     /**
-     * @param string $result
+     * @param string      $result
      * @param null|string $date
      * @return bool
      */
@@ -65,9 +66,9 @@ class QueueModel extends AbstractModel
 
     public static function saveToQueue(string $hook, array $args_arr, string $type = 'hook'): bool
     {
-        $mQueue = new self();
-        $mQueue->cType = $type . ':' . $hook;
-        $mQueue->cData = serialize($args_arr);
+        $mQueue           = new self();
+        $mQueue->cType    = $type . ':' . $hook;
+        $mQueue->cData    = serialize($args_arr);
         $mQueue->dCreated = date('Y-m-d H:i:s');
 
         try {
@@ -75,6 +76,7 @@ class QueueModel extends AbstractModel
         } catch (Exception $e) {
             Shop::Container()->getLogService()
                 ->error('mollie::saveToQueue: ' . $e->getMessage() . ' - ' . print_r($args_arr, 1));
+
             return false;
         }
     }

@@ -2,6 +2,7 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Hook;
@@ -15,12 +16,12 @@ use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use RuntimeException;
 
-class Queue extends AbstractHook
+class Queue extends \WS\JTL5\Hook\AbstractHook
 {
     public static function bestellungInDB(array $args_arr): void
     {
         if (
-            self::Plugin()->getConfig()->getValue('onlyPaid') === 'on'
+            self::Plugin('ws5_mollie')->getConfig()->getValue('onlyPaid') === 'on'
             && array_key_exists('oBestellung', $args_arr)
             && AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)
         ) {
@@ -34,7 +35,7 @@ class Queue extends AbstractHook
         if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
             QueueModel::saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS . ':' . (int)$args_arr['oBestellung']->kBestellung, [
                 'kBestellung' => $args_arr['oBestellung']->kBestellung,
-                'status' => (int)$args_arr['status']
+                'status'      => (int)$args_arr['status']
             ]);
         }
     }
@@ -63,7 +64,7 @@ class Queue extends AbstractHook
                 ], 1);
 
                 if (!$raw) {
-                    throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errOrderNotFound'));
+                    throw new RuntimeException(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errOrderNotFound'));
                 }
 
                 if (strpos($raw->cOrderId, 'tr_') === 0) {
@@ -75,16 +76,16 @@ class Queue extends AbstractHook
                 $checkout->updateModel()->saveModel();
 
                 if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->cStatus, ['completed', 'paid', 'authorized', 'pending'])) {
-                    throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
+                    throw new RuntimeException(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
 
                 $options = [];
-                if (self::Plugin()->getConfig()->getValue('resetMethod') !== 'on') {
+                if (self::Plugin('ws5_mollie')->getConfig()->getValue('resetMethod') !== 'on') {
                     $options['method'] = $checkout->getModel()->cMethod;
                 }
 
                 $mollie = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);
-                $url = $mollie->getCheckoutUrl();
+                $url    = $mollie->getCheckoutUrl();
 
                 header('Location: ' . $url);
                 exit();

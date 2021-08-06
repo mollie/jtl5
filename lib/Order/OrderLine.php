@@ -2,6 +2,7 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Order;
@@ -12,8 +13,8 @@ use Exception;
 use JTL\Cart\CartItem;
 use JTL\Cart\CartItemProperty;
 use Mollie\Api\Types\OrderLineType;
-use Plugin\ws5_mollie\lib\Traits\Jsonable;
 use stdClass;
+use WS\JTL5\Traits\Jsonable;
 
 class OrderLine implements \JsonSerializable
 {
@@ -47,9 +48,9 @@ class OrderLine implements \JsonSerializable
 
     /**
      * @param CartItem|stdClass $oPosition
-     * @param Currency $currency
-     * @return OrderLine
+     * @param Currency          $currency
      * @throws Exception
+     * @return OrderLine
      */
     public static function factory($oPosition, Currency $currency): self
     {
@@ -77,8 +78,8 @@ class OrderLine implements \JsonSerializable
         $_amount = (float)$oPosition->nAnzahl;
 
         if (fmod($oPosition->nAnzahl, 1) !== 0.0) {
-            $_netto          *= $_amount;
-            $_amount          = 1;
+            $_netto *= $_amount;
+            $_amount = 1;
             $orderLine->name .= sprintf(' (%.2f %s)', (float)$oPosition->nAnzahl, $oPosition->cEinheit);
         }
 
@@ -109,10 +110,10 @@ class OrderLine implements \JsonSerializable
             /** @var CartItemProperty $eigenschaft */
             foreach ($oPosition->WarenkorbPosEigenschaftArr as $eigenschaft) {
                 $metadata['properties'][] = [
-                    'kEigenschaft' => $eigenschaft->kEigenschaft,
+                    'kEigenschaft'     => $eigenschaft->kEigenschaft,
                     'kEigenschaftWert' => $eigenschaft->kEigenschaftWert,
-                    'name' => $eigenschaft->cEigenschaftName,
-                    'value' => $eigenschaft->cEigenschaftWertName,
+                    'name'             => $eigenschaft->cEigenschaftName,
+                    'value'            => $eigenschaft->cEigenschaftWertName,
                 ];
                 if (strlen(json_encode($metadata)) > 1000) {
                     array_pop($metadata['properties']);
@@ -128,8 +129,8 @@ class OrderLine implements \JsonSerializable
 
     /**
      * @param $nPosTyp
-     * @return string
      * @throws Exception
+     * @return string
      */
     protected static function getType($nPosTyp): string
     {
@@ -157,8 +158,8 @@ class OrderLine implements \JsonSerializable
 
     /**
      * @param OrderLine[] $orderLines
-     * @param Amount $amount
-     * @param Currency $currency
+     * @param Amount      $amount
+     * @param Currency    $currency
      * @return null|OrderLine
      */
     public static function getRoundingCompensation(array $orderLines, Amount $amount, Currency $currency): ?self
@@ -192,21 +193,21 @@ class OrderLine implements \JsonSerializable
      */
     public static function getCredit(Bestellung $oBestellung): self
     {
-        $line              = new self();
-        $line->type        = OrderLineType::TYPE_STORE_CREDIT;
-        $line->name        = 'Guthaben';
-        $line->quantity    = 1;
-        $line->unitPrice   = (object)[
-            'value' => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
+        $line            = new self();
+        $line->type      = OrderLineType::TYPE_STORE_CREDIT;
+        $line->name      = 'Guthaben';
+        $line->quantity  = 1;
+        $line->unitPrice = (object)[
+            'value'    => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
         $line->totalAmount = (object)[
-            'value' => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
+            'value'    => number_format($oBestellung->Waehrung->getConversionFactor() * $oBestellung->fGuthaben, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
-        $line->vatRate     = '0.00';
-        $line->vatAmount   = (object)[
-            'value' => number_format(0, 2, '.', ''),
+        $line->vatRate   = '0.00';
+        $line->vatAmount = (object)[
+            'value'    => number_format(0, 2, '.', ''),
             'currency' => $oBestellung->Waehrung->getCode(),
         ];
 

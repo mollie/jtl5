@@ -34,8 +34,7 @@ const OrderDetails = (props: OrderDetailsProps) => {
           id: props.id,
         })
         .then((res) => {
-          console.log(res.data)
-          setData(res.data)
+          setData(res.data.data)
           setError(null)
         })
         .catch(setError)

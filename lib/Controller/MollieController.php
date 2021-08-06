@@ -2,6 +2,7 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Controller;
@@ -9,29 +10,33 @@ namespace Plugin\ws5_mollie\lib\Controller;
 use JTL\Plugin\Helper;
 use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Shop;
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Types\PaymentMethod;
 use Plugin\ws5_mollie\lib\MollieAPI;
-use Plugin\ws5_mollie\lib\Response;
+use stdClass;
+use WS\JTL5\Backend\AbstractResult;
+use WS\JTL5\Backend\Controller\AbstractController;
 
 class MollieController extends AbstractController
 {
     /**
-     * @param \stdClass $data
-     * @throws \Mollie\Api\Exceptions\ApiException
-     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
-     * @return Response
+     * @param stdClass $data
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     * @return AbstractResult
      */
-    public static function methods(\stdClass $data)
+    public static function methods(stdClass $data): AbstractResult
     {
         $test = false;
-        if (self::Plugin()->getConfig()->getValue('apiKey') === '' && self::Plugin()->getConfig()->getValue('test_apiKey') !== '') {
+        if (self::Plugin('ws5_mollie')->getConfig()->getValue('apiKey') === '' && self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey') !== '') {
             $test = true;
         }
         $api = new MollieAPI($test);
 
         $_methods = $api->getClient()->methods->allAvailable([/*'includeWallets' => 'applepay', 'resource' => 'orders'*/]);
         $methods  = [];
-        $oPlugin  = self::Plugin();
+        $oPlugin  = self::Plugin('ws5_mollie');
 
         foreach ($_methods as $method) {
             if (in_array($method->id, ['voucher', PaymentMethod::DIRECTDEBIT, PaymentMethod::GIFTCARD], true)) {
@@ -67,14 +72,14 @@ WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
             }
         }
 
-        return new Response($methods);
+        return new AbstractResult($methods);
     }
 
     /**
-     * @param \stdClass $data
-     * @return Response
+     * @param stdClass $data
+     * @return AbstractResult
      */
-    public static function statistics(\stdClass $data)
+    public static function statistics(stdClass $data): AbstractResult
     {
         $id = 'kPlugin_' . Helper::getIDByPluginID('ws5_mollie') . '_%';
 
@@ -105,10 +110,10 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
             ':cModulId4' => $id,
         ], 2);
 
-        $response = array_combine(array_map(function ($v) {
+        $response = array_combine(array_map(static function ($v) {
             return $v->timespan;
         }, $result), array_values($result));
 
-        return new Response($response);
+        return new AbstractResult($response);
     }
 }

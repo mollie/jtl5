@@ -2,12 +2,12 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Checkout;
 
 use Exception;
-use JTL\Shopsetting;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 use Shop;
@@ -36,6 +36,7 @@ class PaymentCheckout extends AbstractCheckout
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId);
                 if ($this->payment->status === PaymentStatus::STATUS_OPEN) {
                     $this->updateModel()->updateModel();
+
                     return $this->payment;
                 }
             } catch (Exception $e) {
@@ -73,8 +74,8 @@ class PaymentCheckout extends AbstractCheckout
     /**
      * @param mixed $force
      * @throws Exception
-     * @return Payment
      * @throws Exception
+     * @return Payment
      */
     public function getMollie($force = false): ?Payment
     {
@@ -108,8 +109,8 @@ class PaymentCheckout extends AbstractCheckout
     }
 
     /**
-     * @return stdClass|null
      * @throws Exception
+     * @return null|stdClass
      */
     public function getIncomingPayment(): ?stdClass
     {
@@ -117,7 +118,7 @@ class PaymentCheckout extends AbstractCheckout
             $data             = [];
             $data['fBetrag']  = (float)$this->getMollie()->amount->value;
             $data['cISO']     = $this->getMollie()->amount->currency;
-            $data['cZahler']  = $this->getMollie()->details->paypalPayerId ?? $this->getMollie()->customerId;
+            $data['cZahler']  = $this->getMollie()->details->paypalPayerId   ?? $this->getMollie()->customerId;
             $data['cHinweis'] = $this->getMollie()->details->paypalReference ?? $this->getMollie()->id;
 
             return (object)$data;

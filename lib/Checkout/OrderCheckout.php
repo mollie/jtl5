@@ -2,6 +2,7 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib\Checkout;
@@ -46,8 +47,8 @@ class OrderCheckout extends AbstractCheckout
 
     /**
      * @param array $paymentOptions
-     * @return Order
      * @throws Exception
+     * @return Order
      */
     public function create(array $paymentOptions = []): Order
     {
@@ -55,7 +56,7 @@ class OrderCheckout extends AbstractCheckout
             try {
                 $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->orderId, ['embed' => 'payments']);
                 if (in_array($this->order->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
-                    throw new RuntimeException(self::Plugin()->getLocalization()->getTranslation('errAlreadyPaid'));
+                    throw new RuntimeException(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
                 if ($this->order->status === OrderStatus::STATUS_CREATED) {
                     if ($this->order->payments()) {
@@ -85,6 +86,7 @@ class OrderCheckout extends AbstractCheckout
             $this->updateModel()->saveModel();
         } catch (Exception $e) {
             $this->Log(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()), LOGLEVEL_ERROR);
+
             throw new RuntimeException(sprintf("OrderCheckout::create: Neue Order '%s' konnte nicht erstellt werden: %s.", $this->oBestellung->cBestellNr, $e->getMessage()));
         }
 
@@ -92,8 +94,8 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
-     * @return static
      * @throws Exception
+     * @return static
      *
      */
     public function updateModel(): AbstractCheckout
@@ -112,8 +114,8 @@ class OrderCheckout extends AbstractCheckout
         if ($this->mollie) {
             $this->getModel()->cTransactionId = $this->mollie->id;
         }
-        $this->getModel()->cStatus = $this->getMollie()->status;
-        $this->getModel()->cHash = $this->getHash();
+        $this->getModel()->cStatus         = $this->getMollie()->status;
+        $this->getModel()->cHash           = $this->getHash();
         $this->getModel()->fAmountRefunded = $this->getMollie()->amountRefunded->value ?? 0;
 
         return $this;
@@ -121,8 +123,8 @@ class OrderCheckout extends AbstractCheckout
 
     /**
      * @param bool $force
-     * @return Order
      * @throws Exception
+     * @return Order
      */
     public function getMollie($force = false): ?Order
     {
@@ -151,14 +153,14 @@ class OrderCheckout extends AbstractCheckout
 
     /**
      * @param array $options
-     * @return self
      * @throws Exception
+     * @return self
      */
     public function loadRequest(array &$options = [])
     {
         parent::loadRequest($options);
 
-        $this->orderNumber = $this->getBestellung()->cBestellNr;
+        $this->orderNumber    = $this->getBestellung()->cBestellNr;
         $this->billingAddress = new Address($this->getBestellung()->oRechnungsadresse);
         if ($this->getBestellung()->Lieferadresse !== null) {
             if (!$this->getBestellung()->Lieferadresse->cMail) {
@@ -202,9 +204,9 @@ class OrderCheckout extends AbstractCheckout
             define('MOLLIE_KLARNA_MAX_EXPIRY_LIMIT', 28);
         }
 
-        if (($dueDays = (int)self::Plugin()->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) && $dueDays > 0) {
-            $max = $this->method && strpos($this->method, 'klarna') !== false ? MOLLIE_KLARNA_MAX_EXPIRY_LIMIT : MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT;
-            $date = new DateTime(sprintf('+%d DAYS', min($dueDays, $max)), new DateTimeZone('UTC'));
+        if (($dueDays = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) && $dueDays > 0) {
+            $max             = $this->method && strpos($this->method, 'klarna') !== false ? MOLLIE_KLARNA_MAX_EXPIRY_LIMIT : MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT;
+            $date            = new DateTime(sprintf('+%d DAYS', min($dueDays, $max)), new DateTimeZone('UTC'));
             $this->expiresAt = $date->format('Y-m-d');
         }
 
@@ -214,15 +216,15 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
+     * @throws Exception
      * @return CartItem[]
      *
      * @psalm-return array<CartItem>
-     * @throws Exception
      */
     public function getPositionen(): array
     {
         if ($this->getPaymentMethod()->duringCheckout) {
-            $conf = Shop::getSettings([CONF_GLOBAL]);
+            $conf           = Shop::getSettings([CONF_GLOBAL]);
             $oPositionenArr = [];
 
             if (is_array($_SESSION['Warenkorb']->PositionenArr) && count($_SESSION['Warenkorb']->PositionenArr) > 0) {
@@ -241,16 +243,16 @@ class OrderCheckout extends AbstractCheckout
                         if (isset($item->Artikel->kVaterArtikel) && $item->Artikel->kVaterArtikel > 0) {
                             foreach ($item->WarenkorbPosEigenschaftArr as $o => $WKPosEigenschaft) {
                                 if ($WKPosEigenschaft->cTyp === 'FREIFELD' || $WKPosEigenschaft->cTyp === 'PFLICHT-FREIFELD') {
-                                    $WKPosEigenschaft->kWarenkorbPos = $item->kWarenkorbPos;
-                                    $WKPosEigenschaft->cEigenschaftName = $WKPosEigenschaft->cEigenschaftName[$idx];
+                                    $WKPosEigenschaft->kWarenkorbPos        = $item->kWarenkorbPos;
+                                    $WKPosEigenschaft->cEigenschaftName     = $WKPosEigenschaft->cEigenschaftName[$idx];
                                     $WKPosEigenschaft->cEigenschaftWertName = $WKPosEigenschaft->cEigenschaftWertName[$idx];
-                                    $WKPosEigenschaft->cFreifeldWert = $WKPosEigenschaft->cEigenschaftWertName;
+                                    $WKPosEigenschaft->cFreifeldWert        = $WKPosEigenschaft->cEigenschaftWertName;
                                 }
                             }
                         } else {
                             foreach ($item->WarenkorbPosEigenschaftArr as $o => $WKPosEigenschaft) {
-                                $WKPosEigenschaft->kWarenkorbPos = $item->kWarenkorbPos;
-                                $WKPosEigenschaft->cEigenschaftName = $WKPosEigenschaft->cEigenschaftName[$idx];
+                                $WKPosEigenschaft->kWarenkorbPos        = $item->kWarenkorbPos;
+                                $WKPosEigenschaft->cEigenschaftName     = $WKPosEigenschaft->cEigenschaftName[$idx];
                                 $WKPosEigenschaft->cEigenschaftWertName = $WKPosEigenschaft->cEigenschaftWertName[$idx];
                                 if ($WKPosEigenschaft->cTyp === 'FREIFELD' || $WKPosEigenschaft->cTyp === 'PFLICHT-FREIFELD') {
                                     $WKPosEigenschaft->cFreifeldWert = $WKPosEigenschaft->cEigenschaftWertName;
@@ -270,8 +272,8 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
-     * @return null|stdClass
      * @throws Exception
+     * @return null|stdClass
      */
     public function getIncomingPayment(): ?stdClass
     {
@@ -287,9 +289,9 @@ class OrderCheckout extends AbstractCheckout
                 $this->mollie = $payment;
 
                 return (object)[
-                    'fBetrag' => (float)$payment->amount->value,
-                    'cISO' => $payment->amount->currency,
-                    'cZahler' => $payment->details->paypalPayerId ?? $payment->customerId,
+                    'fBetrag'  => (float)$payment->amount->value,
+                    'cISO'     => $payment->amount->currency,
+                    'cZahler'  => $payment->details->paypalPayerId ?? $payment->customerId,
                     'cHinweis' => $payment->details->paypalReference ?? $payment->id,
                 ];
             }
@@ -299,8 +301,8 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
-     * @return string
      * @throws ApiException
+     * @return string
      */
     public function cancelOrRefund(): string
     {
@@ -319,16 +321,16 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
-     * @return static
      * @throws \JTL\Exceptions\CircularReferenceException
      * @throws \JTL\Exceptions\ServiceNotFoundException
+     * @return static
      */
     protected function updateOrderNumber()
     {
         try {
             if ($this->getMollie()) {
                 $this->getMollie()->orderNumber = $this->getBestellung()->cBestellNr;
-                $this->getMollie()->webhookUrl = Shop::getURL() . '/?mollie=1';
+                $this->getMollie()->webhookUrl  = Shop::getURL() . '/?mollie=1';
                 $this->getMollie()->update();
             }
             if ($this->getModel()->cTransactionId) {

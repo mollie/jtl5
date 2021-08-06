@@ -2,6 +2,7 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 use Plugin\ws5_mollie\lib\Hook\ApplePay;

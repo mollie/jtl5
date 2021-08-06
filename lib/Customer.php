@@ -2,13 +2,14 @@
 
 /**
  * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\lib;
 
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
-use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use WS\JTL5\Traits\Jsonable;
 
 /**
  * Class Customer
