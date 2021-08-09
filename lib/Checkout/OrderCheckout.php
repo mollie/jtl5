@@ -230,7 +230,10 @@ class OrderCheckout extends AbstractCheckout
             if (is_array($_SESSION['Warenkorb']->PositionenArr) && count($_SESSION['Warenkorb']->PositionenArr) > 0) {
                 $productFilter = (int)$conf['global']['artikel_artikelanzeigefilter'];
                 /** @var CartItem $item */
-                foreach ($_SESSION['Warenkorb']->PositionenArr as $item) {
+                foreach ($_SESSION['Warenkorb']->PositionenArr as $_item) {
+
+                    $item = unserialize(serialize($_item));
+
                     $item->cName = Text::unhtmlentities(is_array($item->cName)
                         ? $item->cName[$_SESSION['cISOSprache']]
                         : $item->cName);
@@ -260,14 +263,11 @@ class OrderCheckout extends AbstractCheckout
                             }
                         }
                     }
-
                     $oPositionenArr[] = $item;
                 }
             }
-
             return $oPositionenArr;
         }
-
         return $this->getBestellung()->Positionen;
     }
 

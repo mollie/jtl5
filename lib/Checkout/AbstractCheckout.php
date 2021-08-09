@@ -120,6 +120,7 @@ abstract class AbstractCheckout
                         || !($paymentSession->nBezahlt && $paymentSession->kBestellung))
                     && count($_SESSION['Warenkorb']->PositionenArr)
                 ) {
+
                     $paymentSession->cNotifyID = $id;
                     $paymentSession->dNotify   = 'NOW()';
 
@@ -129,8 +130,10 @@ abstract class AbstractCheckout
                         $api->getClient()->orders->get($id, ['embed' => 'payments']);
 
                     if (in_array($mollie->status, [OrderStatus::STATUS_PENDING, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PAID], true)) {
+
                         require_once PFAD_ROOT . PFAD_INCLUDES . 'bestellabschluss_inc.php';
                         require_once PFAD_ROOT . PFAD_INCLUDES . 'mailTools.php';
+
                         $order = finalisiereBestellung();
                         $session->cleanUp();
                         $paymentSession->nBezahlt     = 1;

@@ -59,7 +59,7 @@ class Queue
     }
 
     /**
-     * @param $limit
+     * @param int $limit
      *
      * @return Generator
      *
@@ -84,7 +84,7 @@ class Queue
     }
 
     /**
-     * @param $todo
+     * @param QueueModel $todo
      * @return bool
      */
     protected static function lock(QueueModel $todo): bool
@@ -195,7 +195,7 @@ class Queue
     }
 
     /**
-     * @param $todo
+     * @param QueueModel $todo
      * @return bool
      */
     protected static function unlock(QueueModel $todo): bool
