@@ -53,7 +53,6 @@
     }
   },
   "scripts": {
-
     "test": "phpunit",
     "analyze": "phpmetrics --report-html=report ./",
     "phpcs": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",

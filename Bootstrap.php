@@ -10,9 +10,11 @@ namespace Plugin\ws5_mollie;
 use JTL\Events\Dispatcher;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Shop;
 use Plugin\ws5_mollie\lib\Hook\ApplePay;
 use Plugin\ws5_mollie\lib\Hook\Checkbox;
 use Plugin\ws5_mollie\lib\Hook\Queue;
+use Plugin\ws5_mollie\lib\Mapper\MollieUpgradeMapper;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -42,6 +44,20 @@ class Bootstrap extends \WS\JTL5\Bootstrap
 
         if ($this->getPlugin()->getConfig()->getValue('useCustomerAPI') === 'C') {
             $this->listen(HOOK_CHECKBOX_CLASS_GETCHECKBOXFRONTEND, [Checkbox::class, 'execute']);
+        }
+    }
+
+    public function installed()
+    {
+        parent::installed();
+
+        try {
+            $settingsMapper = new MollieUpgradeMapper('ws_mollie', 'ws5_mollie');
+            if ($settingsMapper->oldPluginExists()) {
+                $settingsMapper->mapPluginData();
+            }
+        } catch (\Exception $e) {
+            Shop::Container()->getLogService()->error($e->getMessage());
         }
     }
 }

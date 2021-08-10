@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-07-01</CreateDate>
-    <Version>1.1.3</Version>
+    <CreateDate>2021-08-10</CreateDate>
+    <Version>1.2.0</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -239,6 +239,15 @@
                         <Option value="S" sort="1">Ja, optional</Option>
                         <Option value="Y" sort="2">Ja, obligatorisch</Option>
                         <Option value="N" sort="3">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="selectbox" initialValue="N" sort="31" conf="Y">
+                    <Name>Mollie Trust Grafik</Name>
+                    <Description>Bindet eine Trust-Grafik unterhalb des Kreditkartenformulars ein.</Description>
+                    <ValueName>trustBadge</ValueName>
+                    <SelectboxOptions>
+                        <Option value="Y" sort="2">Ja</Option>
+                        <Option value="N" sort="1">Nein</Option>
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
@@ -956,7 +965,6 @@
             </Variable>
 
         </Locales>
-
         <Emailtemplate>
             <Template>
                 <Name>Zahlungs-Erinnerungsemail</Name>
@@ -1021,6 +1029,5 @@ Pay now: {$oPluginMail->PayURL}
                 </TemplateLanguage>
             </Template>
         </Emailtemplate>
-
     </Install>
 </jtlshopplugin>

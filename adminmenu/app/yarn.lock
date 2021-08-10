@@ -1234,55 +1234,55 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@fortawesome/fontawesome-common-types@^0.2.35":
-  version "0.2.35"
-  resolved "https://npm.fontawesome.com/@fortawesome/fontawesome-common-types/-/0.2.35/fontawesome-common-types-0.2.35.tgz#01dd3d054da07a00b764d78748df20daf2b317e9"
-  integrity sha512-IHUfxSEDS9dDGqYwIW7wTN6tn/O8E0n5PcAHz9cAaBoZw6UpG20IG/YM3NNLaGPwPqgjBAFjIURzqoQs3rrtuw==
+"@fortawesome/fontawesome-common-types@^0.2.36":
+  version "0.2.36"
+  resolved "https://npm.fontawesome.com/@fortawesome/fontawesome-common-types/-/0.2.36/fontawesome-common-types-0.2.36.tgz#b44e52db3b6b20523e0c57ef8c42d315532cb903"
+  integrity sha512-a/7BiSgobHAgBWeN7N0w+lAhInrGxksn13uK7231n2m8EDPE3BMCl9NZLTGrj9ZXfCmC6LM0QLqXidIizVQ6yg==
 
-"@fortawesome/fontawesome-pro@^5.12.0":
-  version "5.15.3"
-  resolved "https://npm.fontawesome.com/@fortawesome/fontawesome-pro/-/5.15.3/fontawesome-pro-5.15.3.tgz#6d039e215b88da6c2a17475810804348993bf3d0"
-  integrity sha512-JAf7zDYGVtcJIqnWAzZ8KRqSHQ2+KnJi4K916Zxti4ONfaVw87jaUoxtfxtNsc3kgTmCmbwgPsi2nOA/1fEnzQ==
+"@fortawesome/fontawesome-pro@^5.15.0":
+  version "5.15.4"
+  resolved "https://npm.fontawesome.com/@fortawesome/fontawesome-pro/-/5.15.4/fontawesome-pro-5.15.4.tgz#aae79a86621a79ae972772ad2906a13ade650a06"
+  integrity sha512-ApOqpDdKgA79xfLZH3B5PucZxj+TZyQUSrZ4bKkbJCR+zjmveQ4/gp/uXc5bNNhsdtJUy16BYJ/lAVydca2Y5Q==
 
-"@fortawesome/fontawesome-svg-core@^1.2.26":
-  version "1.2.35"
-  resolved "https://npm.fontawesome.com/@fortawesome/fontawesome-svg-core/-/1.2.35/fontawesome-svg-core-1.2.35.tgz#85aea8c25645fcec88d35f2eb1045c38d3e65cff"
-  integrity sha512-uLEXifXIL7hnh2sNZQrIJWNol7cTVIzwI+4qcBIq9QWaZqUblm0IDrtSqbNg+3SQf8SMGHkiSigD++rHmCHjBg==
+"@fortawesome/fontawesome-svg-core@^1.2.36":
+  version "1.2.36"
+  resolved "https://npm.fontawesome.com/@fortawesome/fontawesome-svg-core/-/1.2.36/fontawesome-svg-core-1.2.36.tgz#4f2ea6f778298e0c47c6524ce2e7fd58eb6930e3"
+  integrity sha512-YUcsLQKYb6DmaJjIHdDWpBIGCcyE/W+p/LMGvjQem55Mm2XWVAP5kWTMKWLv9lwpCVjpLxPyOMOyUocP1GxrtA==
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.35"
+    "@fortawesome/fontawesome-common-types" "^0.2.36"
 
-"@fortawesome/free-brands-svg-icons@^5.12.0":
-  version "5.15.3"
-  resolved "https://npm.fontawesome.com/@fortawesome/free-brands-svg-icons/-/5.15.3/free-brands-svg-icons-5.15.3.tgz#bec2821d23b9c667be1d192a6c5bfb2667e588eb"
-  integrity sha512-1hirPcbjj72ZJtFvdnXGPbAbpn3Ox6mH3g5STbANFp3vGSiE5u5ingAKV06mK6ZVqNYxUPlh4DlTnaIvLtF2kw==
+"@fortawesome/free-brands-svg-icons@^5.15.0":
+  version "5.15.4"
+  resolved "https://npm.fontawesome.com/@fortawesome/free-brands-svg-icons/-/5.15.4/free-brands-svg-icons-5.15.4.tgz#ec8a44dd383bcdd58aa7d1c96f38251e6fec9733"
+  integrity sha512-f1witbwycL9cTENJegcmcZRYyawAFbm8+c6IirLmwbbpqz46wyjbQYLuxOc7weXFXfB7QR8/Vd2u5R3q6JYD9g==
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.35"
+    "@fortawesome/fontawesome-common-types" "^0.2.36"
 
-"@fortawesome/pro-light-svg-icons@^5.12":
-  version "5.15.3"
-  resolved "https://npm.fontawesome.com/@fortawesome/pro-light-svg-icons/-/5.15.3/pro-light-svg-icons-5.15.3.tgz#1ebfb43a62e3675ad42746f905ee9dfa9008b579"
-  integrity sha512-mAj25a3sgh0i8HkHhmz8Z1bnSsVJ8OwLm2rDDG8HTkOTllmg2WtZZfRhBg0kZcSH7en7BAcIGUh5Rtx/3/NY9w==
+"@fortawesome/pro-light-svg-icons@^5.15.0":
+  version "5.15.4"
+  resolved "https://npm.fontawesome.com/@fortawesome/pro-light-svg-icons/-/5.15.4/pro-light-svg-icons-5.15.4.tgz#56a0d5df1b15eb00b3f17b260542967d94936625"
+  integrity sha512-+Hk1YVmuk+1TYhbRTD4WhabQhWuK/DG8IVGO+iXM5A4OW1D6rHFHr8rt9JNc7iybXFQWY7HuCRPoVXdCm4YZ0A==
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.35"
+    "@fortawesome/fontawesome-common-types" "^0.2.36"
 
-"@fortawesome/pro-regular-svg-icons@^5.12":
-  version "5.15.3"
-  resolved "https://npm.fontawesome.com/@fortawesome/pro-regular-svg-icons/-/5.15.3/pro-regular-svg-icons-5.15.3.tgz#0b70f7ba6212dfa9bf17f9a82422e5fe7864b5b2"
-  integrity sha512-p546sg0iF4qbng79wQZuyOIDBwF51crLS63nwEP9vpwFJKFkOhg1i8W4TUy0tosas2jcuseJSa5fGb9d/7bPug==
+"@fortawesome/pro-regular-svg-icons@^5.15.0":
+  version "5.15.4"
+  resolved "https://npm.fontawesome.com/@fortawesome/pro-regular-svg-icons/-/5.15.4/pro-regular-svg-icons-5.15.4.tgz#38c17d05ddebff70cfd86c2f178a4272f57fb13b"
+  integrity sha512-LN9wOPIISKg3jZBbAuMm6YcsCiMRzTcpVkotLonRuzDmw0OLszUPCHZ6vB5hEnOC7g6IIOwOOnV12fW0V8IS9Q==
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.35"
+    "@fortawesome/fontawesome-common-types" "^0.2.36"
 
-"@fortawesome/pro-solid-svg-icons@^5.12":
-  version "5.15.3"
-  resolved "https://npm.fontawesome.com/@fortawesome/pro-solid-svg-icons/-/5.15.3/pro-solid-svg-icons-5.15.3.tgz#f443689f17dfb932f51d0943d9af69c9044c8c59"
-  integrity sha512-7W0sJ3gkiMEdIbGOBaAXpND/ZGOccw+fzyJL/iG/nuX3zcDggLz7/41ORDnIArIjaWr+UmIOtHZcXSB7gcOAWg==
+"@fortawesome/pro-solid-svg-icons@^5.15.0":
+  version "5.15.4"
+  resolved "https://npm.fontawesome.com/@fortawesome/pro-solid-svg-icons/-/5.15.4/pro-solid-svg-icons-5.15.4.tgz#bf0f54b5920e8a779684bc9e69617ef5259c00c9"
+  integrity sha512-ZlSg/RyAlwYJcsJlw2WfZSeOJ8GMKwIQ3ZY+GNFRZ+7pF+RRXxyZp2WIgUKhPK/M43SfSou6R6XdKZyz2xVVEQ==
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.35"
+    "@fortawesome/fontawesome-common-types" "^0.2.36"
 
-"@fortawesome/react-fontawesome@^0.1.14":
-  version "0.1.14"
-  resolved "https://npm.fontawesome.com/@fortawesome/react-fontawesome/-/0.1.14/react-fontawesome-0.1.14.tgz#bf28875c3935b69ce2dc620e1060b217a47f64ca"
-  integrity sha512-4wqNb0gRLVaBm/h+lGe8UfPPivcbuJ6ecI4hIgW0LjI7kzpYB9FkN0L9apbVzg+lsBdcTf0AlBtODjcSX5mmKA==
+"@fortawesome/react-fontawesome@^0.1.15":
+  version "0.1.15"
+  resolved "https://npm.fontawesome.com/@fortawesome/react-fontawesome/-/0.1.15/react-fontawesome-0.1.15.tgz#1450b838f905981d721bf07e14e3b52c0e9a91ed"
+  integrity sha512-/HFHdcoLESxxMkqZAcZ6RXDJ69pVApwdwRos/B2kiMWxDSAX2dFK8Er2/+rG+RsrzWB/dsAyjefLmemgmfE18g==
   dependencies:
     prop-types "^15.7.2"
 
@@ -2264,10 +2264,10 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@webstollen/react-jtl-plugin@^2.1.1":
-  version "2.1.1"
-  resolved "https://gitlab.webstollen.de/api/v4/projects/444/packages/npm/@webstollen/react-jtl-plugin/-/@webstollen/react-jtl-plugin-2.1.1.tgz#4b7b8e5b1550f6a0b42dd042827b557cfc957f21"
-  integrity sha1-S3uOWxVQ9qC0LdBCgntVfPyVfyE=
+"@webstollen/react-jtl-plugin@^2.2.0":
+  version "2.2.0"
+  resolved "https://gitlab.webstollen.de/api/v4/projects/444/packages/npm/@webstollen/react-jtl-plugin/-/@webstollen/react-jtl-plugin-2.2.0.tgz#0abf88a27a16e89b21faca4d5b3d910f1d6f1a4b"
+  integrity sha1-Cr+IonoW6Jsh+spNWz2RDx1vGks=
   dependencies:
     autoprefixer "^9.8.6"
     axios "^0.21.0"

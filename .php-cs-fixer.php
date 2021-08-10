@@ -5,9 +5,8 @@ use PhpCsFixer\Config;
 $finder = PhpCsFixer\Finder::create()
     ->exclude('report')
     ->exclude('vendor')
-    ->in(__DIR__ . '/lib')
-    ->in(__DIR__ . '/paymentmethod')
-    ->in(__DIR__ . '/frontend');
+    ->exclude('adminmenu/app')
+    ->in(__DIR__);
 
 return (new Config())
     ->setRiskyAllowed(true)

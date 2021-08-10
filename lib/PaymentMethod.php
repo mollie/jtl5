@@ -7,6 +7,8 @@
 
 namespace Plugin\ws5_mollie\lib;
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use Exception;
 use JTL\Alert\Alert;
 use JTL\Checkout\Bestellung;

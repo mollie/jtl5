@@ -231,7 +231,6 @@ class OrderCheckout extends AbstractCheckout
                 $productFilter = (int)$conf['global']['artikel_artikelanzeigefilter'];
                 /** @var CartItem $item */
                 foreach ($_SESSION['Warenkorb']->PositionenArr as $_item) {
-
                     $item = unserialize(serialize($_item));
 
                     $item->cName = Text::unhtmlentities(is_array($item->cName)
@@ -266,8 +265,10 @@ class OrderCheckout extends AbstractCheckout
                     $oPositionenArr[] = $item;
                 }
             }
+
             return $oPositionenArr;
         }
+
         return $this->getBestellung()->Positionen;
     }
 

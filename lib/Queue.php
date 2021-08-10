@@ -71,7 +71,7 @@ class Queue
 
         $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE dDone IS NULL AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%') AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE)) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
             ':LIMIT' => $limit,
-            ':hd' => MOLLIE_HOOK_DELAY
+            ':hd'    => MOLLIE_HOOK_DELAY
         ], 2);
 
         foreach ($open as $_raw) {
@@ -91,10 +91,10 @@ class Queue
     }
 
     /**
-     * @param string $id
+     * @param string     $id
      * @param QueueModel $todo
-     * @return bool
      * @throws Exception
+     * @return bool
      */
     protected static function handleWebhook(string $id, QueueModel $todo): bool
     {
@@ -109,12 +109,12 @@ class Queue
     }
 
     /**
-     * @param int $hook
+     * @param int        $hook
      * @param QueueModel $qm
-     * @return bool
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
      * @throws Exception
+     * @return bool
      */
     protected static function handleHook(int $hook, QueueModel $qm): bool
     {
@@ -135,7 +135,8 @@ class Queue
                                 define('MOLLIE_HOOK_DELAY', 3);
                             }
                             $qm->dCreated = date('Y-m-d H:i:s', strtotime(sprintf('+%d MINUTES', MOLLIE_HOOK_DELAY)));
-                            $qm->cResult = 'Noch keine Lieferscheine, delay...';
+                            $qm->cResult  = 'Noch keine Lieferscheine, delay...';
+
                             return $qm->save();
                         }
 
@@ -180,6 +181,7 @@ class Queue
                         } else {
                             $result = 'Nothing to do.';
                         }
+
                         return $qm->done($result);
                     }
 
@@ -189,9 +191,11 @@ class Queue
                         throw new RuntimeException('Auto-Refund disabled');
                     }
                     $checkout = AbstractCheckout::fromBestellung((int)$data['kBestellung']);
+
                     return $qm->done($checkout->cancelOrRefund());
             }
         }
+
         return false;
     }
 
@@ -208,9 +212,9 @@ class Queue
 
     /**
      * @param mixed $delay
-     * @return true
      * @throws ServiceNotFoundException
      * @throws CircularReferenceException
+     * @return true
      */
     public static function storno($delay): bool
     {
@@ -227,7 +231,7 @@ class Queue
         foreach ($open as $o) {
             try {
                 $checkout = AbstractCheckout::fromBestellung($o->kBestellung);
-                $pm = $checkout->getPaymentMethod();
+                $pm       = $checkout->getPaymentMethod();
                 if ($pm::ALLOW_AUTO_STORNO && $pm::METHOD === $checkout->getMollie()->method) {
                     if ($checkout->getBestellung()->cAbgeholt === 'Y' && (bool)$checkout->getModel()->bSynced === false) {
                         if (!in_array($checkout->getMollie()->status, [OrderStatus::STATUS_PAID, OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_AUTHORIZED], true)) {
