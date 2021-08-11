@@ -76,9 +76,9 @@ pack:
   script:
   - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/
   - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml
+  - if [[ $SKIP_COMPILE = 1 ]]; then echo "Skipped Compiler."; else cd vendor; compiler webstollen webstollen; cd ..; fi
   - cd ..
   - if [[ $SKIP_COMPILE = 1 ]]; then echo "Skipped Compiler."; else compiler $CI_PROJECT_DIR $CI_PROJECT_DIR; fi
-  - if [[ $SKIP_COMPILE = 1 ]]; then echo "Skipped Compiler."; else cd $CI_PROJECT_DIR/vendor; compiler webstollen webstollen; cd ../.. fi
   - zip -r $CI_PROJECT_DIR/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip $CI_PROJECT_NAME
   artifacts:
     expire_in: 30 days
