@@ -20,8 +20,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class Bootstrap extends \WS\JTL5\Bootstrap
 {
-    /** @var Dispatcher */
-    protected $dispatcher;
 
     /**
      * @param Dispatcher $dispatcher

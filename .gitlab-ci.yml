@@ -34,6 +34,7 @@ composer:
     policy: pull
   script:
   - if [ -f "composer.json" ]; then composer install --no-dev -o; else echo "Skipped Composer, no composer.json"; fi
+  - if [ -f "composer.json" ]; then rm -rf vendor/webstollen/jtl5-plugin/tests vendor/webstollen/jtl5-plugin/core vendor/webstollen/jtl5-plugin/docker; else echo "Skipped Composer, no composer.json"; fi
   artifacts:
     expire_in: 3 days
     untracked: true
@@ -77,6 +78,7 @@ pack:
   - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml
   - cd ..
   - if [[ $SKIP_COMPILE = 1 ]]; then echo "Skipped Compiler."; else compiler $CI_PROJECT_DIR $CI_PROJECT_DIR; fi
+  - if [[ $SKIP_COMPILE = 1 ]]; then echo "Skipped Compiler."; else compiler $CI_PROJECT_DIR/vendor/webstollen $CI_PROJECT_DIR/vendor/webstollen; fi
   - zip -r $CI_PROJECT_DIR/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip $CI_PROJECT_NAME
   artifacts:
     expire_in: 30 days
