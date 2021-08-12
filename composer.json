@@ -59,7 +59,7 @@
     "phpcbf": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./",
     "php-cs-fixer": "php-cs-fixer fix",
     "phpstan": "phpstan analyse lib",
-    "fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./ && php-cs-fixer fix",
+    "fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,adminmenu/app/,report/ -p ./; php-cs-fixer fix",
     "psalm": "psalm",
     "psalm:fix": "psalm --alter --issues=MissingReturnType,InvalidReturnType,MissingClosureReturnType,LessSpecificReturnType,MissingParamType",
     "post-status-cmd": [

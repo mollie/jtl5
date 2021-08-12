@@ -9,11 +9,11 @@ namespace Plugin\ws5_mollie\paymentmethod;
 
 use Exception;
 use JTL\Checkout\Bestellung;
+use JTL\Session\Frontend;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Payment\Address;
 use Plugin\ws5_mollie\lib\PaymentMethod;
-use Session;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -58,8 +58,10 @@ class CreditCard extends PaymentMethod
         }
 
         try {
-            $trustBadge   = (bool)self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_trustBadge');
-            $locale       = self::getLocale(Session::getInstance()->getLanguage()->getIso(), Session::getCustomer()->cLand ?? null);
+            $trustBadge = self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_trustBadge') === 'Y'
+                ? self::Plugin('ws5_mollie')->getPaths()->getFrontendURL() . 'img/trust_' . Frontend::getInstance()->getLanguage()->getIso() . '.png'
+                : false;
+            $locale       = self::getLocale(Frontend::getInstance()->getLanguage()->getIso(), Frontend::getCustomer()->cLand ?? null);
             $mode         = MollieAPI::getMode();
             $errorMessage = json_encode(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('mcErrorMessage'), JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
