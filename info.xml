@@ -31,46 +31,47 @@
                 </Setting>
                 <Setting type="text" initialValue="" sort="15" conf="Y">
                     <Name>Test Key</Name>
-                    <Description>Füge hier deinen Mollie API Key ein</Description>
+                    <Description><![CDATA[Füge hier deinen Mollie API Key ein]]></Description>
                     <ValueName>test_apiKey</ValueName>
                 </Setting>
                 <Setting type="text" initialValue="" sort="20" conf="Y">
                     <Name>Profil ID</Name>
-                    <Description>Die ProfilID wird benötigt, um Mollie Components zu verwenden</Description>
+                    <Description><![CDATA[Die ProfilID wird benötigt, um Mollie Components zu verwenden]]></Description>
                     <ValueName>profileId</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="on" sort="25" conf="Y">
                     <Name>Test API als Admin</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet,
-                        wenn man als Admin im Backend eingeloggt ist.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet, wenn man als Admin im Backend eingeloggt ist.]]>
                     </Description>
                     <ValueName>testAsAdmin</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="off" sort="30" conf="Y">
                     <Name>Abgeschlossene Bestellungen ausblenden</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, werden versendete, bezahlte Bestellungen nicht in
-                        der Tabelle angezeigt.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, werden versendete, bezahlte Bestellungen nicht in der Tabelle angezeigt.]]>
                     </Description>
                     <ValueName>hideCompleted</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="off" sort="40" conf="Y">
                     <Name>Bestellungen automatisch stornieren</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, werden komplett Stornierte Bestellungen auch bei
-                        Mollie storniert oder rückerstattet.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, werden komplett Stornierte Bestellungen auch bei Mollie storniert oder rückerstattet.]]>
                     </Description>
                     <ValueName>autoRefund</ValueName>
                 </Setting>
 
                 <Setting type="zahl" initialValue="0" sort="45" conf="Y">
                     <Name>Unbezahlte Bestellungen stornieren</Name>
-                    <Description>Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden
-                        nach Bestellung. (0 = deaktiviert)
+                    <Description>
+                        <![CDATA[Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)]]>
                     </Description>
                     <ValueName>autoStorno</ValueName>
                 </Setting>
                 <Setting type="selectbox" initialValue="Y" sort="46" conf="Y">
                     <Name>Versand bei Mollie</Name>
-                    <Description>Soll Versandinformation fr OrderAPI Methoden an Mollie gesendet werden?.</Description>
+                    <Description>
+                        <![CDATA[Soll Versandinformation für OrderAPI Methoden an Mollie gesendet werden?]]></Description>
                     <ValueName>shippingActive</ValueName>
                     <SelectboxOptions>
                         <Option value="Y" sort="1"><![CDATA[Ja]]></Option>
@@ -80,31 +81,30 @@
                 </Setting>
                 <Setting type="text" initialValue="Order {orderNumber}" sort="47" conf="Y">
                     <Name>Payment API Beschreibung</Name>
-                    <Description>Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung:
-                        {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}
+                    <Description>
+                        <![CDATA[Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung: {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}]]>
                     </Description>
                     <ValueName>paymentDescTpl</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="on" sort="50" conf="Y">
                     <Name>Nur bezahlte Bestellungen in die WAWI übertragen</Name>
-                    <Description>Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI
-                        abgerufen werden.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden.]]>
                     </Description>
                     <ValueName>onlyPaid</ValueName>
                 </Setting>
 
                 <Setting type="checkbox" initialValue="off" sort="50" conf="Y">
                     <Name>Zahlart bei erneutem Zahlvorgang zurücksetzen</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte
-                        Mollie-Zahlungsart zurückzusetzen, somit hat der Kunde zwischen allen aktiven Mollie-Zahlarten
-                        zu wählen.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte Mollie-Zahlungsart zurückzusetzen, somit kann der Kunde zwischen allen aktiven Mollie-Zahlarten zu wählen.]]>
                     </Description>
                     <ValueName>resetMethod</ValueName>
                 </Setting>
 
                 <Setting type="selectbox" initialValue="B" sort="50" conf="Y">
                     <Name>Teilversand Verhalten</Name>
-                    <Description>Bei Gastbestellungen und Teilversand.</Description>
+                    <Description><![CDATA[Bei Gastbestellungen und Teilversand.]]></Description>
                     <ValueName>shippingMode</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="A">Direkt alles versenden</Option>
@@ -113,7 +113,7 @@
                 </Setting>
                 <Setting type="selectbox" initialValue="de_DE" sort="60" conf="Y">
                     <Name>Fallback-Locale</Name>
-                    <Description>Fallback, falls Locale nicht erkannt oder nicht vorhanden.</Description>
+                    <Description><![CDATA[Fallback, falls Locale nicht erkannt oder nicht vorhanden.]]></Description>
                     <ValueName>fallbackLocale</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="en_US">en_US</Option>
@@ -142,16 +142,16 @@
 
                 <Setting type="zahl" initialValue="0" sort="70" conf="Y">
                     <Name>Zahlungserinnerung</Name>
-                    <Description>Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Stunden
-                        nach Bestellung. (0 = deaktiviert)
+                    <Description>
+                        <![CDATA[Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)]]>
                     </Description>
                     <ValueName>reminder</ValueName>
                 </Setting>
 
                 <Setting type="selectbox" initialValue="C" sort="80" conf="Y">
                     <Name>Kunden bei Mollie anlegen (Customer API)</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox,
-                        seine Kundendaten bei Mollie zu speichern. Z.B. für Single-Click Checkout benötigt.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox, seine Kundendaten bei Mollie zu speichern. Z.B. für Single-Click Checkout benötigt.]]>
                     </Description>
                     <ValueName>useCustomerAPI</ValueName>
                     <SelectboxOptions>
@@ -162,7 +162,7 @@
 
                 <Setting type="selectbox" initialValue="Y" sort="90" conf="Y">
                     <Name>Bestellabschluss</Name>
-                    <Description>Hier kann das Bestellabschluss-Verhalten eingestellt werden.</Description>
+                    <Description><![CDATA[Hier kann das Bestellabschluss-Verhalten eingestellt werden.]]></Description>
                     <ValueName>checkoutMode</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="Y">Direkt weiterleiten</Option>

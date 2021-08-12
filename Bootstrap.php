@@ -15,6 +15,7 @@ use Plugin\ws5_mollie\lib\Hook\ApplePay;
 use Plugin\ws5_mollie\lib\Hook\Checkbox;
 use Plugin\ws5_mollie\lib\Hook\Queue;
 use Plugin\ws5_mollie\lib\Mapper\MollieUpgradeMapper;
+use WS\JTL5\Mapper\UpgradeMapperInterface;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -45,17 +46,12 @@ class Bootstrap extends \WS\JTL5\Bootstrap
         }
     }
 
-    public function installed()
+    /**
+     * @return UpgradeMapperInterface|null
+     */
+    public function getUpgradeMapper(): ?UpgradeMapperInterface
     {
-        parent::installed();
-
-        try {
-            $settingsMapper = new MollieUpgradeMapper('ws_mollie', 'ws5_mollie');
-            if ($settingsMapper->oldPluginExists()) {
-                $settingsMapper->mapPluginData();
-            }
-        } catch (\Exception $e) {
-            Shop::Container()->getLogService()->error($e->getMessage());
-        }
+        return new MollieUpgradeMapper('ws_mollie', 'ws5_mollie');
     }
+
 }
