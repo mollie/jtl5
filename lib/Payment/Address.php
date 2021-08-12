@@ -1,16 +1,17 @@
 <?php
 
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
 
 namespace Plugin\ws5_mollie\lib\Payment;
 
-use JTL\Checkout\Adresse;
-use Plugin\ws5_mollie\lib\Traits\Jsonable;
+use WS\JTL5\Traits\Jsonable;
 
 class Address implements \JsonSerializable
 {
-
     use Jsonable;
-
 
     /**
      * @var string
@@ -18,7 +19,7 @@ class Address implements \JsonSerializable
     public $streetAndNumber;
 
     /**
-     * @var string|null
+     * @var null|string
      */
     public $streetAdditional;
 
@@ -33,7 +34,7 @@ class Address implements \JsonSerializable
     public $city;
 
     /**
-     * @var string|null
+     * @var null|string
      */
     public $region;
 
@@ -43,28 +44,21 @@ class Address implements \JsonSerializable
     public $country;
 
     /**
-     * @param Adresse|\stdClass $adresse
-     * @return Address
+     * Address constructor.
+     * @param $address
      */
-    public static function factory($adresse)
+    public function __construct($address)
     {
-        $address = new static();
-
-        $address->streetAndNumber = $adresse->cStrasse . ' ' . $adresse->cHausnummer;
-        $address->postalCode = $adresse->cPLZ;
-        $address->city = $adresse->cOrt;
-        $address->country = $adresse->cLand;
+        $this->streetAndNumber = $address->cStrasse . ' ' . $address->cHausnummer;
+        $this->postalCode      = $address->cPLZ;
+        $this->city            = $address->cOrt;
+        $this->country         = $address->cLand;
 
         if (
             isset($adresse->cAdressZusatz)
             && trim($adresse->cAdressZusatz) !== ''
         ) {
-            $address->streetAdditional = trim($adresse->cAdressZusatz);
+            $this->streetAdditional = trim($adresse->cAdressZusatz);
         }
-
-        return $address;
-
     }
-
-
 }

@@ -1,0 +1,163 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ws5_mollie\n"
+"POT-Creation-Date: 2021-08-12 10:08+0200\n"
+"PO-Revision-Date: 2021-08-12 11:05+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0\n"
+"X-Poedit-Basepath: ../..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __\n"
+"X-Poedit-SearchPath-0: vendor/webstollen/jtl5-plugin/src/tpl/admin\n"
+"X-Poedit-SearchPath-1: adminmenu\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+msgid "Synctype.data"
+msgstr "Plugin data"
+
+msgid "Synctype.syncShipping"
+msgstr "Shipping method connections"
+
+msgid "Synctype.uninstall"
+msgstr "Uninstall Plugin"
+
+msgid "Synctype.settings"
+msgstr "Plugin settings"
+
+msgid "Synctype.paymentSettings"
+msgstr "Payment method settings"
+
+msgid "Abbrechen"
+msgstr "Cancel"
+
+msgid "Upgrade!"
+msgstr "Upgrade!"
+
+msgid "Migration kann durchgeführt werden."
+msgstr "Migration can be done."
+
+msgid "Upgrade-Assistent"
+msgstr "Upgrade assistant"
+
+msgid "Migration kann nicht durchgeführt werden:"
+msgstr "Migration can't be done:"
+
+msgid "Da die JTL-Shop 4 Version dieses Plugins (<code>%s</code>) noch installiert ist, hast du hier die Möglichkeit die Daten zu migrieren."
+msgstr "Since the JTL-Shop 4 version of this plugin (<code>%s</code>) is still installed, you can migrate the data here."
+
+msgid "Test API als Admin"
+msgstr "Test API as Admin"
+
+msgid "Abgeschlossene Bestellungen ausblenden"
+msgstr "Hide completed Orders"
+
+msgid "Profil ID"
+msgstr "Profile ID"
+
+msgid "Bestellungen automatisch stornieren"
+msgstr "Auto-Cancel orders"
+
+msgid "Unbezahlte Bestellungen stornieren"
+msgstr "Cancel unpaid orders"
+
+msgid "Versand bei Mollie"
+msgstr "Shippments with Mollie"
+
+msgid "Payment API Beschreibung"
+msgstr "Payment API description"
+
+msgid "Nur bezahlte Bestellungen in die WAWI übertragen"
+msgstr "Only sync paid orders to WAWI"
+
+msgid "Zahlart bei erneutem Zahlvorgang zurücksetzen"
+msgstr "Reset Payment method on re-pay"
+
+msgid "Teilversand Verhalten"
+msgstr "Partial Shipments"
+
+msgid "Direkt alles versenden"
+msgstr "Ship directly"
+
+msgid "Erst bei komplett Versand versenden"
+msgstr "Only ship, when complete"
+
+msgid "Zahlungserinnerung"
+msgstr "Payment reminder"
+
+msgid "Kunden bei Mollie anlegen (Customer API))"
+msgstr "Use Customer API"
+
+msgid "Ja, Checkbox"
+msgstr "Yes, checkbox"
+
+msgid "Nein"
+msgstr "No"
+
+msgid "Ja"
+msgstr "Yes"
+
+msgid "Direkt weiterleiten"
+msgstr "Redirect directly"
+
+msgid "Nach 3 Sekunden weiterleiten"
+msgstr "Redirect after %d seconds"
+
+msgid "Nicht automatisch weiterleiten"
+msgstr "No automatic redirect"
+
+msgid "Nur Kunden & Komplettversand"
+msgstr "Only Customers and complete Shipments"
+
+msgid "Nein, ich mache alles manuell."
+msgstr "No, I do everything myself."
+
+msgid "Füge hier deinen Mollie API Key ein"
+msgstr "Enter your Mollie API Key here"
+
+msgid "Die ProfilID wird benötigt, um Mollie Components zu verwenden"
+msgstr "The Profile ID is needed to use Mollie Components"
+
+msgid "Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet, wenn man als Admin im Backend eingeloggt ist."
+msgstr "If this setting is activated, the TestAPI is automatically used in the shop if you are logged into the backend as an admin."
+
+msgid "Wenn diese Einstellung aktiviert ist, werden versendete, bezahlte Bestellungen nicht in der Tabelle angezeigt."
+msgstr "If this setting is activated, orders that have been sent and paid for are not displayed in the table."
+
+msgid "Wenn diese Einstellung aktiviert ist, werden komplett Stornierte Bestellungen auch bei Mollie storniert oder rückerstattet."
+msgstr "If this setting is activated, completely canceled orders will also be canceled or refunded at Mollie."
+
+msgid "Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)"
+msgstr "Should the order be canceled if the payment has failed? Specified in hours after ordering. (0 = deactivated)"
+
+msgid "Soll Versandinformation für OrderAPI Methoden an Mollie gesendet werden?"
+msgstr "Should shipping information for OrderAPI methods be sent to Mollie?"
+
+msgid "Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung: {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}"
+msgstr "Description of the payment in Mollie. The following variables are available: {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}"
+
+msgid "Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte Mollie-Zahlungsart zurückzusetzen, somit kann der Kunde zwischen allen aktiven Mollie-Zahlarten zu wählen."
+msgstr "If this setting is activated, an attempt is made to reset the Mollie payment method selected in the order process, so the customer is able to choose between all active Mollie payment methods."
+
+msgid "Bei Gastbestellungen und Teilversand."
+msgstr "For guest orders and partial shipments."
+
+msgid "Fallback, falls Locale nicht erkannt oder nicht vorhanden."
+msgstr "Fallback if the locale is not recognized or does not exist."
+
+msgid "Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)"
+msgstr "Should a payment link be sent if the payment fails? Specified in hours after ordering. (0 = deactivated)"
+
+msgid "Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox, seine Kundendaten bei Mollie zu speichern. Z.B. für Single-Click Checkout benötigt."
+msgstr "If this setting is activated, the customer has the option of using a checkbox to save his customer data with Mollie. E.g. required for single-click checkout."
+
+msgid "Hier kann das Bestellabschluss-Verhalten eingestellt werden."
+msgstr "The order completion behavior can be set here."
+
+msgid "Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden."
+msgstr "If this setting is deactivated, all orders can be called up directly from the WAWI."

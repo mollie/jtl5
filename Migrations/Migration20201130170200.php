@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
 namespace Plugin\ws5_mollie\Migrations;
 
 use JTL\Plugin\Migration;
@@ -7,7 +12,6 @@ use JTL\Update\IMigration;
 
 class Migration20201130170200 extends Migration implements IMigration
 {
-
     public function up()
     {
         $this->execute('CREATE TABLE IF NOT EXISTS `xplugin_ws5_mollie_queue` (

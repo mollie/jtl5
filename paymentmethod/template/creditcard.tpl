@@ -11,7 +11,7 @@
 </div>
 
 
-<div class="form-horizontal">
+<div class="form-horizontal" id="mollie-components">
 
     <div id="mollieError"></div>
 
@@ -81,7 +81,7 @@
 </div>
 
 <script src="https://js.mollie.com/v1/mollie.js"></script>
-<script>
+<script defer>
     // <!--
 
     var form = document.getElementById("form_payment_extra");

@@ -1,8 +1,11 @@
 <?php
 
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
 
 namespace Plugin\ws5_mollie\lib;
-
 
 use Composer\CaBundle\CaBundle;
 use Exception;
@@ -11,24 +14,22 @@ use GuzzleHttp\RequestOptions;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\MollieApiClient;
-use Plugin\ws5_mollie\lib\Traits\Plugin;
 use Shop;
+use WS\JTL5\Traits\Plugin;
 
 class MollieAPI
 {
+    use Plugin;
+
     /**
      * @var MollieApiClient
      */
     protected $client;
 
-
-    use Plugin;
-
     /**
      * @var bool
      */
     protected $test;
-
 
     public function __construct($test = false)
     {
@@ -45,32 +46,35 @@ class MollieAPI
     public static function getMode(): bool
     {
         try {
-            if (self::Plugin()->getConfig()->getValue("testAsAdmin") === 'on') {
+            if (self::Plugin('ws5_mollie')->getConfig()->getValue('testAsAdmin') === 'on' && self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey') !== '') {
                 $_GET['fromAdmin'] = 'yes';
+
                 return Shop::isAdmin(true);
             }
         } catch (Exception $e) {
             return false;
         }
+
         return false;
     }
 
     /**
-     * @return MollieApiClient
      * @throws ApiException
      * @throws IncompatiblePlatform
+     * @return MollieApiClient
      */
     public function getClient(): MollieApiClient
     {
         if (!$this->client) {
             $this->client = new MollieApiClient(new Client([
-                RequestOptions::VERIFY => CaBundle::getBundledCaBundlePath(),
+                RequestOptions::VERIFY  => CaBundle::getBundledCaBundlePath(),
                 RequestOptions::TIMEOUT => 60,
             ]));
             $this->client->setApiKey(self::getAPIKey($this->test));
-            $this->client->addVersionString("JTL-Shop/" . APPLICATION_VERSION);
-            $this->client->addVersionString('ws5_mollie/' . self::Plugin()->getCurrentVersion());
+            $this->client->addVersionString('JTL-Shop/' . APPLICATION_VERSION);
+            $this->client->addVersionString('ws5_mollie/' . self::Plugin('ws5_mollie')->getCurrentVersion());
         }
+
         return $this->client;
     }
 
@@ -81,9 +85,10 @@ class MollieAPI
     protected static function getAPIKey(bool $test): string
     {
         if ($test) {
-            return self::Plugin()->getConfig()->getValue("test_apiKey");
+            return self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey');
         }
-        return self::Plugin()->getConfig()->getValue("apiKey");
+
+        return self::Plugin('ws5_mollie')->getConfig()->getValue('apiKey');
     }
 
     /**
@@ -93,5 +98,4 @@ class MollieAPI
     {
         return $this->test;
     }
-
 }

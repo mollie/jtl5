@@ -1,6 +1,8 @@
 <?php
+
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\Migrations;
@@ -12,7 +14,8 @@ class Migration20200717130530 extends Migration implements IMigration
 {
     public function up()
     {
-        $this->execute('CREATE TABLE IF NOT EXISTS `xplugin_ws5_mollie_orders` (
+        $this->execute(
+            'CREATE TABLE IF NOT EXISTS `xplugin_ws5_mollie_orders` (
   `kId` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `kBestellung` int(11) DEFAULT NULL,
   `cOrderId` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
@@ -27,7 +30,8 @@ class Migration20200717130530 extends Migration implements IMigration
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
         );
 
-        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders`
+        $this->execute(
+            'ALTER TABLE `xplugin_ws5_mollie_orders`
   ADD UNIQUE KEY `cOrderId` (`cOrderId`),
   ADD UNIQUE KEY `kBestellung` (`kBestellung`);'
         );

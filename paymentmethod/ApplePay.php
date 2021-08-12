@@ -1,6 +1,8 @@
 <?php
+
 /**
- * @copyright 2020 WebStollen GmbH
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
  */
 
 namespace Plugin\ws5_mollie\paymentmethod;
@@ -13,6 +15,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 class ApplePay extends PaymentMethod
 {
     public const METHOD = \Mollie\Api\Types\PaymentMethod::APPLEPAY;
+
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
 
     public function isSelectable(): bool
     {

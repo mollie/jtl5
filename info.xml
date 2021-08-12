@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-05-03</CreateDate>
-    <Version>1.0.2</Version>
+    <CreateDate>2021-08-10</CreateDate>
+    <Version>1.2.0</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -31,56 +31,80 @@
                 </Setting>
                 <Setting type="text" initialValue="" sort="15" conf="Y">
                     <Name>Test Key</Name>
-                    <Description>Füge hier deinen Mollie API Key ein</Description>
+                    <Description><![CDATA[Füge hier deinen Mollie API Key ein]]></Description>
                     <ValueName>test_apiKey</ValueName>
                 </Setting>
                 <Setting type="text" initialValue="" sort="20" conf="Y">
                     <Name>Profil ID</Name>
-                    <Description>Die ProfilID wird benötigt, um Mollie Components zu verwenden</Description>
+                    <Description><![CDATA[Die ProfilID wird benötigt, um Mollie Components zu verwenden]]></Description>
                     <ValueName>profileId</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="on" sort="25" conf="Y">
                     <Name>Test API als Admin</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet,
-                        wenn man als Admin im Backend eingeloggt ist.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet, wenn man als Admin im Backend eingeloggt ist.]]>
                     </Description>
                     <ValueName>testAsAdmin</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="off" sort="30" conf="Y">
                     <Name>Abgeschlossene Bestellungen ausblenden</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, werden versendete, bezahlte Bestellungen nicht in
-                        der Tabelle angezeigt.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, werden versendete, bezahlte Bestellungen nicht in der Tabelle angezeigt.]]>
                     </Description>
                     <ValueName>hideCompleted</ValueName>
                 </Setting>
                 <Setting type="checkbox" initialValue="off" sort="40" conf="Y">
                     <Name>Bestellungen automatisch stornieren</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, werden komplett Stornierte Bestellungen auch bei
-                        Mollie storniert oder rückerstattet.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, werden komplett Stornierte Bestellungen auch bei Mollie storniert oder rückerstattet.]]>
                     </Description>
                     <ValueName>autoRefund</ValueName>
                 </Setting>
 
+                <Setting type="zahl" initialValue="0" sort="45" conf="Y">
+                    <Name>Unbezahlte Bestellungen stornieren</Name>
+                    <Description>
+                        <![CDATA[Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)]]>
+                    </Description>
+                    <ValueName>autoStorno</ValueName>
+                </Setting>
+                <Setting type="selectbox" initialValue="Y" sort="46" conf="Y">
+                    <Name>Versand bei Mollie</Name>
+                    <Description>
+                        <![CDATA[Soll Versandinformation für OrderAPI Methoden an Mollie gesendet werden?]]></Description>
+                    <ValueName>shippingActive</ValueName>
+                    <SelectboxOptions>
+                        <Option value="Y" sort="1"><![CDATA[Ja]]></Option>
+                        <Option value="K" sort="2"><![CDATA[Nur Kunden & Komplettversand]]></Option>
+                        <Option value="N" sort="3"><![CDATA[Nein, ich mache alles manuell.]]></Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="text" initialValue="Order {orderNumber}" sort="47" conf="Y">
+                    <Name>Payment API Beschreibung</Name>
+                    <Description>
+                        <![CDATA[Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung: {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}]]>
+                    </Description>
+                    <ValueName>paymentDescTpl</ValueName>
+                </Setting>
                 <Setting type="checkbox" initialValue="on" sort="50" conf="Y">
                     <Name>Nur bezahlte Bestellungen in die WAWI übertragen</Name>
-                    <Description>Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI
-                        abgerufen werden.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden.]]>
                     </Description>
                     <ValueName>onlyPaid</ValueName>
                 </Setting>
 
                 <Setting type="checkbox" initialValue="off" sort="50" conf="Y">
                     <Name>Zahlart bei erneutem Zahlvorgang zurücksetzen</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte
-                        Mollie-Zahlungsart zurückzusetzen, somit hat der Kunde zwischen allen aktiven Mollie-Zahlarten
-                        zu wählen.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte Mollie-Zahlungsart zurückzusetzen, somit kann der Kunde zwischen allen aktiven Mollie-Zahlarten zu wählen.]]>
                     </Description>
                     <ValueName>resetMethod</ValueName>
                 </Setting>
 
                 <Setting type="selectbox" initialValue="B" sort="50" conf="Y">
                     <Name>Teilversand Verhalten</Name>
-                    <Description>Bei Gastbestellungen und Teilversand.</Description>
+                    <Description><![CDATA[Bei Gastbestellungen und Teilversand.]]></Description>
                     <ValueName>shippingMode</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="A">Direkt alles versenden</Option>
@@ -89,7 +113,7 @@
                 </Setting>
                 <Setting type="selectbox" initialValue="de_DE" sort="60" conf="Y">
                     <Name>Fallback-Locale</Name>
-                    <Description>Fallback, falls Locale nicht erkannt oder nicht vorhanden.</Description>
+                    <Description><![CDATA[Fallback, falls Locale nicht erkannt oder nicht vorhanden.]]></Description>
                     <ValueName>fallbackLocale</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="en_US">en_US</Option>
@@ -118,16 +142,16 @@
 
                 <Setting type="zahl" initialValue="0" sort="70" conf="Y">
                     <Name>Zahlungserinnerung</Name>
-                    <Description>Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Stunden
-                        nach Bestellung. (0 = deaktiviert)
+                    <Description>
+                        <![CDATA[Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)]]>
                     </Description>
                     <ValueName>reminder</ValueName>
                 </Setting>
 
                 <Setting type="selectbox" initialValue="C" sort="80" conf="Y">
                     <Name>Kunden bei Mollie anlegen (Customer API)</Name>
-                    <Description>Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox,
-                        seine Kundendaten bei Mollie zu speichern. Z.B. für Single-Click Checkout benötigt.
+                    <Description>
+                        <![CDATA[Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox, seine Kundendaten bei Mollie zu speichern. Z.B. für Single-Click Checkout benötigt.]]>
                     </Description>
                     <ValueName>useCustomerAPI</ValueName>
                     <SelectboxOptions>
@@ -138,7 +162,7 @@
 
                 <Setting type="selectbox" initialValue="Y" sort="90" conf="Y">
                     <Name>Bestellabschluss</Name>
-                    <Description>Hier kann das Bestellabschluss-Verhalten eingestellt werden.</Description>
+                    <Description><![CDATA[Hier kann das Bestellabschluss-Verhalten eingestellt werden.]]></Description>
                     <ValueName>checkoutMode</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="Y">Direkt weiterleiten</Option>
@@ -217,7 +241,16 @@
                         <Option value="N" sort="3">Nein</Option>
                     </SelectboxOptions>
                 </Setting>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="N" sort="31" conf="Y">
+                    <Name>Mollie Trust Grafik</Name>
+                    <Description>Bindet eine Trust-Grafik unterhalb des Kreditkartenformulars ein.</Description>
+                    <ValueName>trustBadge</ValueName>
+                    <SelectboxOptions>
+                        <Option value="Y" sort="2">Ja</Option>
+                        <Option value="N" sort="1">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -239,7 +272,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -251,7 +284,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Apple Pay.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -273,7 +306,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>PAYPAL</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -285,7 +318,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit PayPal.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -307,7 +340,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>INVOICE</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -332,7 +365,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>FINANCING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -357,7 +390,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -369,7 +402,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit SOFORT.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -391,7 +424,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -403,7 +436,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Przelewy24.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -425,7 +458,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>GIROPAY</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -437,7 +470,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Giropay.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -459,7 +492,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -471,7 +504,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit iDeal.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -493,7 +526,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>DIRECT_E_BANKING</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -505,7 +538,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit eps.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -527,7 +560,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -539,7 +572,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Bancontact.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -573,7 +606,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem per Überweisung.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -595,7 +628,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -607,7 +640,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit Belfius.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -629,7 +662,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -641,7 +674,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit KBC.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -663,7 +696,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -675,7 +708,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit MyBank.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -697,7 +730,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>OTHER</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -709,7 +742,7 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem mit paysafe card.</InfoText>
                 </MethodLanguage>
-                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
                     <ValueName>api</ValueName>
@@ -932,7 +965,6 @@
             </Variable>
 
         </Locales>
-
         <Emailtemplate>
             <Template>
                 <Name>Zahlungs-Erinnerungsemail</Name>
@@ -997,6 +1029,5 @@ Pay now: {$oPluginMail->PayURL}
                 </TemplateLanguage>
             </Template>
         </Emailtemplate>
-
     </Install>
 </jtlshopplugin>
