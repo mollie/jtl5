@@ -8,6 +8,8 @@ stages:
 
 sast:
   stage: test
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
 include:
   - template: Security/SAST.gitlab-ci.yml
 
@@ -15,7 +17,7 @@ code_navigation:
   image: node:14
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-    - exists:
+      exists:
         - adminemnu/app/package.json
   allow_failure: true # recommended
   script:
@@ -30,7 +32,7 @@ phpunit:
   stage: test
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-    - exists:
+      exists:
         - phpunit.xml
   script:
     - if [ -f "phpunit.xml" ]; then composer install -o && ./vendor/bin/phpunit; else echo "Skipped PHPUnit, no phpunit.xml"; fi
@@ -39,7 +41,7 @@ composer:
   stage: build
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-    - exists:
+      exists:
         - composer.json
   cache:
     key:
@@ -59,7 +61,7 @@ node:
   stage: build
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-    - exists:
+      exists:
         - adminmenu/app/package.json
   cache:
     key:
@@ -91,10 +93,9 @@ node:
 
 pack:
   stage: release
-  needs: [ "node", "composer" ]
-  only:
-    - tags
-    - master
+  #  needs: [ "node", "composer" ]
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
   script:
     - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/
     - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml
