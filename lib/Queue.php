@@ -64,12 +64,10 @@ class Queue
      */
     private static function getOpen(int $limit): Generator
     {
-        // TODO: DOKU
         if (!defined('MOLLIE_HOOK_DELAY')) {
             define('MOLLIE_HOOK_DELAY', 3);
         }
-
-        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE dDone IS NULL AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%') AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE)) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
+        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE (dDone IS NULL OR dDone = '0000-00-00 00:00:00') AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%') AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE)) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
             ':LIMIT' => $limit,
             ':hd'    => MOLLIE_HOOK_DELAY
         ], 2);
@@ -111,9 +109,9 @@ class Queue
     /**
      * @param int        $hook
      * @param QueueModel $qm
-     * @throws CircularReferenceException
      * @throws ServiceNotFoundException
      * @throws Exception
+     * @throws CircularReferenceException
      * @return bool
      */
     protected static function handleHook(int $hook, QueueModel $qm): bool
@@ -212,8 +210,8 @@ class Queue
 
     /**
      * @param mixed $delay
-     * @throws ServiceNotFoundException
      * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return true
      */
     public static function storno($delay): bool
