@@ -51,7 +51,7 @@ class Address extends \Plugin\ws5_mollie\lib\Payment\Address
     {
         parent::__construct($address);
 
-        $this->title      = trim(($address->cAnrede === 'm' ? \Shop::Lang()->get('mr') : \Shop::Lang()->get('mrs')) . ' ' . $address->cTitel) ?? null;
+        $this->title      = substr(trim(($address->cAnrede === 'm' ? \JTL\Shop::Lang()->get('mr') : \JTL\Shop::Lang()->get('mrs')) . ' ' . $address->cTitel), 0, 20) ?? null;
         $this->givenName  = $address->cVorname;
         $this->familyName = $address->cNachname;
         $this->email      = $address->cMail ?? null;
