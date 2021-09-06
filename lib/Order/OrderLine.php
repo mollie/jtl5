@@ -7,16 +7,18 @@
 
 namespace Plugin\ws5_mollie\lib\Order;
 
-use Bestellung;
-use Currency;
 use Exception;
+use JsonSerializable;
 use JTL\Cart\CartItem;
 use JTL\Cart\CartItemProperty;
+use JTL\Catalog\Currency;
+use JTL\Checkout\Bestellung;
 use Mollie\Api\Types\OrderLineType;
+use RuntimeException;
 use stdClass;
 use WS\JTL5\Traits\Jsonable;
 
-class OrderLine implements \JsonSerializable
+class OrderLine implements JsonSerializable
 {
     use Jsonable;
 
@@ -48,14 +50,14 @@ class OrderLine implements \JsonSerializable
 
     /**
      * @param CartItem|stdClass $oPosition
-     * @param Currency          $currency
-     * @throws Exception
+     * @param Currency $currency
      * @return OrderLine
+     * @throws Exception
      */
     public static function factory($oPosition, Currency $currency): self
     {
         if (!$oPosition) {
-            throw new \RuntimeException('$oPosition invalid: ', print_r($oPosition, 1));
+            throw new RuntimeException('$oPosition invalid: ', print_r($oPosition, 1));
         }
 
         $orderLine = new self();

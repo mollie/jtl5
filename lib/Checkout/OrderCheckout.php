@@ -14,6 +14,7 @@ use JTL\Cart\CartItem;
 use JTL\Helpers\Tax;
 use JTL\Helpers\Text;
 use JTL\Session\Frontend;
+use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
@@ -22,7 +23,6 @@ use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Order\Address;
 use Plugin\ws5_mollie\lib\Order\OrderLine as WSOrderLine;
 use RuntimeException;
-use Shop;
 use stdClass;
 
 /**
@@ -154,7 +154,7 @@ class OrderCheckout extends AbstractCheckout
     /**
      * @param array $options
      * @throws Exception
-     * @return self
+     * @return $this
      */
     public function loadRequest(array &$options = [])
     {
