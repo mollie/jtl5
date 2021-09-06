@@ -7,9 +7,10 @@
 
 namespace Plugin\ws5_mollie\lib\Payment;
 
+use JsonSerializable;
 use WS\JTL5\Traits\Jsonable;
 
-class Address implements \JsonSerializable
+class Address implements JsonSerializable
 {
     use Jsonable;
 

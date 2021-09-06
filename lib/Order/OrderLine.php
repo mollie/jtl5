@@ -50,9 +50,9 @@ class OrderLine implements JsonSerializable
 
     /**
      * @param CartItem|stdClass $oPosition
-     * @param Currency $currency
-     * @return OrderLine
+     * @param Currency          $currency
      * @throws Exception
+     * @return OrderLine
      */
     public static function factory($oPosition, Currency $currency): self
     {

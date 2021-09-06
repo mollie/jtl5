@@ -7,6 +7,8 @@
 
 namespace Plugin\ws5_mollie\lib\Model;
 
+use WS\JTL5\Model\AbstractModel;
+
 /**
  * Class CustomerModel
  * @package ws5_mollie\Model
@@ -15,7 +17,7 @@ namespace Plugin\ws5_mollie\lib\Model;
  * @property string $customerId
  *
  */
-final class CustomerModel extends \WS\JTL5\Model\AbstractModel
+final class CustomerModel extends AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_kunde';
     public const PRIMARY = 'kKunde';

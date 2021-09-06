@@ -7,11 +7,12 @@
 
 namespace Plugin\ws5_mollie\lib\Order;
 
+use JsonSerializable;
 use JTL\Catalog\Currency;
-use Shop;
+use JTL\Shop;
 use WS\JTL5\Traits\Jsonable;
 
-class Amount implements \JsonSerializable
+class Amount implements JsonSerializable
 {
     use Jsonable;
 
@@ -22,7 +23,6 @@ class Amount implements \JsonSerializable
      * Amount constructor.
      * @param $value
      * @param null|Currency $currency
-     * @param bool          $useFactor
      * @param bool          $useRounding (is it total SUM => true [5 Rappen Rounding])
      * @todo: prüfe mit Shop4
      */

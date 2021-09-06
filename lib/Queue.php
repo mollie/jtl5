@@ -49,7 +49,7 @@ class Queue
                             break;
                     }
                 } catch (Exception $e) {
-                    Shop::Container()->getLogService()->error($e->getMessage() . " ({$type}, {$id})");
+                    Shop::Container()->getLogService()->error($e->getMessage() . " ($type, $id)");
                     $todo->done("{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}");
                 }
             }
@@ -103,7 +103,7 @@ class Queue
             return $todo->done('Status: ' . $checkout->getMollie()->status);
         }
 
-        throw new RuntimeException("Bestellung oder Zahlungsart konnte nicht geladen werden: {$id}");
+        throw new RuntimeException("Bestellung oder Zahlungsart konnte nicht geladen werden: $id");
     }
 
     /**
@@ -160,11 +160,11 @@ class Queue
                                     if ($shipments = Shipment::syncBestellung($checkout)) {
                                         foreach ($shipments as $shipment) {
                                             if (is_string($shipment)) {
-                                                $checkout->Log("Shipping-Error: {$shipment}");
-                                                $result .= "Shipping-Error: {$shipment}\n";
+                                                $checkout->Log("Shipping-Error: $shipment");
+                                                $result .= "Shipping-Error: $shipment\n";
                                             } else {
-                                                $checkout->Log("Order shipped: {$shipment->id}");
-                                                $result .= "Order shipped: {$shipment->id}\n";
+                                                $checkout->Log("Order shipped: $shipment->id");
+                                                $result .= "Order shipped: $shipment->id\n";
                                             }
                                         }
                                     } else {

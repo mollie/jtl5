@@ -6,6 +6,7 @@
  */
 
 use JTL\Helpers\Request;
+use JTL\Helpers\Text;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\ExclusiveLock;
@@ -25,7 +26,7 @@ try {
     Queue::run(MOLLIE_QUEUE_MAX);
 
     if (array_key_exists('hash', $_REQUEST) && strpos($_SERVER['PHP_SELF'], 'bestellabschluss.php') !== false) {
-        $sessionHash    = trim(StringHandler::htmlentities(StringHandler::filterXSS($_REQUEST['hash'])), '_');
+        $sessionHash    = trim(Text::htmlentities(Text::filterXSS($_REQUEST['hash'])), '_');
         $paymentSession = Shop::Container()->getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash);
         if ($paymentSession && $paymentSession->kBestellung) {
             $oBestellung = new \JTL\Checkout\Bestellung($paymentSession->kBestellung);

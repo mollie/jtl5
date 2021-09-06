@@ -8,7 +8,10 @@
 namespace Plugin\ws5_mollie\lib\Model;
 
 use Exception;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
+use WS\JTL5\Model\AbstractModel;
 
 /**
  * Class QueueModel
@@ -24,7 +27,7 @@ use JTL\Shop;
  * @property bool $bLock
  *
  */
-class QueueModel extends \WS\JTL5\Model\AbstractModel
+class QueueModel extends AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_queue';
     public const PRIMARY = 'kId';
@@ -64,6 +67,14 @@ class QueueModel extends \WS\JTL5\Model\AbstractModel
         return parent::save();
     }
 
+    /**
+     * @param string $hook
+     * @param array  $args_arr
+     * @param string $type
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     * @return bool
+     */
     public static function saveToQueue(string $hook, array $args_arr, string $type = 'hook'): bool
     {
         $mQueue           = new self();

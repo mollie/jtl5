@@ -17,8 +17,8 @@ trait RequestData
     protected $requestData;
 
     /**
-     * @return array
      * @throws Exception
+     * @return array
      */
     public function jsonSerialize(): array
     {
@@ -37,8 +37,8 @@ trait RequestData
 
     /**
      * @param string $name
-     * @return false|mixed|string
      * @throws Exception
+     * @return false|mixed|string
      */
     public function __get(string $name)
     {

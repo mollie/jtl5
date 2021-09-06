@@ -17,6 +17,7 @@ use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Plugin\Helper as PluginHelper;
 use JTL\Plugin\Payment\Method;
 use JTL\Session\Frontend;
+use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
@@ -232,7 +233,7 @@ abstract class PaymentMethod extends Method
 
             $paymentOptions = [];
 
-            if ((int)Frontend::getCustomer()->nRegistriert && ($customerID = Customer::createOrUpdate(Frontend::getCustomer()))) {
+            if (Frontend::getCustomer()->nRegistriert && ($customerID = Customer::createOrUpdate(Frontend::getCustomer()))) {
                 $paymentOptions['customerId'] = $customerID;
             }
 
@@ -252,7 +253,7 @@ abstract class PaymentMethod extends Method
 
             ifndef('MOLLIE_REDIRECT_DELAY', 3);
             $checkoutMode = self::Plugin('ws5_mollie')->getConfig()->getValue('checkoutMode');
-            \JTL\Shop::Smarty()->assign('redirect', $url)
+            Shop::Smarty()->assign('redirect', $url)
                 ->assign('checkoutMode', $checkoutMode);
             if ($checkoutMode === 'Y' && !headers_sent()) {
                 header('Location: ' . $url);
@@ -260,7 +261,7 @@ abstract class PaymentMethod extends Method
         } catch (Exception $e) {
             $this->doLog('mollie::preparePaymentProcess: ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_ERROR);
 
-            \JTL\Shop::Container()->getAlertService()->addAlert(
+            Shop::Container()->getAlertService()->addAlert(
                 Alert::TYPE_ERROR,
                 self::Plugin('ws5_mollie')->getLocalization()->getTranslation('error_create'),
                 'paymentFailed'
@@ -290,8 +291,8 @@ abstract class PaymentMethod extends Method
             }
             $checkout->handleNotification($hash);
         } catch (Exception $e) {
-            $this->doLog("ERROR: mollie::handleNotification: Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
-            \JTL\Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
+            $this->doLog("ERROR: mollie::handleNotification: Bestellung '$order->cBestellNr': {$e->getMessage()}", LOGLEVEL_ERROR);
+            Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
     }
 }

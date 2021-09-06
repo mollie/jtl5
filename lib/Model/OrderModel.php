@@ -7,6 +7,8 @@
 
 namespace Plugin\ws5_mollie\lib\Model;
 
+use WS\JTL5\Model\AbstractModel;
+
 /**
  * Class OrderModel
  * @package ws5_mollie\Model
@@ -31,11 +33,14 @@ namespace Plugin\ws5_mollie\lib\Model;
  * @property string $dReminder
  *
  */
-final class OrderModel extends \WS\JTL5\Model\AbstractModel
+final class OrderModel extends AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_orders';
     public const PRIMARY = 'kId';
 
+    /**
+     * @return bool
+     */
     public function save(): bool
     {
         if (!$this->dCreated || $this->dCreated === '0000-00-00 00:00:00') {

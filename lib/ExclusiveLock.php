@@ -16,7 +16,11 @@ class ExclusiveLock
     protected $own  = false; //have we locked resource
     protected $path = '';
 
-    public function __construct($key, $path = '')
+    /**
+     * @param $key
+     * @param string $path
+     */
+    public function __construct($key, string $path = '')
     {
         $this->key  = $key;
         $this->path = rtrim(realpath($path), '/') . '/';
@@ -58,6 +62,9 @@ class ExclusiveLock
         return true; // success
     }
 
+    /**
+     * @return bool
+     */
     public function lock(): bool
     {
         if (!flock($this->file, LOCK_EX | LOCK_NB)) { //failed

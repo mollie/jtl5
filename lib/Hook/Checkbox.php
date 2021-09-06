@@ -7,24 +7,26 @@
 
 namespace Plugin\ws5_mollie\lib\Hook;
 
+use Exception;
 use JTL\Language\LanguageHelper;
+use JTL\Session\Frontend;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
-use Session;
+use WS\JTL5\Hook\AbstractHook;
 
-class Checkbox extends \WS\JTL5\Hook\AbstractHook
+class Checkbox extends AbstractHook
 {
     /**
      * @param $args_arr
-     * @throws \Exception
+     * @throws Exception
      */
     public static function execute(&$args_arr): void
     {
-        if (!Session::get('Zahlungsart') || strpos(Session::get('Zahlungsart')->cModulId, 'kPlugin_' . self::Plugin('ws5_mollie')->getID() . '_') === false) {
+        if (!Frontend::get('Zahlungsart') || strpos(Frontend::get('Zahlungsart')->cModulId, 'kPlugin_' . self::Plugin('ws5_mollie')->getID() . '_') === false) {
             return;
         }
 
-        if (Session::getCustomer()->nRegistriert && $args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS) {
-            $mCustomer = CustomerModel::fromID(Session::getCustomer()->getID(), 'kKunde');
+        if (Frontend::getCustomer()->nRegistriert && $args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS) {
+            $mCustomer = CustomerModel::fromID(Frontend::getCustomer()->getID(), 'kKunde');
 
             if ($mCustomer->customerId) {
                 return;
@@ -54,7 +56,7 @@ class Checkbox extends \WS\JTL5\Hook\AbstractHook
                 ];
             }
 
-            $checkbox->kKundengruppe_arr = [Session::getCustomer()->getGroupID()];
+            $checkbox->kKundengruppe_arr = [Frontend::getCustomer()->getGroupID()];
             $checkbox->kAnzeigeOrt_arr   = [CHECKBOX_ORT_BESTELLABSCHLUSS];
             $checkbox->cID               = 'mollie_create_customer';
             $checkbox->cLink             = '';

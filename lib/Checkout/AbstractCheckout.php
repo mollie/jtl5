@@ -37,8 +37,10 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order\Amount;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
+use RuntimeException;
 use stdClass;
-use WS\JTL5\Model\AbstractModel;
+use WS\JTL5\Model\ModelInterface;
+use WS\JTL5\Traits\Plugin;
 
 /**
  * Class AbstractCheckout
@@ -54,7 +56,7 @@ use WS\JTL5\Model\AbstractModel;
  */
 abstract class AbstractCheckout
 {
-    use \WS\JTL5\Traits\Plugin;
+    use Plugin;
     use RequestData;
 
     /**
@@ -316,6 +318,7 @@ abstract class AbstractCheckout
     }
 
     /**
+     * @throws Exception
      * @return static
      */
     public function updateModel(): self
@@ -328,7 +331,7 @@ abstract class AbstractCheckout
             $this->getModel()->cCurrency = $this->getMollie()->amount->currency;
             $this->getModel()->cStatus   = $this->getMollie()->status;
         }
-        $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: AbstractModel::NULL;
+        $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: ModelInterface::NULL;
         $this->getModel()->cBestellNr  = $this->getBestellung()->cBestellNr;
         $this->getModel()->bSynced     = $this->getModel()->bSynced ?? (self::Plugin('ws5_mollie')->getConfig()->getValue('onlyPaid') !== 'on');
 
@@ -360,6 +363,7 @@ abstract class AbstractCheckout
     }
 
     /**
+     * @throws Exception
      * @return bool
      */
     public function completlyPaid(): bool
@@ -385,7 +389,7 @@ abstract class AbstractCheckout
     public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
     {
         if ($oBestellung->cAbgeholt === 'Y' && !$model->bSynced) {
-            Shop::Container()->getDB()->update('tbestellung', 'kBestellung', (int)$oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
+            Shop::Container()->getDB()->update('tbestellung', 'kBestellung', $oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
             $model->bSynced = true;
 
             try {
@@ -436,7 +440,7 @@ abstract class AbstractCheckout
                 ':cModulId'     => 'kPlugin_' . self::Plugin('ws5_mollie')->getID() . '%'
             ], 1);
 
-            return $res ? true : false;
+            return (bool)$res;
         }
 
         return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
@@ -455,6 +459,7 @@ abstract class AbstractCheckout
     }
 
     /**
+     * @param int   $kBestellung
      * @param mixed $fill
      * @return OrderCheckout|PaymentCheckout
      */
@@ -464,7 +469,7 @@ abstract class AbstractCheckout
 
         $oBestellung = new Bestellung($model->kBestellung, $fill);
         if (!$oBestellung->kBestellung) {
-            throw new Exception(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
+            throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
         }
         if (strpos($model->cOrderId, 'tr_') !== false) {
             $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
@@ -529,7 +534,7 @@ abstract class AbstractCheckout
             $order->dReminder = date('Y-m-d H:i:s');
             $order->save();
 
-            throw new Exception("Kunde '{$oBestellung->kKunde}' nicht gefunden.");
+            throw new Exception("Kunde '$oBestellung->kKunde' nicht gefunden.");
         }
         $data->Bestellung = $oBestellung;
         $data->PayURL     = $repayURL;
@@ -662,14 +667,13 @@ abstract class AbstractCheckout
 
     protected static function aktualisiereLagerbestand(Artikel $product, int $amount, array $attributeValues, int $productFilter = 1)
     {
-        $inventory = (float)$product->fLagerbestand;
+        $inventory = $product->fLagerbestand;
         $db        = Shop::Container()->getDB();
         if ($product->cLagerBeachten !== 'Y') {
             return $inventory;
         }
         if (
             $product->cLagerVariation === 'Y'
-            && is_array($attributeValues)
             && count($attributeValues) > 0
         ) {
             foreach ($attributeValues as $value) {
@@ -697,7 +701,7 @@ abstract class AbstractCheckout
                 $tmpProduct = $db->select(
                     'tartikel',
                     'kArtikel',
-                    (int)$product->kArtikel,
+                    $product->kArtikel,
                     null,
                     null,
                     null,

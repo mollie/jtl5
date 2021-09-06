@@ -11,6 +11,8 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use JTL\Cart\CartItem;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Helpers\Tax;
 use JTL\Helpers\Text;
 use JTL\Session\Frontend;
@@ -303,6 +305,7 @@ class OrderCheckout extends AbstractCheckout
 
     /**
      * @throws ApiException
+     * @throws Exception
      * @return string
      */
     public function cancelOrRefund(): string
@@ -322,8 +325,8 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
-     * @throws \JTL\Exceptions\CircularReferenceException
-     * @throws \JTL\Exceptions\ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return static
      */
     protected function updateOrderNumber()

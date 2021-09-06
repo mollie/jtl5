@@ -50,12 +50,12 @@ class MollieController extends AbstractController
             $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
 
             $methods[$method->id] = (object)[
-                'settings'            => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart={$oZahlungsart->kZahlungsart}&token={$_SESSION['jtl_token']}",
+                'settings'            => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
                 'mollie'              => $method,
                 'duringCheckout'      => (int)$oZahlungsart->nWaehrendBestellung === 1,
                 'allowDuringCheckout' => $oPaymentMethod::ALLOW_PAYMENT_BEFORE_ORDER ?? null,
                 'paymentMethod'       => $oZahlungsart,
-                'shipping'            => \Shop::Container()->getDB()->executeQueryPrepared('SELECT v.* FROM tversandart v
+                'shipping'            => Shop::Container()->getDB()->executeQueryPrepared('SELECT v.* FROM tversandart v
 JOIN tversandartzahlungsart vz ON v.kVersandart = vz.kVersandart
 JOIN tzahlungsart z ON vz.kZahlungsart = z.kZahlungsart
 WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
@@ -83,7 +83,7 @@ WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
     {
         $id = 'kPlugin_' . Helper::getIDByPluginID('ws5_mollie') . '_%';
 
-        $result = \Shop::Container()->getDB()->executeQueryPrepared('(
+        $result = Shop::Container()->getDB()->executeQueryPrepared('(
 SELECT COUNT(b.cBestellNr) as transactions, ROUND(IFNULL(SUM(b.fGesamtsumme),0),2) as amount, "day" as timespan FROM tbestellung b
 WHERE kZahlungsart IN (SELECT z.kZahlungsart FROM tzahlungsart z
 WHERE z.cModulId LIKE :cModulId1)

@@ -31,8 +31,9 @@ class Locale
     ];
 
     /**
+     * @param mixed $cISOSprache
      * @param null|string $country
-     * @param mixed       $cISOSprache
+     * @return string
      */
     public static function getLocale($cISOSprache, ?string $country = null): string
     {
