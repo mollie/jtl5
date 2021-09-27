@@ -117,7 +117,7 @@ class Queue extends AbstractHook
                 $alertHelper = Shop::Container()->getAlertService();
                 $alertHelper->addAlert(Alert::TYPE_ERROR, $e->getMessage(), 'mollie_repay', ['dismissable' => true]);
             } catch (Exception $e) {
-                Shop::Container()->getLogService()->addError('mollie:repay:error: ' . $e->getMessage() . "\n" . print_r($_REQUEST, 1));
+                Shop::Container()->getLogService()->error('mollie:repay:error: ' . $e->getMessage() . "\n" . print_r($_REQUEST, 1));
             }
         }
     }

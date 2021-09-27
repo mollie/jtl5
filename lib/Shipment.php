@@ -142,7 +142,7 @@ class Shipment
                     $shipments[] = $e->getMessage();
                 } catch (Exception $e) {
                     $shipments[] = $e->getMessage();
-                    Shop::Container()->getLogService()->addError("mollie: Shipment::syncBestellung (BestellNr. {$checkout->getBestellung()->cBestellNr}, Lieferschein: {$shipment->getLieferschein()->getLieferscheinNr()}) - " . $e->getMessage());
+                    Shop::Container()->getLogService()->error("mollie: Shipment::syncBestellung (BestellNr. {$checkout->getBestellung()->cBestellNr}, Lieferschein: {$shipment->getLieferschein()->getLieferscheinNr()}) - " . $e->getMessage());
                 }
             }
         }
