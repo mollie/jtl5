@@ -291,11 +291,16 @@ class OrderCheckout extends AbstractCheckout
             ) {
                 $this->mollie = $payment;
 
+                $cHinweis = $payment->details->paypalReference ?? $payment->id;
+                if(self::Plugin("ws5_mollie")->getConfig()->getValue('paymentID') === 'api'){
+                    $cHinweis = $this->getMollie()->id;
+                }
+
                 return (object)[
                     'fBetrag'  => (float)$payment->amount->value,
                     'cISO'     => $payment->amount->currency,
                     'cZahler'  => $payment->details->paypalPayerId ?? $payment->customerId,
-                    'cHinweis' => $payment->details->paypalReference ?? $payment->id,
+                    'cHinweis' => $cHinweis,
                 ];
             }
         }
