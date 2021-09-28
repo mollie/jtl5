@@ -18,7 +18,6 @@ use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use RuntimeException;
-use StringHandler;
 use WS\JTL5\Hook\AbstractHook;
 
 class Queue extends AbstractHook

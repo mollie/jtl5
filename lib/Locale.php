@@ -31,7 +31,7 @@ class Locale
     ];
 
     /**
-     * @param mixed $cISOSprache
+     * @param mixed       $cISOSprache
      * @param null|string $country
      * @return string
      */

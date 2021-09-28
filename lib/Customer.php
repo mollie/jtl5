@@ -43,7 +43,7 @@ class Customer
 
     /**
      * @param \JTL\Customer\Customer $oKunde
-     * @return string|null
+     * @return null|string
      */
     public static function createOrUpdate(\JTL\Customer\Customer $oKunde): ?string
     {
