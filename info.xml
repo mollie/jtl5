@@ -86,7 +86,7 @@
                     </Description>
                     <ValueName>paymentDescTpl</ValueName>
                 </Setting>
-                <Setting type="checkbox" initialValue="on" sort="50" conf="Y">
+                <Setting type="checkbox" initialValue="off" sort="50" conf="Y">
                     <Name>Nur bezahlte Bestellungen in die WAWI übertragen</Name>
                     <Description>
                         <![CDATA[Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden.]]>
@@ -170,6 +170,17 @@
                         <Option sort="2" value="N">Nicht automatisch weiterleiten</Option>
                     </SelectboxOptions>
                 </Setting>
+
+                <Setting type="selectbox" initialValue="Y" sort="48" conf="Y">
+                    <Name>ID im Zahlungseingang</Name>
+                    <Description><![CDATA[Welche ID soll im Zahlungseingang hinterlegt werden? (außer PayPal))]]></Description>
+                    <ValueName>paymentID</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="api">Je nach API, Order- oder Payment-ID verwenden</Option>
+                        <Option sort="2" value="tr">Immer Payment-ID verwenden</Option>
+                    </SelectboxOptions>
+                </Setting>
+
             </Settingslink>
         </Adminmenu>
         <PaymentMethod>
