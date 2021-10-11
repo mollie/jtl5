@@ -14,6 +14,13 @@
         <Hooks>
             <Hook id="131">hooks/131.php</Hook>
         </Hooks>
+        <JS>
+            <file>
+                <name>applePay.js</name>
+                <priority>5</priority>
+                <position>body</position>
+            </file>
+        </JS>
         <Adminmenu>
             <Customlink sort="1">
                 <Name>Dashboard</Name>
@@ -387,6 +394,31 @@
                     <Name>Klarna Slice It.</Name>
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem in Raten mit Klarna.</InfoText>
+                </MethodLanguage>
+                <Setting type="zahl" initialValue="28" sort="45" conf="Y">
+                    <Name>Gültigkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
+            <Method>
+                <Name>Klarna Pay Now</Name>
+                <PictureURL>images/Payment_methods/klarna@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>INVOICE</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>KlarnaPayLater.php</ClassFile>
+                <ClassName>KlarnaPayLater</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Klarna Pay Later.</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem auf Rechnung mit Klarna.</InfoText>
                 </MethodLanguage>
                 <Setting type="zahl" initialValue="28" sort="45" conf="Y">
                     <Name>Gültigkeit in Tagen</Name>

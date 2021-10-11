@@ -18,6 +18,6 @@ class KBC extends PaymentMethod
 
     public function getPaymentOptions(Bestellung $order, $apiType): array
     {
-        return ['description' => substr($order->cBestellNr, 0, 13)];
+        return $apiType === 'payment' ? ['description' => substr($order->cBestellNr, 0, 13)] : [];
     }
 }
