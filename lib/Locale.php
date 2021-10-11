@@ -7,11 +7,12 @@
 
 namespace Plugin\ws5_mollie\lib;
 
-use WS\JTL5\Traits\Plugin;
+
+use WS\JTL5\Traits\Plugins;
 
 class Locale
 {
-    use Plugin;
+    use Plugins;
 
     protected static $langs = [
         'ger' => ['lang' => 'de', 'country' => ['AT', 'DE', 'CH']],

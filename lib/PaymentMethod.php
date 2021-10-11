@@ -22,11 +22,11 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 abstract class PaymentMethod extends Method
 {
-    use Plugin;
+    use Plugins;
 
     public const ALLOW_AUTO_STORNO = true;
 

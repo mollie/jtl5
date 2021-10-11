@@ -15,11 +15,11 @@ use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\MollieApiClient;
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 class MollieAPI
 {
-    use Plugin;
+    use Plugins;
 
     /**
      * @var MollieApiClient

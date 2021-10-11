@@ -20,7 +20,7 @@ use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
 use WS\JTL5\Exception\APIException;
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 /**
  * Class Shipment
@@ -32,7 +32,7 @@ use WS\JTL5\Traits\Plugin;
  */
 class Shipment
 {
-    use Plugin;
+    use Plugins;
     use RequestData;
 
     /**

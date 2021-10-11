@@ -17,11 +17,11 @@ use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use RuntimeException;
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 class Queue
 {
-    use Plugin;
+    use Plugins;
 
     /**
      * @param int $limit
