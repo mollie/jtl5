@@ -49,8 +49,9 @@ class Queue
                             break;
                     }
                 } catch (Exception $e) {
-                    Shop::Container()->getLogService()->error($e->getMessage() . " ($type, $id)");
-                    $todo->done("{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}");
+                    Shop::Container()->getLogService()->error('Mollie Queue Fehler: ' . $e->getMessage() . " ($type, $id)");
+                    $todo->cError = "{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
+                    $todo->done();
                 }
             }
 
@@ -109,9 +110,9 @@ class Queue
     /**
      * @param int        $hook
      * @param QueueModel $qm
-     * @throws ServiceNotFoundException
      * @throws Exception
      * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return bool
      */
     protected static function handleHook(int $hook, QueueModel $qm): bool
@@ -210,8 +211,8 @@ class Queue
 
     /**
      * @param mixed $delay
-     * @throws CircularReferenceException
      * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
      * @return true
      */
     public static function storno($delay): bool

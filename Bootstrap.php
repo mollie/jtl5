@@ -7,19 +7,25 @@
 
 namespace Plugin\ws5_mollie;
 
+use JTL\Backend\Notification;
+use JTL\Backend\NotificationEntry;
 use JTL\Events\Dispatcher;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Shop;
 use Plugin\ws5_mollie\lib\Hook\ApplePay;
 use Plugin\ws5_mollie\lib\Hook\Checkbox;
 use Plugin\ws5_mollie\lib\Hook\Queue;
 use Plugin\ws5_mollie\lib\Mapper\MollieUpgradeMapper;
 use WS\JTL5\Mapper\UpgradeMapperInterface;
+use WS\JTL5\Traits\Plugins;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 class Bootstrap extends \WS\JTL5\Bootstrap
 {
+    use Plugins;
+
     /**
      * @param Dispatcher $dispatcher
      * @throws CircularReferenceException
@@ -28,6 +34,26 @@ class Bootstrap extends \WS\JTL5\Bootstrap
     public function boot(Dispatcher $dispatcher): void
     {
         parent::boot($dispatcher);
+
+        if (!Shop::isFrontend()) {
+            if ($authorized = Shop::Container()->getDB()->getAffectedRows('SELECT kId FROM xplugin_ws5_mollie_orders WHERE cStatus = "authorized" AND dCreated > DATE_SUB(NOW(), INTERVAL 30 DAY)')) {
+                Notification::getInstance()->add(
+                    NotificationEntry::TYPE_WARNING,
+                    'Mollie Authorized Orders',
+                    "Derzeit gibt es {$authorized} Bestellung(en), mit dem Status 'authorized' (in den letzten 30 Tagen).",
+                    Shop::getURL() . '/admin/plugin.php?kPlugin=' . self::Plugin('ws5_mollie')->getID()
+                );
+            }
+
+            if ($errors = Shop::Container()->getDB()->getAffectedRows('SELECT kId FROM xplugin_ws5_mollie_queue WHERE cError IS NOT NULL AND dCreated > DATE_SUB(NOW(), INTERVAL 30 DAY);')) {
+                Notification::getInstance()->add(
+                    NotificationEntry::TYPE_DANGER,
+                    'Mollie Queue with Errors',
+                    "Derzeit gibt es {$errors} Warteschlangen-Einträge, mit einem Fehler (in den letzten 30 Tagen).",
+                    Shop::getURL() . '/admin/plugin.php?kPlugin=' . self::Plugin('ws5_mollie')->getID()
+                );
+            }
+        }
 
         $this->listen(HOOK_SMARTY_OUTPUTFILTER, [ApplePay::class, 'execute']);
 

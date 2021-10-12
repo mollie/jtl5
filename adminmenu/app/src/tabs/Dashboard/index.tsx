@@ -90,9 +90,9 @@ const Dashboard = () => {
       methods[id].paymentMethod &&
       (!methods[id].duringCheckout || methods[id].allowDuringCheckout)
     ) {
-      validMethods.push(<Valid cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
+      validMethods.push(<Valid key={id} cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
     } else {
-      invalidMethods.push(<Invalid cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
+      invalidMethods.push(<Invalid key={id} cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
     }
   })
 

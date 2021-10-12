@@ -22,6 +22,7 @@ use WS\JTL5\Model\AbstractModel;
  * @property string $cData
  * @property string $cResult
  * @property string $dDone
+ * @property string $cError
  * @property string $dCreated
  * @property string $dModified
  * @property bool $bLock
@@ -44,14 +45,15 @@ class QueueModel extends AbstractModel
     }
 
     /**
-     * @param string      $result
+     * @param null|string $result
      * @param null|string $date
      * @return bool
      */
-    public function done(string $result, string $date = null): bool
+    public function done(string $result = null, string $date = null): bool
     {
-        $this->cResult = $result;
-        $this->dDone   = $date ?? date('Y-m-d H:i:s');
+        $this->cResult = $result ?? self::NULL;
+        $this->cError = $this->cError ?? self::NULL;
+        $this->dDone   = $date   ?? date('Y-m-d H:i:s');
         $this->bLock   = self::NULL;
 
         return $this->save();
