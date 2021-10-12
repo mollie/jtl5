@@ -6,6 +6,7 @@ import {
   faCreditCard,
   faEnvelopeOpenDollar,
   faEnvelopeOpenText,
+  faEraser,
   faExternalLink,
   faMoneyBill,
   faShippingFast,
@@ -36,6 +37,19 @@ const Dashboard = () => {
     _setLoading((prev) => {
       return { ...prev, [key]: value }
     })
+  }
+
+  const cleanLogfiles = (modulId: string) => () => {
+    setLoading('methods', true)
+    api
+      .run('mollie', 'cleanlog', { cModulId: modulId })
+      .then((res) => {
+        loadMethods()
+      })
+      .catch((e) => {
+        console.error(e)
+        setLoading('methods', false)
+      })
   }
 
   const loadMethods = useCallback(() => {
@@ -76,9 +90,9 @@ const Dashboard = () => {
       methods[id].paymentMethod &&
       (!methods[id].duringCheckout || methods[id].allowDuringCheckout)
     ) {
-      validMethods.push(<Valid method={methods[id] as MethodProps} />)
+      validMethods.push(<Valid cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
     } else {
-      invalidMethods.push(<Invalid method={methods[id] as MethodProps} />)
+      invalidMethods.push(<Invalid cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
     }
   })
 
@@ -242,6 +256,15 @@ const Dashboard = () => {
                     title={'Zahlung nach Bestellabschluss, zahlung vor Bestellabschluss wäre möglich!'}
                   />{' '}
                   = Zahlung nach Bestellabschluss
+                </li>
+                <li className="text-xs">
+                  <FontAwesomeIcon
+                    color="red"
+                    size={'xs'}
+                    icon={faEraser}
+                    title={'ZA hat mehr als 30 Tage alte Logeinträge'}
+                  />{' '}
+                  = Logfiles älter als 30 Tage löschen
                 </li>
               </ul>
             </div>

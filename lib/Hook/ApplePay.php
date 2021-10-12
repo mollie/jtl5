@@ -8,7 +8,6 @@
 namespace Plugin\ws5_mollie\lib\Hook;
 
 use Exception;
-use JTL\Shop;
 use WS\JTL5\Hook\AbstractHook;
 
 class ApplePay extends AbstractHook
@@ -33,7 +32,7 @@ class ApplePay extends AbstractHook
             }
 
             if (!array_key_exists('ws_mollie_applepay_available', $_SESSION)) {
-                pq('head')->append("<script>window.MOLLIE_APPLEPAY_CHECK_URL = '".self::Plugin('ws5_mollie')->getPaths()->getBaseURL() . "applepay.php';</script>");
+                pq('head')->append("<script>window.MOLLIE_APPLEPAY_CHECK_URL = '" . self::Plugin('ws5_mollie')->getPaths()->getBaseURL() . "applepay.php';</script>");
             }
         } catch (Exception $e) {
         }

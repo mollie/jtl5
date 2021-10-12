@@ -6,8 +6,8 @@
     "@fortawesome/fontawesome-pro": "^5.15.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^5.15.0",
-    "@fortawesome/pro-regular-svg-icons": "^5.15.0",
     "@fortawesome/pro-light-svg-icons": "^5.15.0",
+    "@fortawesome/pro-regular-svg-icons": "^5.15.0",
     "@fortawesome/pro-solid-svg-icons": "^5.15.0",
     "@fortawesome/react-fontawesome": "^0.1.15",
     "@types/node": "^12.0.0",
@@ -34,10 +34,10 @@
     "node-sass": "^4.14.1",
     "npm-run-all": "^4.1.5",
     "postcss-cli": "^7.0.35",
+    "prettier": "^2.1.2",
     "react-scripts": "4.0.0",
     "tailwindcss": "^1.9.6",
-    "typescript": "~4.0.3",
-    "prettier": "^2.1.2"
+    "typescript": "~4.0.3"
   },
   "scripts": {
     "start": "npm-run-all -p watch:css start-js",

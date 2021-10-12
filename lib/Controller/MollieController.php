@@ -22,8 +22,8 @@ class MollieController extends AbstractController
 {
     /**
      * @param stdClass $data
-     * @throws ApiException
      * @throws IncompatiblePlatform
+     * @throws ApiException
      * @return AbstractResult
      */
     public static function methods(stdClass $data): AbstractResult
@@ -50,6 +50,7 @@ class MollieController extends AbstractController
             $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
 
             $methods[$method->id] = (object)[
+                'log'                 => Shop::Container()->getDB()->getAffectedRows('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId]),
                 'settings'            => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
                 'mollie'              => $method,
                 'duringCheckout'      => (int)$oZahlungsart->nWaehrendBestellung === 1,
@@ -73,6 +74,19 @@ WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
         }
 
         return new AbstractResult($methods);
+    }
+
+    /**
+     * @param stdClass $data
+     * @return AbstractResult
+     */
+    public static function cleanlog(stdClass $data): AbstractResult
+    {
+        if (isset($data->cModulId) && ($modulId = $data->cModulId)) {
+            return new AbstractResult(Shop::Container()->getDB()->delete('tzahlungslog', 'cModulId', $modulId));
+        }
+
+        return new AbstractResult(false);
     }
 
     /**

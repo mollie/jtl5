@@ -23,12 +23,13 @@ class Banktransfer extends PaymentMethod
         $paymentOptions = [];
         if ($apiType === 'payment') {
             $paymentOptions['billingEmail'] = $order->oRechnungsadresse->cMail;
-            $paymentOptions['locale'] = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), $order->oRechnungsadresse->cLand);
-            $dueDays = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_dueDays');
+            $paymentOptions['locale']       = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), $order->oRechnungsadresse->cLand);
+            $dueDays                        = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_dueDays');
             if ($dueDays > 3) {
                 $paymentOptions['dueDate'] = date('Y-m-d', strtotime("+{$dueDays} DAYS"));
             }
         }
+
         return $paymentOptions;
     }
 }
