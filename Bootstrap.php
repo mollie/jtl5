@@ -13,6 +13,7 @@ use JTL\Events\Dispatcher;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
+use JTL\DB\ReturnType;
 use Plugin\ws5_mollie\lib\Hook\ApplePay;
 use Plugin\ws5_mollie\lib\Hook\Checkbox;
 use Plugin\ws5_mollie\lib\Hook\Queue;
@@ -36,7 +37,7 @@ class Bootstrap extends \WS\JTL5\Bootstrap
         parent::boot($dispatcher);
 
         if (!Shop::isFrontend()) {
-            if ($authorized = Shop::Container()->getDB()->getAffectedRows('SELECT kId FROM xplugin_ws5_mollie_orders WHERE cStatus = "authorized" AND dCreated > DATE_SUB(NOW(), INTERVAL 30 DAY)')) {
+            if ($authorized = Shop::Container()->getDB()->executeQuery('SELECT kId FROM xplugin_ws5_mollie_orders WHERE cStatus = "authorized" AND dCreated > DATE_SUB(NOW(), INTERVAL 30 DAY)', ReturnType::AFFECTED_ROWS)) {
                 Notification::getInstance()->add(
                     NotificationEntry::TYPE_WARNING,
                     'Mollie Authorized Orders',
@@ -45,7 +46,7 @@ class Bootstrap extends \WS\JTL5\Bootstrap
                 );
             }
 
-            if ($errors = Shop::Container()->getDB()->getAffectedRows('SELECT kId FROM xplugin_ws5_mollie_queue WHERE cError IS NOT NULL AND dCreated > DATE_SUB(NOW(), INTERVAL 30 DAY);')) {
+            if ($errors = Shop::Container()->getDB()->executeQuery('SELECT kId FROM xplugin_ws5_mollie_queue WHERE cError IS NOT NULL AND dCreated > DATE_SUB(NOW(), INTERVAL 30 DAY);', ReturnType::AFFECTED_ROWS)) {
                 Notification::getInstance()->add(
                     NotificationEntry::TYPE_DANGER,
                     'Mollie Queue with Errors',
