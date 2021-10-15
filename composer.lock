@@ -225,16 +225,16 @@
         },
         {
             "name": "webstollen/jtl5-plugin",
-            "version": "0.2.3",
+            "version": "0.2.4",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.webstollen.de/webstollen/composer/jtl5-plugin.git",
-                "reference": "066c28b6f8cf0c56140e827343df52b93703d013"
+                "reference": "aa73b7325f001d4b5f99c3a60a9a3d0b191ee666"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.webstollen.de/api/v4/projects/480/packages/composer/archives/webstollen/jtl5-plugin.zip?sha=066c28b6f8cf0c56140e827343df52b93703d013",
-                "reference": "066c28b6f8cf0c56140e827343df52b93703d013",
+                "url": "https://gitlab.webstollen.de/api/v4/projects/480/packages/composer/archives/webstollen/jtl5-plugin.zip?sha=aa73b7325f001d4b5f99c3a60a9a3d0b191ee666",
+                "reference": "aa73b7325f001d4b5f99c3a60a9a3d0b191ee666",
                 "shasum": ""
             },
             "require": {
