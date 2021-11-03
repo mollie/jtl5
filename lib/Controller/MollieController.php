@@ -50,7 +50,7 @@ class MollieController extends AbstractController
             $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
 
             $methods[$method->id] = (object)[
-                'log'                 => Shop::Container()->getDB()->getAffectedRows('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId]),
+                'log'                 => Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId], 3),
                 'settings'            => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
                 'mollie'              => $method,
                 'duringCheckout'      => (int)$oZahlungsart->nWaehrendBestellung === 1,

@@ -38,7 +38,6 @@ class QueueModel extends AbstractModel
      */
     public static function cleanUp()
     {
-        // TODO: DOKU
         ifndef('MOLLIE_CLEANUP_DAYS', 30);
         /** @noinspection PhpUndefinedConstantInspection */
         return Shop::Container()->getDB()->executeQuery(sprintf('DELETE FROM %s WHERE dDone IS NOT NULL AND (bLock IS NULL OR bLock = "0000-00-00 00:00:00") AND dCreated < DATE_SUB(NOW(), INTERVAL %d DAY)', self::TABLE, MOLLIE_CLEANUP_DAYS), 3);

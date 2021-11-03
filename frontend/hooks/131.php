@@ -49,7 +49,6 @@ try {
         }
     }
 
-    // TODO: DOKU
     ifndef('MOLLIE_CLEANUP_PROP', 15);
     /** @noinspection PhpUndefinedConstantInspection */
     if (MOLLIE_CLEANUP_PROP && random_int(1, MOLLIE_CLEANUP_PROP) % MOLLIE_CLEANUP_PROP === 0) {
