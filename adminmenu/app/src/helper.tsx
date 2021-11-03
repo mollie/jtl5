@@ -201,12 +201,13 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
                 return <img className={'inline'} src={prefix + images[method]} title={method} alt={method}/>
             case 'klarnasliceit':
             case 'klarnapaylater':
+            case 'klarnapaynow':
                 return <img className={'inline'} src={prefix + images.klarna} title={method} alt={method}/>
             case 'banktransfer':
                 return <img className={'inline'} src={prefix + images.directdebit} title={method} alt={method}/>
         }
     }
-    return <pre>{method}</pre>;
+    return <pre style={{display: 'inline'}}>{method}</pre>;
 }
 
 export function removeItemOnce<T>(arr: T[], value: T) {
