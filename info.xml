@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2021-09-28</CreateDate>
-    <Version>1.2.2</Version>
+    <Version>1.2.5</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -147,6 +147,14 @@
                     </SelectboxOptions>
                 </Setting>
 
+                <Setting type="text" initialValue="" sort="65" conf="Y">
+                    <Name>Klarna EID</Name>
+                    <Description>
+                        <![CDATA[Von Klarna vergebene und dem Händler bekannte ShopID. Benötigt für die korrekte Checkbox-Verlinkung bei Klarna Zahlarten.]]>
+                    </Description>
+                    <ValueName>klarnaEID</ValueName>
+                </Setting>
+
                 <Setting type="zahl" initialValue="0" sort="70" conf="Y">
                     <Name>Zahlungserinnerung</Name>
                     <Description>
@@ -180,7 +188,8 @@
 
                 <Setting type="selectbox" initialValue="tr" sort="48" conf="Y">
                     <Name>ID im Zahlungseingang</Name>
-                    <Description><![CDATA[Welche ID soll im Zahlungseingang hinterlegt werden? (außer PayPal))]]></Description>
+                    <Description>
+                        <![CDATA[Welche ID soll im Zahlungseingang hinterlegt werden? (außer PayPal))]]></Description>
                     <ValueName>paymentID</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="api">Je nach API, Order- oder Payment-ID verwenden</Option>
@@ -375,6 +384,15 @@
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
+                <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
+                    <Name>AGB Checkbox für Klarna anzeigen</Name>
+                    <Description>Klarna Integration konform mit Trusted Shops</Description>
+                    <ValueName>trustedShopsCheckbox</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Ja</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Klarna Slice It</Name>
@@ -400,6 +418,15 @@
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
+                <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
+                    <Name>AGB Checkbox für Klarna anzeigen</Name>
+                    <Description>Klarna Integration konform mit Trusted Shops</Description>
+                    <ValueName>trustedShopsCheckbox</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Ja</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Klarna Pay Now</Name>
@@ -412,14 +439,23 @@
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
-                <ClassFile>KlarnaPayLater.php</ClassFile>
-                <ClassName>KlarnaPayLater</ClassName>
+                <ClassFile>KlarnaPayNow.php</ClassFile>
+                <ClassName>KlarnaPayNow</ClassName>
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
                     <Name>Klarna Pay Later.</Name>
                     <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem auf Rechnung mit Klarna.</InfoText>
+                    <InfoText>Bezahlen Sie bequem und direkt mit Klarna Pay Now.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
+                    <Name>AGB Checkbox für Klarna anzeigen</Name>
+                    <Description>Klarna Integration konform mit Trusted Shops</Description>
+                    <ValueName>trustedShopsCheckbox</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Ja</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="zahl" initialValue="28" sort="45" conf="Y">
                     <Name>Gültigkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
@@ -1005,6 +1041,23 @@
                     <![CDATA[Cela peut accélérer le processus pour la prochaine commande.]]></VariableLocalized>
                 <VariableLocalized iso="ITA">
                     <![CDATA[Questo può accelerare il processo di ordinazione per l'ordine successivo.]]></VariableLocalized>
+            </Variable>
+
+            <Variable>
+                <Name>klarnaAGBText</Name>
+                <Description></Description>
+                <VariableLocalized iso="GER"><![CDATA[Mit der Übermittlung der für die Abwicklung der gewählten Klarna Zahlungsmethode und einer Identitätsund Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[I consent to the transmission of the data required for processing the Klarna payment method selected and an identity and credit check to Klarna.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Je consens à la transmission des données nécessaires au traitement du mode de paiement Klarna sélectionné et à une vérification d'identité et de crédit à Klarna.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Acconsento alla trasmissione dei dati necessari per l'elaborazione del metodo di pagamento Klarna selezionato e una verifica dell'identità e del credito a Klarna.]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>klarnaAGBDesc</Name>
+                <Description></Description>
+                <VariableLocalized iso="GER"><![CDATA[Meine <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/de_de/consent');">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[I can give my <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/en_en/consent');">consent</a> can be revoked at any time with effect for the future.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Je peux donner mon <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/fr_fr/consent');">consentement</a> peut être révoqué à tout moment avec effet pour l'avenir.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Posso dare il mio <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/it_it/consent');">consenso</a> può essere revocato in qualsiasi momento con effetto per il futuro.]]></VariableLocalized>
             </Variable>
 
         </Locales>
