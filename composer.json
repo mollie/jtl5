@@ -11,7 +11,7 @@
   },
   "require": {
     "php": ">=7.3.0",
-    "mollie/mollie-api-php": "^2.31.1",
+    "mollie/mollie-api-php": "^v2.39.0",
     "webstollen/jtl5-plugin": "^0.2"
   },
   "require-dev": {
