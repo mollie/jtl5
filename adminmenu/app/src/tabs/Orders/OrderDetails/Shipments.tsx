@@ -46,7 +46,7 @@ const Shipments = ({ mollie, kBestellung }: ShipmentsProps) => {
           alert(resp.data.error.message)
         } else {
           loadShipments()
-          console.log(resp)
+          //console.log(resp)
         }
       })
       .catch((err) => {

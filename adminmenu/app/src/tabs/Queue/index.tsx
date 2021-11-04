@@ -52,7 +52,7 @@ const Queue = () => {
         .then((response: Record<string, any>) => {
           setMaxItems(response.data.data.maxItems)
           resolve(response.data.data.items)
-          console.debug(response.data.data.items)
+          //console.debug(response.data.data.items)
         })
         .catch(reject)
         .finally(() => setLoading(false))

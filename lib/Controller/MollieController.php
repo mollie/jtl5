@@ -13,6 +13,8 @@ use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Types\PaymentMethod;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use stdClass;
 use WS\JTL5\Backend\AbstractResult;
@@ -22,9 +24,9 @@ class MollieController extends AbstractController
 {
     /**
      * @param stdClass $data
-     * @throws IncompatiblePlatform
-     * @throws ApiException
      * @return AbstractResult
+     * @throws ApiException
+     * @throws IncompatiblePlatform
      */
     public static function methods(stdClass $data): AbstractResult
     {
@@ -35,14 +37,14 @@ class MollieController extends AbstractController
         $api = new MollieAPI($test);
 
         $_methods = $api->getClient()->methods->allAvailable([/*'includeWallets' => 'applepay', 'resource' => 'orders'*/]);
-        $methods  = [];
-        $oPlugin  = self::Plugin('ws5_mollie');
+        $methods = [];
+        $oPlugin = self::Plugin('ws5_mollie');
 
         foreach ($_methods as $method) {
             if (in_array($method->id, ['voucher', PaymentMethod::DIRECTDEBIT, PaymentMethod::GIFTCARD], true)) {
                 continue;
             }
-            $id           = 'kPlugin_' . Helper::getIDByPluginID('ws5_mollie') . '_' . $method->id;
+            $id = 'kPlugin_' . Helper::getIDByPluginID('ws5_mollie') . '_' . $method->id;
             $oZahlungsart = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId = :cModulID;', [
                 ':cModulID' => $id
             ], 1);
@@ -50,13 +52,13 @@ class MollieController extends AbstractController
             $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
 
             $methods[$method->id] = (object)[
-                'log'                 => Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId], 3),
-                'settings'            => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
-                'mollie'              => $method,
-                'duringCheckout'      => (int)$oZahlungsart->nWaehrendBestellung === 1,
+                'log' => Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId], 3),
+                'settings' => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
+                'mollie' => $method,
+                'duringCheckout' => (int)$oZahlungsart->nWaehrendBestellung === 1,
                 'allowDuringCheckout' => $oPaymentMethod::ALLOW_PAYMENT_BEFORE_ORDER ?? null,
-                'paymentMethod'       => $oZahlungsart,
-                'shipping'            => Shop::Container()->getDB()->executeQueryPrepared('SELECT v.* FROM tversandart v
+                'paymentMethod' => $oZahlungsart,
+                'shipping' => Shop::Container()->getDB()->executeQueryPrepared('SELECT v.* FROM tversandart v
 JOIN tversandartzahlungsart vz ON v.kVersandart = vz.kVersandart
 JOIN tzahlungsart z ON vz.kZahlungsart = z.kZahlungsart
 WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
@@ -130,4 +132,83 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
 
         return new AbstractResult($response);
     }
+
+    /**
+     * @param stdClass $data
+     * @return AbstractResult
+     * @throws ApiException
+     * @throws \Exception
+     */
+    public static function cancelOrderLine(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'ord_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        if (strpos($data->lineId, 'odl_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        if (!$data->quantity || $data->quantity <= 0) {
+            throw new \RuntimeException('Invalid Quantity!');
+        }
+
+        $checkout = OrderCheckout::fromID($data->id);
+        $checkout->getMollie()->cancelLines([
+            'lines' => [
+                [
+                    'id' => $data->lineId,
+                    'quantity' => $data->quantity,
+                ],
+            ],
+        ]);
+
+        return new AbstractResult(true);
+    }
+
+    public static function refundOrderLine(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'ord_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        if (strpos($data->lineId, 'odl_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        if (!$data->quantity || $data->quantity <= 0) {
+            throw new \RuntimeException('Invalid Quantity!');
+        }
+
+        $checkout = OrderCheckout::fromID($data->id);
+        $checkout->getMollie()->refund([
+            'lines' => [
+                [
+                    'id' => $data->lineId,
+                    'quantity' => $data->quantity,
+                ],
+            ],
+        ]);
+
+        return new AbstractResult(true);
+    }
+
+
+    public static function refundAmount(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'tr_') !== 0) {
+            throw new \RuntimeException('Invalid Payment ID!');
+        }
+
+        if (!$data->amount) {
+            throw new \RuntimeException('Invalid Amount!');
+        }
+
+        $checkout = PaymentCheckout::fromID($data->id);
+        $result = $checkout->getMollie()->refund([
+            'amount' => [
+                'value' => number_format((float)$data->amount, 2),
+                'currency' => $checkout->getMollie()->amount->currency,
+            ],
+            'description' => 'Refund for order ' . $checkout->getBestellung()->cBestellNr,
+        ]);
+        return new AbstractResult($result->id);
+    }
+
 }
