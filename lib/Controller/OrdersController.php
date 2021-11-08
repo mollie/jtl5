@@ -123,6 +123,45 @@ class OrdersController extends AbstractController
      * @throws Exception
      * @return AbstractResult
      */
+    public static function get(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'tr_') !== false) {
+            $checkout = PaymentCheckout::fromID($data->id);
+        } else {
+            $checkout = OrderCheckout::fromID($data->id);
+        }
+        $checkout->updateModel()->saveModel();
+
+        return new AbstractResult($checkout->getBestellung());
+    }
+
+    public static function getQueue(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'tr_') !== false) {
+            $checkout = PaymentCheckout::fromID($data->id);
+        } else {
+            $checkout = OrderCheckout::fromID($data->id);
+        }
+
+        $checkout->updateModel()->saveModel();
+
+        return new AbstractResult(Shop::Container()->getDB()
+            ->executeQueryPrepared(
+                'SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook',
+                [
+                    ':cTypeWebhook' => "%{$checkout->getModel()->cOrderId}%",
+                    ':cTypeHook'    => "%:{$checkout->getModel()->kBestellung}%"
+                ],
+                2
+            ));
+    }
+
+
+    /**
+     * @param stdClass $data
+     * @throws Exception
+     * @return AbstractResult
+     */
     public static function reminder(stdClass $data): AbstractResult
     {
         return new AbstractResult(AbstractCheckout::sendReminder($data->id));

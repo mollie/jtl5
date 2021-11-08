@@ -26,41 +26,39 @@ class Checkbox extends AbstractHook
         }
 
         if ($args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS && ($klarnaEID = trim(self::Plugin('ws5_mollie')->getConfig()->getValue('klarnaEID'))) !== '') {
-            $modulID = Frontend::get('Zahlungsart')->cModulId;
+            $modulID              = Frontend::get('Zahlungsart')->cModulId;
             $trustedShopsCheckbox = self::Plugin('ws5_mollie')->getConfig()->getValue($modulID . '_trustedShopsCheckbox');
             if ($trustedShopsCheckbox === 'Y') {
-
-                $checkbox = new \JTL\CheckBox();
-                $checkbox->kLink = 0;
-                $checkbox->kCheckBox = 0;
-                $checkbox->kCheckBoxFunktion = 0;
-                $checkbox->cName = 'MOLLIE KLARNA AGB';
-                $checkbox->cKundengruppe = ';1;';
-                $checkbox->cAnzeigeOrt = ';2;';
-                $checkbox->nAktiv = 1;
-                $checkbox->nPflicht = 1;
-                $checkbox->nLogging = 0;
-                $checkbox->nSort = 999;
-                $checkbox->dErstellt = date('Y-m-d H:i:s');
+                $checkbox                       = new \JTL\CheckBox();
+                $checkbox->kLink                = 0;
+                $checkbox->kCheckBox            = 0;
+                $checkbox->kCheckBoxFunktion    = 0;
+                $checkbox->cName                = 'MOLLIE KLARNA AGB';
+                $checkbox->cKundengruppe        = ';1;';
+                $checkbox->cAnzeigeOrt          = ';2;';
+                $checkbox->nAktiv               = 1;
+                $checkbox->nPflicht             = 1;
+                $checkbox->nLogging             = 0;
+                $checkbox->nSort                = 999;
+                $checkbox->dErstellt            = date('Y-m-d H:i:s');
                 $checkbox->oCheckBoxSprache_arr = [];
 
                 $langs = LanguageHelper::getAllLanguages(1);
                 foreach ($langs as $kSprache => $lang) {
                     $checkbox->oCheckBoxSprache_arr[$kSprache] = (object)[
-                        'cText' => self::Plugin('ws5_mollie')->getLocalization()->getTranslation('klarnaAGBText', $lang->getIso()),
+                        'cText'         => self::Plugin('ws5_mollie')->getLocalization()->getTranslation('klarnaAGBText', $lang->getIso()),
                         'cBeschreibung' => sprintf(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('klarnaAGBDesc', $lang->getIso()), $klarnaEID),
-                        'kSprache' => $kSprache,
-                        'kCheckbox' => -1
+                        'kSprache'      => $kSprache,
+                        'kCheckbox'     => -1
                     ];
                 }
 
                 $checkbox->kKundengruppe_arr = [Frontend::getCustomer()->getGroupID()];
-                $checkbox->kAnzeigeOrt_arr = [CHECKBOX_ORT_BESTELLABSCHLUSS];
-                $checkbox->cID = 'mollie_klarna_agb';
-                $checkbox->cLink = '';
+                $checkbox->kAnzeigeOrt_arr   = [CHECKBOX_ORT_BESTELLABSCHLUSS];
+                $checkbox->cID               = 'mollie_klarna_agb';
+                $checkbox->cLink             = '';
 
                 $args_arr['oCheckBox_arr'][] = $checkbox;
-
             }
         }
 
@@ -72,34 +70,34 @@ class Checkbox extends AbstractHook
                 return;
             }
 
-            $checkbox = new \JTL\CheckBox();
-            $checkbox->kLink = 0;
-            $checkbox->kCheckBox = 0;
-            $checkbox->kCheckBoxFunktion = 0;
-            $checkbox->cName = 'MOLLIE SAVE CUSTOMER';
-            $checkbox->cKundengruppe = ';1;';
-            $checkbox->cAnzeigeOrt = ';2;';
-            $checkbox->nAktiv = 1;
-            $checkbox->nPflicht = 0;
-            $checkbox->nLogging = 0;
-            $checkbox->nSort = 999;
-            $checkbox->dErstellt = date('Y-m-d H:i:s');
+            $checkbox                       = new \JTL\CheckBox();
+            $checkbox->kLink                = 0;
+            $checkbox->kCheckBox            = 0;
+            $checkbox->kCheckBoxFunktion    = 0;
+            $checkbox->cName                = 'MOLLIE SAVE CUSTOMER';
+            $checkbox->cKundengruppe        = ';1;';
+            $checkbox->cAnzeigeOrt          = ';2;';
+            $checkbox->nAktiv               = 1;
+            $checkbox->nPflicht             = 0;
+            $checkbox->nLogging             = 0;
+            $checkbox->nSort                = 999;
+            $checkbox->dErstellt            = date('Y-m-d H:i:s');
             $checkbox->oCheckBoxSprache_arr = [];
 
             $langs = LanguageHelper::getAllLanguages(1);
             foreach ($langs as $kSprache => $lang) {
                 $checkbox->oCheckBoxSprache_arr[$kSprache] = (object)[
-                    'cText' => self::Plugin('ws5_mollie')->getLocalization()->getTranslation('checkboxText', $lang->getIso()),
+                    'cText'         => self::Plugin('ws5_mollie')->getLocalization()->getTranslation('checkboxText', $lang->getIso()),
                     'cBeschreibung' => self::Plugin('ws5_mollie')->getLocalization()->getTranslation('checkboxDescr', $lang->getIso()),
-                    'kSprache' => $kSprache,
-                    'kCheckbox' => -1
+                    'kSprache'      => $kSprache,
+                    'kCheckbox'     => -1
                 ];
             }
 
             $checkbox->kKundengruppe_arr = [Frontend::getCustomer()->getGroupID()];
-            $checkbox->kAnzeigeOrt_arr = [CHECKBOX_ORT_BESTELLABSCHLUSS];
-            $checkbox->cID = 'mollie_create_customer';
-            $checkbox->cLink = '';
+            $checkbox->kAnzeigeOrt_arr   = [CHECKBOX_ORT_BESTELLABSCHLUSS];
+            $checkbox->cID               = 'mollie_create_customer';
+            $checkbox->cLink             = '';
 
             $args_arr['oCheckBox_arr'][] = $checkbox;
         }

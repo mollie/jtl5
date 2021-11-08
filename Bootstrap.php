@@ -9,11 +9,11 @@ namespace Plugin\ws5_mollie;
 
 use JTL\Backend\Notification;
 use JTL\Backend\NotificationEntry;
+use JTL\DB\ReturnType;
 use JTL\Events\Dispatcher;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
-use JTL\DB\ReturnType;
 use Plugin\ws5_mollie\lib\Hook\ApplePay;
 use Plugin\ws5_mollie\lib\Hook\Checkbox;
 use Plugin\ws5_mollie\lib\Hook\Queue;

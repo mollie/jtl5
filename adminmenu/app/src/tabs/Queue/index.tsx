@@ -1,22 +1,39 @@
-import React, { useState } from 'react'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
+import React, { useCallback, useEffect, useState } from 'react'
 import useApi from '@webstollen/react-jtl-plugin/lib/hooks/useAPI'
+import useQueues from '../../hooks/useQueues'
+import useErrorSnack from '../../hooks/useErrorSnack'
+import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
 import ReactTimeago from 'react-timeago'
+import Button from '@webstollen/react-jtl-plugin/lib/components/Button'
 import { faBolt, faLock, faTrash } from '@fortawesome/pro-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Button from '@webstollen/react-jtl-plugin/lib/components/Button'
 
 const Queue = () => {
   const [loading, setLoading] = useState(false)
-  const [maxItems, setMaxItems] = useState(0)
   const api = useApi()
+  const [showError] = useErrorSnack()
+  const queueData = useQueues()
+  const [queuesState, setQueuesState] = useState({
+    page: 0,
+    perPage: 10,
+    query: '',
+  })
+
+  const reload = useCallback(
+    async () => await queueData.load(queuesState.page, queuesState.perPage),
+    [queuesState.page, queuesState.perPage]
+  )
+
+  useEffect(() => {
+    queueData.load(queuesState.page, queuesState.perPage)
+  }, [queueData.load, queuesState.page, queuesState.perPage])
 
   const deleteQueue = (id: number) => {
     setLoading(true)
     api
       .run('queue', 'delete', { id: id })
-      .then(() => alert('Bitte Tabelle neu laden!'))
-      .catch(alert)
+      .then(reload)
+      .catch(showError)
       .finally(() => setLoading(false))
   }
 
@@ -24,8 +41,8 @@ const Queue = () => {
     setLoading(true)
     api
       .run('queue', 'unlock', { id: id })
-      .then(() => alert('Bitte Tabelle neu laden!'))
-      .catch(alert)
+      .then(reload)
+      .catch(showError)
       .finally(() => setLoading(false))
   }
 
@@ -33,112 +50,115 @@ const Queue = () => {
     setLoading(true)
     api
       .run('queue', 'run', { id: id })
-      .then(() => alert('Bitte Tabelle neu laden!'))
-      .catch(alert)
+      .then(reload)
+      .catch(showError)
       .finally(() => setLoading(false))
   }
 
-  const handleOnData = (page: number, itemsPerPage: number): Promise<any[]> => {
-    setLoading(true)
-    return new Promise((resolve, reject) => {
-      api
-        .run('queue', 'all', {
-          query: 'SELECT * FROM xplugin_ws5_mollie_queue ORDER BY dCreated DESC',
-          params: {
-            ':limit': itemsPerPage,
-            ':offset': page * itemsPerPage,
-          },
-        })
-        .then((response: Record<string, any>) => {
-          setMaxItems(response.data.data.maxItems)
-          resolve(response.data.data.items)
-          //console.debug(response.data.data.items)
-        })
-        .catch(reject)
-        .finally(() => setLoading(false))
-    })
+  const header: Array<DataTableHeader> = [
+    {
+      title: 'ID',
+      column: 'kID',
+    },
+    {
+      title: 'Type',
+      column: 'cType',
+    },
+    {
+      title: 'Result?',
+      column: 'cResult',
+    },
+    {
+      title: 'Error?',
+      column: 'cError',
+    },
+    {
+      title: 'Erledigt',
+      column: 'dDone',
+    },
+    {
+      title: 'Erstellt',
+      column: 'dCreated',
+    },
+    {
+      title: '',
+      column: '_actions',
+    },
+  ]
+
+  const handleTableChange = async (page: number, perPage: number) => {
+    if (page == queuesState.page && perPage === queuesState.perPage) {
+      await queueData.load(queuesState.page, queuesState.perPage)
+    } else {
+      setQueuesState((p) => ({ ...p, page: page, perPage: perPage }))
+    }
   }
 
-  const template = {
-    kId: {
-      header: () => 'ID',
-      data: (row) => <>{row.kId}</>,
-    },
-    cType: {
-      header: () => 'Type',
-      data: (row) => <code>{row.cType}</code>,
-    },
-    cResult: {
-      header: () => 'Result?',
-      data: (row) => (
-        <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cResult}</div>
-      ),
-    },
-    cError: {
-      header: () => 'Error?',
-      data: (row) => (
-        <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cError}</div>
-      ),
-    },
-    dDone: {
-      header: () => 'Done',
-      data: (row) => (row.dDone ? <ReactTimeago date={row.dDone} /> : '-'),
-    },
-    dCreated: {
-      header: () => 'Created',
-      data: (row) => (row.dCreated ? <ReactTimeago date={row.dCreated} /> : '-'),
-    },
-    cActions: {
-      header: () => ' ',
-      data: (row) => (
-        <div className="flex text-center justify-center items-center">
-          {row.bLock ? (
-            <div className="flex flex-col text-center  items-center ">
-              <Button
-                onClick={() => (window.confirm('Wirklich entsperren?') ? unlockQueue(row.kId) : null)}
-                color="orange"
-                title="Unlock!"
-                className="cursor-pointer p-1 ml-1"
-              >
-                <FontAwesomeIcon fixedWidth icon={faLock} />
-              </Button>
-              <ReactTimeago className="text-xs antialiased" date={row.bLock} />
-            </div>
-          ) : (
-            <Button
-              onClick={() => (window.confirm('Wirklich erneut ausführen?') ? runQueue(row.kId) : null)}
-              className="ml-1"
-              color="blue"
-              title="Run again!"
-            >
-              <FontAwesomeIcon fixedWidth icon={faBolt} />
-            </Button>
-          )}
-          <Button
-            onClick={() => (window.confirm('Wirklich löschen?') ? deleteQueue(row.kId) : null)}
-            title="Delete"
-            className="ml-1"
-            color="red"
-          >
-            <FontAwesomeIcon fixedWidth icon={faTrash} />
-          </Button>
-        </div>
-      ),
-    },
-  } as Record<string, ItemTemplate<any>>
-
   const table = (
-    <Table
-      paginate={{
-        maxPages: 2,
-        maxItems: maxItems,
-        itemsPerPage: 10,
-      }}
-      onData={handleOnData}
-      template={template}
+    <DataTable
+      loading={queueData.loading || loading}
+      header={header}
+      fullWidth
       striped
-      loading={loading}
-    />
+      pagination={{
+        page: queuesState.page,
+        total: queueData.data?.maxItems ?? 0,
+        perPage: queuesState.perPage,
+        onChange: handleTableChange,
+      }}
+    >
+      {queueData.data?.items &&
+        queueData.data?.items.map((row) => (
+          <tr>
+            <td>{row.kId}</td>
+            <td>
+              <code>{row.cType}</code>
+            </td>
+            <td>
+              <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cResult}</div>
+            </td>
+            <td>
+              <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cError}</div>
+            </td>
+            <td>{row.dDone ? <ReactTimeago date={row.dDone} /> : '-'}</td>
+            <td>{row.dCreated ? <ReactTimeago date={row.dCreated} /> : '-'}</td>
+            <td>
+              <div className="flex text-center justify-center items-center">
+                {row.bLock ? (
+                  <div className="flex flex-col text-center  items-center ">
+                    <Button
+                      onClick={() => (window.confirm('Wirklich entsperren?') ? unlockQueue(row.kId) : null)}
+                      color="orange"
+                      title="Unlock!"
+                      className="cursor-pointer p-1 ml-1"
+                    >
+                      <FontAwesomeIcon fixedWidth icon={faLock} />
+                    </Button>
+                    <ReactTimeago className="text-xs antialiased" date={row.bLock} />
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => (window.confirm('Wirklich erneut ausführen?') ? runQueue(row.kId) : null)}
+                    className="ml-1"
+                    color="blue"
+                    title="Run again!"
+                  >
+                    <FontAwesomeIcon fixedWidth icon={faBolt} />
+                  </Button>
+                )}
+                <Button
+                  onClick={() => (window.confirm('Wirklich löschen?') ? deleteQueue(row.kId) : null)}
+                  title="Delete"
+                  className="ml-1"
+                  color="red"
+                >
+                  <FontAwesomeIcon fixedWidth icon={faTrash} />
+                </Button>
+              </div>
+            </td>
+          </tr>
+        ))}
+    </DataTable>
   )
 
   return (

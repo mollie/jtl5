@@ -2,48 +2,78 @@ import React, { useState } from 'react'
 import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronDoubleDown, faChevronDoubleLeft } from '@fortawesome/pro-regular-svg-icons'
+import { UseQueueReturn } from '../../../hooks/useQueue'
+import { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
+import DataTable from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
+import ReactTimeago from 'react-timeago'
 
 type QueueProps = {
-  data: Array<Record<string, any>>
+  queue: UseQueueReturn
 }
 
-const Queue = ({ data }: QueueProps) => {
+const Queue = ({ queue }: QueueProps) => {
   const [showLogs, setShowLogs] = useState(false)
 
-  const template = {
-    kId: {
-      header: () => 'ID',
-      data: (row) => row.kId,
-    },
-    cType: {
-      header: () => 'Typ',
-      data: (row) => row.cType,
-    },
-    cResult: {
-      header: () => 'Result',
-      data: (row) => <pre>{row.cResult ?? 'n/a'}</pre>,
-    },
-    dDone: {
-      header: () => 'Status',
-      data: (row) => (!row.dDone ? 'PENDING' : 'DONE'),
-      align: 'center',
-    },
-    dCreated: {
-      header: () => 'Erstellt',
-      data: (row) => row.dCreated,
-      align: 'right',
-    },
-  } as Record<string, ItemTemplate<Record<string, any>>>
-
-  return data.length ? (
+  return queue.data?.length ? (
     <div className="mt-4">
       <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowLogs((prev) => !prev)}>
-        Queue {data.length ? <>({data.length})</> : null}
+        Queue {queue.data?.length ? <>({queue.data?.length})</> : null}
         <FontAwesomeIcon className=" float-right" icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft} />
       </h3>
-      {showLogs ? <Table template={template} items={data} /> : null}
+      {showLogs && (
+        <DataTable striped fullWidth header={header}>
+          {queue.data.length &&
+            queue.data.map((row) => (
+              <tr>
+                <td>{row.kId}</td>
+                <td>{row.cType}</td>
+                <td>
+                  <pre>{row.cResult ?? 'n/a'}</pre>
+                </td>
+                <td>
+                  <pre>{row.cError ?? 'n/a'}</pre>
+                </td>
+                <td>{!row.dDone ? 'PENDING' : 'DONE'}</td>
+                <td>
+                  <ReactTimeago date={row.dCreated} />
+                </td>
+              </tr>
+            ))}
+        </DataTable>
+      )}
     </div>
   ) : null
 }
+
+const header: Array<DataTableHeader> = [
+  {
+    title: 'ID',
+    column: 'id',
+  },
+  {
+    title: 'Typ',
+    column: 'typ',
+  },
+  {
+    title: 'Result',
+    column: 'result',
+  },
+  {
+    title: 'Fehler?',
+    column: 'error',
+  },
+  {
+    title: 'Status',
+    column: 'status',
+  },
+  {
+    title: 'Erstellt',
+    column: 'created',
+  },
+  {
+    title: '',
+    column: '_actions',
+  },
+]
 
 export default Queue
