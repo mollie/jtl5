@@ -12,6 +12,7 @@ import Button from '@webstollen/react-jtl-plugin/lib/components/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBolt, faEnvelopeOpenDollar, faSync, faUnlock } from '@fortawesome/pro-regular-svg-icons'
 import useSuccessSnack from '../../hooks/useSuccessSnack'
+import Alert from '@webstollen/react-jtl-plugin/lib/components/Alert'
 
 const Orders = () => {
   const [showSuccess] = useSuccessSnack()
@@ -21,7 +22,7 @@ const Orders = () => {
   const pluginInfo = usePluginInfo()
   const [showError] = useErrorSnack()
 
-  const orderData = useOrders()
+  const { loading: ordersLoading, load: loadOrders, error: ordersError, data: ordersData } = useOrders()
   const [ordersState, setOrderState] = useState({
     page: 0,
     perPage: 10,
@@ -29,8 +30,8 @@ const Orders = () => {
   })
 
   useEffect(() => {
-    orderData.load(ordersState.page, ordersState.perPage, ordersState.query)
-  }, [orderData.load, ordersState.perPage, ordersState.page, ordersState.query])
+    loadOrders(ordersState.page, ordersState.perPage, ordersState.query)
+  }, [loadOrders, ordersState.perPage, ordersState.page, ordersState.query])
 
   const reWebhook = (id: string) => {
     setLoading(true)
@@ -51,7 +52,7 @@ const Orders = () => {
         showSuccess('E-Mail versendet.')
         await reload()
       })
-      .catch((e) => showError(`${e}`))
+      .catch(showError)
       .finally(() => setLoading(false))
   }
 
@@ -78,11 +79,11 @@ const Orders = () => {
   }
 
   const reload = useCallback(
-    async () => await orderData.load(ordersState.page, ordersState.perPage),
-    [ordersState.page, ordersState.perPage]
+    async () => await loadOrders(ordersState.page, ordersState.perPage),
+    [ordersState.page, ordersState.perPage, loadOrders]
   )
   const handleTableChange = async (page: number, perPage: number) => {
-    if (page == ordersState.page && perPage === ordersState.perPage) {
+    if (page === ordersState.page && perPage === ordersState.perPage) {
       await reload()
     } else {
       setOrderState((p) => ({ ...p, page: page, perPage: perPage }))
@@ -98,22 +99,29 @@ const Orders = () => {
     [setOrderState, ordersState.query]
   )
 
-  const table = (
+  const table = ordersError ? (
+    <Alert variant="error">
+      {ordersError}{' '}
+      <TextLink color="red" onClick={() => loadOrders(ordersState.page, ordersState.perPage, ordersState.query)}>
+        Erneut versuchen!
+      </TextLink>
+    </Alert>
+  ) : (
     <DataTable
       fullWidth
       onSearch={handleSearch}
       header={header}
-      loading={orderData.loading || loading}
+      loading={ordersLoading || loading}
       striped
       pagination={{
         page: ordersState.page,
-        total: orderData.data?.maxItems ?? 0,
+        total: ordersData?.maxItems ?? 0,
         perPage: ordersState.perPage,
         onChange: handleTableChange,
       }}
     >
-      {orderData.data?.items && orderData.data?.items.length > 0
-        ? orderData.data?.items.map((row: Record<string, any>) => (
+      {ordersData?.items && ordersData?.items.length > 0
+        ? ordersData?.items.map((row: Record<string, any>) => (
             <tr>
               <td>
                 <TextLink

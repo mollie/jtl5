@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import Alert from '@webstollen/react-jtl-plugin/lib/components/Alert'
 import { faExclamation } from '@fortawesome/pro-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Loading } from '@webstollen/react-jtl-plugin/lib'
 import Details from './Details'
-import { faSync, faTimes } from '@fortawesome/pro-regular-svg-icons'
 import useMollie from '../../../hooks/useMollie'
+import { faSync, faTimes } from '@fortawesome/pro-regular-svg-icons'
 import useOrder from '../../../hooks/useOrder'
 import useErrorSnack from '../../../hooks/useErrorSnack'
 import OrderLines from './OrderLines'
@@ -27,14 +27,16 @@ const OrderDetails = (props: OrderDetailsProps) => {
 
   const [showError] = useErrorSnack()
 
-  const reload = () => {
-    mollie.load().catch((e) => showError(`${e}`))
-    order.load().catch((e) => showError(`${e}`))
-    queue.load().catch((e) => showError(`${e}`))
-  }
+  const reload = useCallback(() => {
+    mollie.load().catch(showError)
+    order.load().catch(showError)
+    queue.load().catch(showError)
+  }, [])
 
   useEffect(() => {
-    reload()
+    mollie.load().catch(showError)
+    order.load().catch(showError)
+    queue.load().catch(showError)
   }, [])
 
   if (mollie.error !== null || order.error !== null) {

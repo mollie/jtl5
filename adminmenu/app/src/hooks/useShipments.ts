@@ -18,14 +18,17 @@ const useShipments = (kBestellung: number): UseShipmentsReturn => {
     data: null,
   })
 
-  const sync = useCallback(async (mollieId: string, kLieferschein: number) => {
-    const api = PluginAPI()
-    return await api.run('shipments', 'sync', {
-      kLieferschein: kLieferschein,
-      orderId: mollieId,
-      kBestellung: kBestellung,
-    })
-  }, [])
+  const sync = useCallback(
+    async (mollieId: string, kLieferschein: number) => {
+      const api = PluginAPI()
+      return await api.run('shipments', 'sync', {
+        kLieferschein: kLieferschein,
+        orderId: mollieId,
+        kBestellung: kBestellung,
+      })
+    },
+    [kBestellung]
+  )
 
   const load = useCallback(async () => {
     const api = PluginAPI()
@@ -41,7 +44,7 @@ const useShipments = (kBestellung: number): UseShipmentsReturn => {
       })
       .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
       .finally(() => setState((p) => ({ ...p, loading: false })))
-  }, [])
+  }, [kBestellung])
 
   return {
     loading: state.loading,

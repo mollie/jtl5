@@ -7,12 +7,14 @@ import ReactTimeago from 'react-timeago'
 import Button from '@webstollen/react-jtl-plugin/lib/components/Button'
 import { faBolt, faLock, faTrash } from '@fortawesome/pro-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Alert from '@webstollen/react-jtl-plugin/lib/components/Alert'
+import TextLink from '@webstollen/react-jtl-plugin/lib/components/TextLink'
 
 const Queue = () => {
   const [loading, setLoading] = useState(false)
   const api = useApi()
   const [showError] = useErrorSnack()
-  const queueData = useQueues()
+  const { data, load, error } = useQueues()
   const [queuesState, setQueuesState] = useState({
     page: 0,
     perPage: 10,
@@ -20,13 +22,13 @@ const Queue = () => {
   })
 
   const reload = useCallback(
-    async () => await queueData.load(queuesState.page, queuesState.perPage, queuesState.query),
-    [queuesState.page, queuesState.perPage, queuesState.query]
+    async () => await load(queuesState.page, queuesState.perPage, queuesState.query),
+    [load, queuesState.page, queuesState.perPage, queuesState.query]
   )
 
   useEffect(() => {
-    queueData.load(queuesState.page, queuesState.perPage, queuesState.query)
-  }, [queueData.load, queuesState.page, queuesState.perPage, queuesState.query])
+    load(queuesState.page, queuesState.perPage, queuesState.query)
+  }, [load, queuesState.page, queuesState.perPage, queuesState.query])
 
   const deleteQueue = (id: number) => {
     setLoading(true)
@@ -87,8 +89,8 @@ const Queue = () => {
   ]
 
   const handleTableChange = async (page: number, perPage: number) => {
-    if (page == queuesState.page && perPage === queuesState.perPage) {
-      await queueData.load(queuesState.page, queuesState.perPage)
+    if (page === queuesState.page && perPage === queuesState.perPage) {
+      await load(queuesState.page, queuesState.perPage)
     } else {
       setQueuesState((p) => ({ ...p, page: page, perPage: perPage }))
     }
@@ -103,22 +105,29 @@ const Queue = () => {
     [setQueuesState, queuesState.query]
   )
 
-  const table = (
+  const table = error ? (
+    <Alert variant="error">
+      {error}{' '}
+      <TextLink color="red" onClick={reload}>
+        Erneut versuchen!
+      </TextLink>
+    </Alert>
+  ) : (
     <DataTable
-      loading={queueData.loading || loading}
+      loading={loading || loading}
       header={header}
       onSearch={handleSearch}
       fullWidth
       striped
       pagination={{
         page: queuesState.page,
-        total: queueData.data?.maxItems ?? 0,
+        total: data?.maxItems ?? 0,
         perPage: queuesState.perPage,
         onChange: handleTableChange,
       }}
     >
-      {queueData.data?.items &&
-        queueData.data?.items.map((row) => (
+      {data?.items &&
+        data?.items.map((row) => (
           <tr>
             <td>{row.kId}</td>
             <td>

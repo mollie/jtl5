@@ -16,20 +16,19 @@ export type ShipmentsProps = {
 const Shipments = ({ mollie, kBestellung }: ShipmentsProps) => {
   const [showShipments, setShowShipments] = useState(false)
   const [showError] = useErrorSnack()
-  const shipmentData = useShipments(kBestellung)
+  const { load, data, loading, sync } = useShipments(kBestellung)
 
   useEffect(() => {
-    shipmentData.load()
-  }, [shipmentData.load])
+    load()
+  }, [load])
 
   const syncShipping = (kLieferschein: number) => {
-    shipmentData
-      .sync(mollie.data?.id, kLieferschein)
+    sync(mollie.data?.id, kLieferschein)
       .then(async (resp) => {
         if (resp.data.error) {
           showError(resp.data.error.message)
         } else {
-          await shipmentData.load()
+          await load()
         }
       })
       .catch(showError)
@@ -43,8 +42,8 @@ const Shipments = ({ mollie, kBestellung }: ShipmentsProps) => {
       </h3>
 
       {showShipments && (
-        <DataTable striped fullWidth header={header} loadin={shipmentData.loading}>
-          {shipmentData.data?.map((row) => (
+        <DataTable striped fullWidth header={header} loadin={loading}>
+          {data?.map((row) => (
             <tr>
               <td>
                 {row.shipment ? (

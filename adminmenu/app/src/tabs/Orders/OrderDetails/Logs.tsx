@@ -7,6 +7,7 @@ import { UseMollieReturn } from '../../../hooks/useMollie'
 import usePaymentLogs from '../../../hooks/usePaymentLogs'
 import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
 import ReactTimeago from 'react-timeago'
+import { parseInt } from 'lodash'
 
 export type LogsProps = {
   order: UseOrderReturn
@@ -15,11 +16,11 @@ export type LogsProps = {
 
 const Logs = ({ order, mollie }: LogsProps) => {
   const [showLogs, setShowLogs] = useState(false)
-  const logs = usePaymentLogs(order.data?.kBestellung, mollie.data?.id)
+  const { load, loading, data } = usePaymentLogs(order.data?.kBestellung, mollie.data?.id)
 
   useEffect(() => {
-    logs.load()
-  }, [logs.load])
+    load()
+  }, [load])
 
   return (
     <div className="mt-4">
@@ -28,20 +29,20 @@ const Logs = ({ order, mollie }: LogsProps) => {
         <FontAwesomeIcon className="float-right" icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft} />
       </h3>
       {showLogs &&
-        (!logs.data ? (
+        (!data ? (
           <>Loading...</>
-        ) : !logs.data?.length ? (
+        ) : !data?.length ? (
           <>No Data!</>
         ) : (
-          <DataTable striped fullWidth header={header}>
-            {logs.data.map((row) => (
+          <DataTable striped fullWidth header={header} loading={loading}>
+            {data.map((row) => (
               <tr>
                 <td className="text-center">
-                  {row.nLevel == 1 ? (
+                  {parseInt(row.nLevel) === 1 ? (
                     <Label color="red">ERROR</Label>
-                  ) : row.nLevel == 2 ? (
+                  ) : parseInt(row.nLevel) === 2 ? (
                     <Label color="blue">NOTICE</Label>
-                  ) : row.nLevel == 3 ? (
+                  ) : parseInt(row.nLevel) === 3 ? (
                     <Label color="gray">DEBUG</Label>
                   ) : (
                     row.nLevel
