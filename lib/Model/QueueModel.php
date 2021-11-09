@@ -50,9 +50,9 @@ class QueueModel extends AbstractModel
      */
     public function done(string $result = null, string $date = null): bool
     {
-        $this->cResult = $result ?? self::NULL;
-        $this->cError = $this->cError ?? self::NULL;
-        $this->dDone   = $date   ?? date('Y-m-d H:i:s');
+        $this->cResult = $result       ?? self::NULL;
+        $this->cError  = $this->cError ?? self::NULL;
+        $this->dDone   = $date         ?? date('Y-m-d H:i:s');
         $this->bLock   = self::NULL;
 
         return $this->save();

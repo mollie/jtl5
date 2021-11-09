@@ -1,17 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import useApi from '@webstollen/react-jtl-plugin/lib/hooks/useAPI'
+import React, { useEffect } from 'react'
 import Alert from '@webstollen/react-jtl-plugin/lib/components/Alert'
 import { faExclamation } from '@fortawesome/pro-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Loading } from '@webstollen/react-jtl-plugin/lib'
-import { ApiError } from '../../../helper'
-import Payments from './Payments'
 import Details from './Details'
-import OrderLines from './OrderLines'
-import Shipments from './Shipments'
 import { faSync, faTimes } from '@fortawesome/pro-regular-svg-icons'
-import Queue from './Queue'
+import useMollie from '../../../hooks/useMollie'
+import useOrder from '../../../hooks/useOrder'
+import useErrorSnack from '../../../hooks/useErrorSnack'
+import OrderLines from './OrderLines'
+import Payments from './Payments'
+import Shipments from './Shipments'
 import Refunds from './Refunds'
+import useQueue from '../../../hooks/useQueue'
+import Queue from './Queue'
 import Logs from './Logs'
 
 export type OrderDetailsProps = {
@@ -19,93 +21,88 @@ export type OrderDetailsProps = {
   onClose?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 }
 const OrderDetails = (props: OrderDetailsProps) => {
-  const [data, setData] = useState<null | Record<string, any>>(null)
-  const [error, setError] = useState<ApiError | null>(null)
-  const [loading, setLoading] = useState(false)
-  const api = useApi()
+  const mollie = useMollie(props.id)
+  const order = useOrder(props.id)
+  const queue = useQueue(props.id)
 
-  const loadOrder = useCallback(() => {
-    setError(null)
-    setData(null)
-    if (props.id) {
-      setLoading(true)
-      api
-        .run('orders', 'one', {
-          id: props.id,
-        })
-        .then((res) => {
-          setData(res.data.data)
-          setError(null)
-        })
-        .catch(setError)
-        .finally(() => setLoading(false))
-    }
-  }, [api, props.id])
+  const [showError] = useErrorSnack()
 
-  useEffect(loadOrder, [loadOrder])
+  const reload = () => {
+    console.debug('(OrderDetails->reload)')
+    mollie.load().catch((e) => showError(`${e}`))
+    order.load().catch((e) => showError(`${e}`))
+    queue.load().catch((e) => showError(`${e}`))
+  }
 
-  if (error !== null) {
+  useEffect(() => {
+    reload()
+  }, [])
+
+  if (mollie.error !== null || order.error !== null) {
     return (
       <div className="relative flex-col mb-3 rounded-md w-full">
-        <div className="flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
+        <div className="flex flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
           <div className="flex-grow">
-            Bestellung: {data?.order.cBestellNr} (<pre className="inline text-ws_gray-light">{props.id}</pre>)
+            Bestellung: {order.data?.cBestellNr} (<pre className="inline text-ws_gray-light">{props.id}</pre>)
           </div>
-          <div onClick={loadOrder} className="cursor-pointer mr-2">
-            <FontAwesomeIcon icon={faSync} spin={loading} size={'sm'} />
+          <div onClick={reload} className="cursor-pointer mr-2">
+            <FontAwesomeIcon icon={faSync} spin={order.loading} size={'sm'} />
           </div>
           <div onClick={props.onClose} className="cursor-pointer">
             <FontAwesomeIcon icon={faTimes} />
           </div>
         </div>
-        <Alert variant={'error'} icon={{ icon: faExclamation }}>
-          Fehler beim laden der Bestellung "{props.id}": {error.message}
-        </Alert>
+        {order.error != null && (
+          <Alert variant={'error'} icon={{ icon: faExclamation }}>
+            Fehler beim laden der Bestellung "{props.id}": {order.error}
+          </Alert>
+        )}
+        {mollie.error != null && (
+          <Alert variant={'error'} icon={{ icon: faExclamation }}>
+            Fehler beim Laden von Mollie "{props.id}": {mollie.error}
+          </Alert>
+        )}
       </div>
     )
   }
 
   return (
-    <div className="relative flex-col mb-3 rounded-md w-full">
-      <Loading loading={loading} className="rounded-md">
-        <div className="flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
+    <div className="relative mb-3 w-full">
+      <Loading loading={order.loading}>
+        <div className="flex flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
           <div className="flex-grow">
-            Bestellung: <span title={data?.order.kBestellung}>{data?.order.cBestellNr}</span> (
+            Bestellung: <span title={order.data?.kBestellung}>{order.data?.cBestellNr}</span> (
             <pre className="inline text-ws_gray-light">{props.id}</pre>)
           </div>
-          <div onClick={loadOrder} className="cursor-pointer mr-2">
-            <FontAwesomeIcon icon={faSync} spin={loading} size={'sm'} />
+          <div onClick={reload} className="cursor-pointer mr-2">
+            <FontAwesomeIcon icon={faSync} spin={order.loading} size={'sm'} />
           </div>
           <div onClick={props.onClose} className="cursor-pointer">
             <FontAwesomeIcon icon={faTimes} />
           </div>
         </div>
         <div className=" rounded-md">
-          {data && data.mollie && <Details mollie={data.mollie} />}
+          {mollie && <Details mollie={mollie} />}
 
-          {data && data.mollie.resource === 'payment' ? (
-            <>{/* PAYMENT API */}</>
+          {mollie && mollie?.data?.resource === 'payment' ? (
+            <></>
           ) : (
             <>
-              {/* ORDER API */}
+              {mollie.data && <OrderLines mollie={mollie} />}
 
-              {data && data.mollie && <OrderLines mollie={data.mollie} />}
+              {mollie.data && <Payments mollie={mollie} />}
 
-              {data && data.mollie && <Payments mollie={data.mollie} />}
-
-              {data && data.mollie && data.bestellung && (
-                <Shipments kBestellung={data.bestellung.kBestellung} mollie={data.mollie} />
+              {mollie.data && order && order?.data && (
+                <Shipments kBestellung={order?.data.kBestellung} mollie={mollie} />
               )}
             </>
           )}
 
-          {data && data.mollie && <Refunds mollie={data.mollie} />}
+          {mollie.data && <Refunds mollie={mollie} />}
 
-          {data && data.logs && <Queue data={data.logs} />}
+          {queue.data && <Queue queue={queue} />}
 
-          {data && data.mollie && data.bestellung && (
-            <Logs orderId={data.mollie.id} kBestellung={data.bestellung.kBestellung} />
-          )}
+          {mollie.data && order?.data && <Logs order={order} mollie={mollie} />}
         </div>
       </Loading>
     </div>
