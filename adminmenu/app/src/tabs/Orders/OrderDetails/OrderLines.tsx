@@ -18,7 +18,6 @@ type Variation = {
 }
 
 const OrderLines = ({ mollie }: OrderLinesProps) => {
-  console.debug('(OrderLines->render)', mollie)
   const [showError] = useErrorSnack()
   const handleCancelOrderLine = (lineId: string, max: number) => {
     const quantity =

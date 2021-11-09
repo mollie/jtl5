@@ -37,7 +37,6 @@ const useShipments = (kBestellung: number): UseShipmentsReturn => {
         kBestellung: kBestellung,
       })
       .then((res) => {
-        console.debug('(useShipments->load) Shipments loaded', res)
         setState((p) => ({ ...p, data: res.data.data }))
       })
       .catch((e) => setState((p) => ({ ...p, error: `${e}` })))

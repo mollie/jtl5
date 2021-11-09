@@ -23,7 +23,6 @@ const useQueues = (): UseQueuesReturn => {
   const load = useCallback(
     async (page: number, perPage: number, query?: string) => {
       const api = PluginAPI()
-      console.debug('(useQueues->load)')
       setState((p) => ({ ...p, loading: true, error: null }))
 
       const offset = perPage * page
@@ -46,7 +45,6 @@ const useQueues = (): UseQueuesReturn => {
           params: params,
         })
         .then((res) => {
-          console.debug('(useQueues->load) Queues loaded', res)
           setState((p) => ({ ...p, data: res.data.data }))
         })
         .catch((e) => setState((p) => ({ ...p, error: `${e}` })))

@@ -28,7 +28,6 @@ const OrderDetails = (props: OrderDetailsProps) => {
   const [showError] = useErrorSnack()
 
   const reload = () => {
-    console.debug('(OrderDetails->reload)')
     mollie.load().catch((e) => showError(`${e}`))
     order.load().catch((e) => showError(`${e}`))
     queue.load().catch((e) => showError(`${e}`))

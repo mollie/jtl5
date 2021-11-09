@@ -22,7 +22,6 @@ const useOrders = (): UseOrdersReturn => {
 
   const load = useCallback(async (page: number, perPage: number, query?: string) => {
     const api = PluginAPI()
-    console.debug('(useOrders->load)')
     setState((p) => ({ ...p, loading: true, error: null }))
 
     const offset = perPage * page
@@ -38,12 +37,14 @@ const useOrders = (): UseOrdersReturn => {
         'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme ' +
         'FROM xplugin_ws5_mollie_orders o ' +
         'JOIN tbestellung b ON b.kbestellung = o.kBestellung ' +
-        'WHERE b.cBestellNr LIKE :query1 OR o.cOrderId LIKE :query2 ' +
+        'WHERE b.cBestellNr LIKE :query1 ' +
+        'OR o.cOrderId LIKE :query2 ' +
+        'OR o.cStatus LIKE :query3 ' +
+        'OR o.cMethod LIKE :query4 ' +
+        'OR o.cTransactionId LIKE :query5 ' +
         'ORDER BY b.dErstellt DESC;'
-      params[':query1'] = params[':query2'] = `%${query}%`
+      params[':query1'] = params[':query2'] = params[':query3'] = params[':query4'] = params[':query5'] = `%${query}%`
     }
-
-    console.log(sqlQuery, params)
 
     api
       .run('orders', 'all', {
@@ -51,7 +52,6 @@ const useOrders = (): UseOrdersReturn => {
         params: params,
       })
       .then((res) => {
-        console.debug('(useOrders->load) Orders loaded', res)
         setState((p) => ({ ...p, data: res.data.data }))
       })
       .catch((e) => setState((p) => ({ ...p, error: `${e}` })))

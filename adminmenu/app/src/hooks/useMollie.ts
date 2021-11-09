@@ -11,6 +11,7 @@ export type UseMollieReturn = {
   refundOrderLine: (orderLineId: string, quantity: number) => Promise<void>
   cancelOrder: () => Promise<void>
   refundOrder: () => Promise<void>
+  cancelRefund: (id: string) => Promise<void>
 }
 
 const PluginAPI = useApi
@@ -24,7 +25,6 @@ const useMollie = (id: string): UseMollieReturn => {
 
   const load = useCallback(async () => {
     const api = PluginAPI()
-    console.debug('(useMollie->load)')
     setState((p) => ({ ...p, loading: true, error: null }))
 
     if (id.substring(0, 4) === 'ord_') {
@@ -33,7 +33,6 @@ const useMollie = (id: string): UseMollieReturn => {
           id: id,
         })
         .then((res) => {
-          console.debug('(useMollie->load) Order loaded', res)
           setState((p) => ({ ...p, data: res.data.data }))
         })
         .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
@@ -44,7 +43,6 @@ const useMollie = (id: string): UseMollieReturn => {
           id: id,
         })
         .then((res) => {
-          console.debug('(useMollie->load) Payment loaded', res)
           setState((p) => ({ ...p, data: res.data.data }))
         })
         .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
@@ -155,6 +153,26 @@ const useMollie = (id: string): UseMollieReturn => {
     [id, load, setState]
   )
 
+  const cancelRefund = useCallback(
+    async (refundId: string) => {
+      const api = PluginAPI()
+      if (refundId.trim()) {
+        setState((p) => ({ ...p, loading: true }))
+
+        api
+          .run('mollie', 'cancelRefund', {
+            id: id,
+            refundId: refundId,
+          })
+          .then(async (r) => {
+            await load()
+          })
+          .finally(() => setState((p) => ({ ...p, loading: false })))
+      }
+    },
+    [id, load, setState]
+  )
+
   return {
     loading: state.loading,
     data: state.data,
@@ -165,6 +183,7 @@ const useMollie = (id: string): UseMollieReturn => {
     refundOrderLine: refundOrderLine,
     cancelOrder: cancelOrder,
     refundOrder: refundOrder,
+    cancelRefund: cancelRefund,
   }
 }
 

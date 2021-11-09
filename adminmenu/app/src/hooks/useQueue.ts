@@ -19,14 +19,12 @@ const useQueue = (id: string): UseQueueReturn => {
 
   const load = useCallback(async () => {
     const api = PluginAPI()
-    console.debug('(useQueue->load)')
     setState((p) => ({ ...p, loading: true, error: null }))
     api
       .run('Orders', 'getQueue', {
         id: id,
       })
       .then((res) => {
-        console.debug('(useQueue->load) Queue loaded', res)
         setState((p) => ({ ...p, data: res.data.data }))
       })
       .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
