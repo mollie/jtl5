@@ -79,6 +79,7 @@ class Customer
         } else {
             try {
                 $customer              = $api->getClient()->customers->create($customer->toArray());
+                $mCustomer->kKunde     = $oKunde->getID();
                 $mCustomer->customerId = $customer->id;
                 $mCustomer->save();
             } catch (ApiException $e) {
