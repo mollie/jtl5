@@ -20,13 +20,13 @@ const Queue = () => {
   })
 
   const reload = useCallback(
-    async () => await queueData.load(queuesState.page, queuesState.perPage),
-    [queuesState.page, queuesState.perPage]
+    async () => await queueData.load(queuesState.page, queuesState.perPage, queuesState.query),
+    [queuesState.page, queuesState.perPage, queuesState.query]
   )
 
   useEffect(() => {
-    queueData.load(queuesState.page, queuesState.perPage)
-  }, [queueData.load, queuesState.page, queuesState.perPage])
+    queueData.load(queuesState.page, queuesState.perPage, queuesState.query)
+  }, [queueData.load, queuesState.page, queuesState.perPage, queuesState.query])
 
   const deleteQueue = (id: number) => {
     setLoading(true)
@@ -94,10 +94,20 @@ const Queue = () => {
     }
   }
 
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (query !== queuesState.query) {
+        setQueuesState((p) => ({ ...p, query: query, page: 0 }))
+      }
+    },
+    [setQueuesState, queuesState.query]
+  )
+
   const table = (
     <DataTable
       loading={queueData.loading || loading}
       header={header}
+      onSearch={handleSearch}
       fullWidth
       striped
       pagination={{

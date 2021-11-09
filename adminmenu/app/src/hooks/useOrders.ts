@@ -10,7 +10,7 @@ export type UseOrdersReturn = {
     items: Array<Record<string, any>>
   }
   error: null | string
-  load: (perPage: number, page: number) => Promise<void>
+  load: (perPage: number, page: number, query?: string) => Promise<void>
 }
 
 const useOrders = (): UseOrdersReturn => {
@@ -20,18 +20,35 @@ const useOrders = (): UseOrdersReturn => {
     data: null,
   })
 
-  const load = useCallback(async (page: number, perPage: number) => {
+  const load = useCallback(async (page: number, perPage: number, query?: string) => {
     const api = PluginAPI()
     console.debug('(useOrders->load)')
     setState((p) => ({ ...p, loading: true, error: null }))
 
     const offset = perPage * page
+    let params: Record<string, any> = { ':limit': perPage, ':offset': offset }
+    let sqlQuery =
+      'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme ' +
+      'FROM xplugin_ws5_mollie_orders o ' +
+      'JOIN tbestellung b ON b.kbestellung = o.kBestellung ' +
+      'ORDER BY b.dErstellt DESC;'
+
+    if (query && query.trim() !== '') {
+      sqlQuery =
+        'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme ' +
+        'FROM xplugin_ws5_mollie_orders o ' +
+        'JOIN tbestellung b ON b.kbestellung = o.kBestellung ' +
+        'WHERE b.cBestellNr LIKE :query1 OR o.cOrderId LIKE :query2 ' +
+        'ORDER BY b.dErstellt DESC;'
+      params[':query1'] = params[':query2'] = `%${query}%`
+    }
+
+    console.log(sqlQuery, params)
 
     api
       .run('orders', 'all', {
-        query:
-          'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung ORDER BY b.dErstellt DESC;',
-        params: { ':limit': perPage, ':offset': offset },
+        query: sqlQuery,
+        params: params,
       })
       .then((res) => {
         console.debug('(useOrders->load) Orders loaded', res)

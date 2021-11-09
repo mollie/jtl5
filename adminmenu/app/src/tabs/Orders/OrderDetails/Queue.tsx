@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronDoubleDown, faChevronDoubleLeft } from '@fortawesome/pro-regular-svg-icons'
 import { UseQueueReturn } from '../../../hooks/useQueue'
-import { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
-import DataTable from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
+import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
 import ReactTimeago from 'react-timeago'
 
 type QueueProps = {

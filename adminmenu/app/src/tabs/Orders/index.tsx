@@ -29,8 +29,8 @@ const Orders = () => {
   })
 
   useEffect(() => {
-    orderData.load(ordersState.page, ordersState.perPage)
-  }, [orderData.load, ordersState.perPage, ordersState.page])
+    orderData.load(ordersState.page, ordersState.perPage, ordersState.query)
+  }, [orderData.load, ordersState.perPage, ordersState.page, ordersState.query])
 
   const reWebhook = (id: string) => {
     setLoading(true)
@@ -89,11 +89,20 @@ const Orders = () => {
     }
   }
 
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (query !== ordersState.query) {
+        setOrderState((p) => ({ ...p, query: query, page: 0 }))
+      }
+    },
+    [setOrderState, ordersState.query]
+  )
+
   const table = (
     <DataTable
       fullWidth
+      onSearch={handleSearch}
       header={header}
-      searchable
       loading={orderData.loading || loading}
       striped
       pagination={{
@@ -103,76 +112,78 @@ const Orders = () => {
         onChange: handleTableChange,
       }}
     >
-      {orderData.data?.items.length &&
-        orderData.data?.items.map((row: Record<string, any>) => (
-          <tr>
-            <td>
-              <TextLink
-                color={'blue'}
-                onClick={() =>
-                  setOpenTabs((prevState) =>
-                    prevState[row.cOrderId] ? { ...prevState } : { [row.cOrderId]: row.cBestellNr, ...prevState }
-                  )
-                }
-              >
-                {row.cBestellNr}
-              </TextLink>
-              {!parseInt(row.bSynced) ? (
-                <abbr className="cursor-help" title="Nicht abholbar.">
-                  *
-                </abbr>
-              ) : null}
-            </td>
-            <td>
-              {parseInt(row.bTest) ? (
-                <Label className={'inline mr-1'} color={'red'}>
-                  TEST
-                </Label>
-              ) : null}
-              <pre className={'inline'}>{row.cOrderId}</pre>
-            </td>
-            <td className="text-center">
-              {molliePaymentStatusLabel(row.fAmountRefunded === row.fAmount ? 'refunded' : row.cStatus)}
-            </td>
-            <td className="text-center">{jtlStatus2label(row.cJTLStatus)}</td>
-            <td className="text-center">
-              <PaymentMethod2img method={row.cMethod} />
-            </td>
-            <td className="text-right">{formatAmount(row.fAmount)}</td>
-            <td className="text-center">{row.cCurrency}</td>
-            <td>
-              <ReactTimeago date={row.dCreated} />
-            </td>
-            <td className="text-right">
-              {!parseInt(row.bSynced) && (
-                <Button onClick={() => makeFetchable(row.cOrderId)} title="Abholbar machen" className={'mr-1'}>
-                  <FontAwesomeIcon icon={faUnlock} />
-                </Button>
-              )}
-
-              {!['paid', 'authorized', 'completed', 'pending'].includes(row.cStatus) && parseInt(row.cJTLStatus) > 0 ? (
-                <Button
-                  onClick={() => sendReminder(row.kId)}
-                  title={'Zahlungserinnerung ' + (row.dReminder !== null ? 'erneut ' : '') + 'verschicken'}
-                  className={'mr-1'}
+      {orderData.data?.items && orderData.data?.items.length > 0
+        ? orderData.data?.items.map((row: Record<string, any>) => (
+            <tr>
+              <td>
+                <TextLink
+                  color={'blue'}
+                  onClick={() =>
+                    setOpenTabs((prevState) =>
+                      prevState[row.cOrderId] ? { ...prevState } : { [row.cOrderId]: row.cBestellNr, ...prevState }
+                    )
+                  }
                 >
-                  {row.dReminder !== null ? (
-                    <span className="fa-layers fa-fw">
-                      <FontAwesomeIcon icon={faEnvelopeOpenDollar} inverse transform="shrink-7" />
-                      <FontAwesomeIcon icon={faSync} inverse transform="grow-7" />
-                    </span>
-                  ) : (
-                    <FontAwesomeIcon icon={faEnvelopeOpenDollar} />
-                  )}
-                </Button>
-              ) : null}
+                  {row.cBestellNr}
+                </TextLink>
+                {!parseInt(row.bSynced) ? (
+                  <abbr className="cursor-help" title="Nicht abholbar.">
+                    *
+                  </abbr>
+                ) : null}
+              </td>
+              <td>
+                {parseInt(row.bTest) ? (
+                  <Label className={'inline mr-1'} color={'red'}>
+                    TEST
+                  </Label>
+                ) : null}
+                <pre className={'inline'}>{row.cOrderId}</pre>
+              </td>
+              <td className="text-center">
+                {molliePaymentStatusLabel(row.fAmountRefunded === row.fAmount ? 'refunded' : row.cStatus)}
+              </td>
+              <td className="text-center">{jtlStatus2label(row.cJTLStatus)}</td>
+              <td className="text-center">
+                <PaymentMethod2img method={row.cMethod} />
+              </td>
+              <td className="text-right">{formatAmount(row.fAmount)}</td>
+              <td className="text-center">{row.cCurrency}</td>
+              <td>
+                <ReactTimeago date={row.dCreated} />
+              </td>
+              <td className="text-right">
+                {!parseInt(row.bSynced) && (
+                  <Button onClick={() => makeFetchable(row.cOrderId)} title="Abholbar machen" className={'mr-1'}>
+                    <FontAwesomeIcon icon={faUnlock} />
+                  </Button>
+                )}
 
-              <Button onClick={() => reWebhook(row.cOrderId)} title="Simulate Webhook">
-                <FontAwesomeIcon icon={faBolt} />
-              </Button>
-            </td>
-          </tr>
-        ))}
+                {!['paid', 'authorized', 'completed', 'pending'].includes(row.cStatus) &&
+                parseInt(row.cJTLStatus) > 0 ? (
+                  <Button
+                    onClick={() => sendReminder(row.kId)}
+                    title={'Zahlungserinnerung ' + (row.dReminder !== null ? 'erneut ' : '') + 'verschicken'}
+                    className={'mr-1'}
+                  >
+                    {row.dReminder !== null ? (
+                      <span className="fa-layers fa-fw">
+                        <FontAwesomeIcon icon={faEnvelopeOpenDollar} inverse transform="shrink-7" />
+                        <FontAwesomeIcon icon={faSync} inverse transform="grow-7" />
+                      </span>
+                    ) : (
+                      <FontAwesomeIcon icon={faEnvelopeOpenDollar} />
+                    )}
+                  </Button>
+                ) : null}
+
+                <Button onClick={() => reWebhook(row.cOrderId)} title="Simulate Webhook">
+                  <FontAwesomeIcon icon={faBolt} />
+                </Button>
+              </td>
+            </tr>
+          ))
+        : null}
     </DataTable>
   )
 

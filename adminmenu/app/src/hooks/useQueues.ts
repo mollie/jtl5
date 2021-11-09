@@ -8,7 +8,7 @@ export type UseQueuesReturn = {
     items: Array<Record<string, any>>
   }
   error: null | string
-  load: (page: number, itemsPerPage: number) => Promise<void>
+  load: (page: number, itemsPerPage: number, query?: string) => Promise<void>
 }
 
 const PluginAPI = useApi
@@ -21,17 +21,29 @@ const useQueues = (): UseQueuesReturn => {
   })
 
   const load = useCallback(
-    async (page: number, itemsPerPage: number) => {
+    async (page: number, perPage: number, query?: string) => {
       const api = PluginAPI()
       console.debug('(useQueues->load)')
       setState((p) => ({ ...p, loading: true, error: null }))
+
+      const offset = perPage * page
+      let params: Record<string, any> = { ':limit': perPage, ':offset': offset }
+      let sqlQuery = 'SELECT * FROM xplugin_ws5_mollie_queue ORDER BY dCreated DESC'
+
+      if (query && query.trim() !== '') {
+        sqlQuery =
+          'SELECT * FROM xplugin_ws5_mollie_queue ' +
+          'WHERE cType LIKE :query1 ' +
+          'OR cResult LIKE :query2 ' +
+          'OR cError LIKE :query3 ' +
+          'ORDER BY dCreated DESC'
+        params[':query1'] = params[':query2'] = params[':query3'] = `%${query}%`
+      }
+
       api
         .run('queue', 'all', {
-          query: 'SELECT * FROM xplugin_ws5_mollie_queue ORDER BY dCreated DESC',
-          params: {
-            ':limit': itemsPerPage,
-            ':offset': page * itemsPerPage,
-          },
+          query: sqlQuery,
+          params: params,
         })
         .then((res) => {
           console.debug('(useQueues->load) Queues loaded', res)

@@ -32,7 +32,7 @@ const usePamentLogs = (kBestellung: number, id: string): UseQueueReturn => {
       })
       .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
       .finally(() => setState((p) => ({ ...p, loading: false })))
-  }, [id, setState])
+  }, [id, setState, kBestellung])
 
   return {
     loading: state.loading,

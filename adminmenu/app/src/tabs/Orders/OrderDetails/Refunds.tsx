@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
 import { formatAmount, Loading } from '@webstollen/react-jtl-plugin/lib'
 import { molliePaymentStatusLabel } from '../../../helper'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'

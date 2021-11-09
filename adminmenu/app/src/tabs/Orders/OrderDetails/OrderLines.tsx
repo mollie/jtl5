@@ -1,5 +1,4 @@
 import React from 'react'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
 import { formatAmount, Loading } from '@webstollen/react-jtl-plugin/lib'
 import { mollieOrderLineTypeLabel, molliePaymentStatusLabel, OrderLineType } from '../../../helper'
 import Button from '@webstollen/react-jtl-plugin/lib/components/Button'

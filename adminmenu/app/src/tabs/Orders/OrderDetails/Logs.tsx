@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Label } from '@webstollen/react-jtl-plugin/lib'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
 import { faChevronDoubleDown, faChevronDoubleLeft } from '@fortawesome/pro-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UseOrderReturn } from '../../../hooks/useOrder'
 import { UseMollieReturn } from '../../../hooks/useMollie'
 import usePaymentLogs from '../../../hooks/usePaymentLogs'
-import { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
-import DataTable from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
+import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
 import ReactTimeago from 'react-timeago'
 
 export type LogsProps = {

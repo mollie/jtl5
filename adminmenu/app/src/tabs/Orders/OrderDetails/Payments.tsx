@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
 import TextLink from '@webstollen/react-jtl-plugin/lib/components/TextLink'
 import { formatAmount } from '@webstollen/react-jtl-plugin/lib'
 import { molliePaymentStatusLabel, PaymentMethod2img } from '../../../helper'
