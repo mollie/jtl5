@@ -19,7 +19,6 @@ const useOrder = (id: string): UseOrderReturn => {
 
   const load = useCallback(async () => {
     const api = PluginAPI()
-    console.debug('(useOrder->load)')
     setState((p) => ({ ...p, loading: true, error: null }))
 
     if (id.substring(0, 4) === 'ord_') {
@@ -28,7 +27,6 @@ const useOrder = (id: string): UseOrderReturn => {
           id: id,
         })
         .then((res) => {
-          console.debug('(useOrder->load) Order loaded', res)
           setState((p) => ({ ...p, data: res.data.data }))
         })
         .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
@@ -39,7 +37,6 @@ const useOrder = (id: string): UseOrderReturn => {
           id: id,
         })
         .then((res) => {
-          console.debug('(useOrder->load) Payment loaded', res)
           setState((p) => ({ ...p, data: res.data.data }))
         })
         .catch((e) => setState((p) => ({ ...p, error: `${e}` })))

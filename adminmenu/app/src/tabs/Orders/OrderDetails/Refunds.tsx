@@ -36,13 +36,17 @@ const Refunds = ({ mollie }: RefundsProps) => {
     [setRefundAmount, mollie.refundAmount, showError]
   )
 
+  const handleCancel = (id: string) => {
+    if (window.confirm('Diese Erstattung wirklich abbrechen?')) {
+      mollie.cancelRefund(id).catch((e) => showError(`${e}`))
+    }
+  }
+
   const handleRefundOrder = () => {
     if (window.confirm('Diese Bestellung bei Mollie wirklich zurück erstatten?')) {
       mollie.refundOrder().catch((e) => showError(`${e}`))
     }
   }
-
-  // TODO: Cancel pending Refunds
 
   return (
     <div className="mt-4">
@@ -101,7 +105,13 @@ const Refunds = ({ mollie }: RefundsProps) => {
                       <td className="text-right">
                         <ReactTimeago date={row.createdAt} />
                       </td>
-                      <td></td>
+                      <td className="text-right">
+                        {row.status === 'pending' ? (
+                          <Button color="red" onClick={() => handleCancel(row.id)}>
+                            cancel
+                          </Button>
+                        ) : null}
+                      </td>
                     </tr>
                   ))}
               </DataTable>

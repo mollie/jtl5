@@ -35,6 +35,7 @@ const Queue = ({ queue }: QueueProps) => {
                 <td>
                   <ReactTimeago date={row.dCreated} />
                 </td>
+                <td>{/*TODO: REDO*/}</td>
               </tr>
             ))}
         </DataTable>

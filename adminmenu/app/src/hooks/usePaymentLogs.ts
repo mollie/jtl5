@@ -19,7 +19,6 @@ const usePamentLogs = (kBestellung: number, id: string): UseQueueReturn => {
 
   const load = useCallback(async () => {
     const api = PluginAPI()
-    console.debug('(usePaymentLogs->load)')
     setState((p) => ({ ...p, loading: true, error: null }))
     api
       .run('Orders', 'zalog', {
@@ -27,7 +26,6 @@ const usePamentLogs = (kBestellung: number, id: string): UseQueueReturn => {
         id: id,
       })
       .then((res) => {
-        console.debug('(usePaymentLogs->load) Log loaded', res)
         setState((p) => ({ ...p, data: res.data.data }))
       })
       .catch((e) => setState((p) => ({ ...p, error: `${e}` })))

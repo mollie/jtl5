@@ -12,6 +12,7 @@ use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Resources\Refund;
 use Mollie\Api\Types\PaymentMethod;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
@@ -24,8 +25,8 @@ class MollieController extends AbstractController
 {
     /**
      * @param stdClass $data
-     * @throws ApiException
      * @throws IncompatiblePlatform
+     * @throws ApiException
      * @return AbstractResult
      */
     public static function methods(stdClass $data): AbstractResult
@@ -135,8 +136,8 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
 
     /**
      * @param stdClass $data
-     * @throws ApiException
      * @throws \Exception
+     * @throws ApiException
      * @return AbstractResult
      */
     public static function cancelOrderLine(stdClass $data): AbstractResult
@@ -192,6 +193,30 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
         }
 
         return new AbstractResult(true);
+    }
+
+    public static function cancelRefund(stdClass $data): AbstractResult
+    {
+        if (!$data->id || !$data->refundId) {
+            throw new \RuntimeException('Missing Mollie ID or Refund ID!');
+        }
+
+        if (strpos($data->id, 'tr_') !== false) {
+            $checkout = PaymentCheckout::fromID($data->id);
+        } else {
+            $checkout = OrderCheckout::fromID($data->id);
+        }
+        $refunds = $checkout->getMollie()->refunds();
+        /** @var Refund $refund */
+        foreach ($refunds as $refund) {
+            if ($refund->id === $data->refundId) {
+                $refund->cancel();
+
+                return new AbstractResult(true);
+            }
+        }
+
+        throw new \RuntimeException('Refund not found!');
     }
 
     public static function refundOrderLine(stdClass $data): AbstractResult
