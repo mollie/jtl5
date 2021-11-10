@@ -34,6 +34,7 @@ use Mollie\Api\Types\PaymentStatus;
 use PaymentMethod;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order\Amount;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
@@ -173,9 +174,13 @@ abstract class AbstractCheckout
                         throw new Exception(sprintf('Bestellung nicht finalisiert: %s', print_r($order, 1)));
                     }
                 } else {
+                    QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+
                     throw new Exception(sprintf('PaymentSession bereits bezahlt: %s - ID: %s => Queue', $sessionHash, $id));
                 }
             } else {
+                QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+
                 throw new Exception(sprintf('PaymentSession nicht gefunden: %s - ID: %s => Queue', $sessionHash, $id));
             }
         } catch (Exception $e) {
