@@ -288,6 +288,16 @@ abstract class AbstractCheckout
             $hash = $this->getModel()->cHash;
         }
 
+//        try{
+//            $pm = $this->getPaymentMethod();
+//            if(method_exists($pm, 'generatePUI') && ($pui = $pm->generatePUI($this))){
+//                $this->getBestellung()->cPUIZahlungsdaten = $pui;
+//                $this->getBestellung()->updateInDB();
+//            }
+//        }catch (\Exception $e){
+//
+//        }
+
         $this->updateModel()->saveModel();
         if (null === $this->getBestellung()->dBezahltDatum) {
             if ($incoming = $this->getIncomingPayment()) {

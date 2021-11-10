@@ -9,6 +9,7 @@ namespace Plugin\ws5_mollie\paymentmethod;
 
 use JTL\Checkout\Bestellung;
 use JTL\Session\Frontend;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\PaymentMethod;
 
@@ -17,6 +18,32 @@ class Banktransfer extends PaymentMethod
     public const ALLOW_AUTO_STORNO = false;
 
     public const METHOD = \Mollie\Api\Types\PaymentMethod::BANKTRANSFER;
+
+
+    public function generatePUI(AbstractCheckout $checkout): string
+    {
+        $template = self::Plugin('ws5_mollie')->getLocalization()->getTranslation('banktransferPUI');
+
+        return str_replace(
+            [
+                '%amount%',
+                '%expiresAt%',
+                '%bankName%',
+                '%bankAccount%',
+                '%bankBic%',
+                '%transferReference%'
+            ],
+            [
+                "{$checkout->getMollie()->amount->value} {$checkout->getMollie()->amount->currency}",
+                date('d.m.Y', strtotime($checkout->getMollie()->expiresAt)),
+                $checkout->getMollie()->details->bankName,
+                $checkout->getMollie()->details->bankAccount,
+                $checkout->getMollie()->details->bankBic,
+                $checkout->getMollie()->details->transferReference
+            ],
+            $template
+        );
+    }
 
     public function getPaymentOptions(Bestellung $order, $apiType): array
     {

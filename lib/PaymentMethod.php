@@ -251,6 +251,15 @@ abstract class PaymentMethod extends Method
                 $url      = $mOrder->getCheckoutUrl();
             }
 
+            try {
+                if ($order->kBestellung > 0 && method_exists($this, 'generatePUI') && ($pui = $this->generatePUI($checkout))) {
+                    $order->cPUIZahlungsdaten = $pui;
+                    $order->updateInDB();
+                }
+            } catch (\Exception $e) {
+                $this->doLog('mollie::preparePaymentProcess: PUI - ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_NOTICE);
+            }
+
             ifndef('MOLLIE_REDIRECT_DELAY', 3);
             $checkoutMode = self::Plugin('ws5_mollie')->getConfig()->getValue('checkoutMode');
             Shop::Smarty()->assign('redirect', $url)

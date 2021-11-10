@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2021-09-28</CreateDate>
-    <Version>1.2.5</Version>
+    <Version>1.2.6</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -1058,6 +1058,14 @@
                 <VariableLocalized iso="ENG"><![CDATA[I can give my <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/en_en/consent');">consent</a> can be revoked at any time with effect for the future.]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Je peux donner mon <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/fr_fr/consent');">consentement</a> peut être révoqué à tout moment avec effet pour l'avenir.]]></VariableLocalized>
                 <VariableLocalized iso="ITA"><![CDATA[Posso dare il mio <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/it_it/consent');">consenso</a> può essere revocato in qualsiasi momento con effetto per il futuro.]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>banktransferPUI</Name>
+                <Description></Description>
+                <VariableLocalized iso="GER"><![CDATA[Bitte überweisen Sie den Betrag in Höhe von %amount% bis zum %expiresAt% auf das unten angegebene Konto:\nEmpfänger: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nReferenznummer: %transferReference%]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Please transfer the amount of %amount% to the account given below by %expiresAt%:\nRecipient: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nReference number: %transferReference%]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Veuillez virer le montant de %amount% sur le compte indiqué ci-dessous avant le %expiresAt%:\nBénéficiaire: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNuméro de référence : %transferReference%]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Si prega di trasferire l'importo di %amount% sul conto indicato di seguito entro il %expiresAt%:\nDestinatario: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNumero di riferimento: %transferReference%]]></VariableLocalized>
             </Variable>
 
         </Locales>
