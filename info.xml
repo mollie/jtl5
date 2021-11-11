@@ -920,18 +920,20 @@
             <Variable>
                 <Name>lbl_cardHolder</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Karteninhaber:]]></VariableLocalized>
-                <VariableLocalized iso="ENG"><![CDATA[Card holder:]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[Titulaire de la carte:]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Titolare della Carta:]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[Name des Karteninhabers:]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Name on Card:]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Nom du titulaire de la carte:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[Naam kaarthouder:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Nome de titolare della carta:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_cardNumber</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Kartennummer:]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[Kreditkartennummer:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Card number:]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[Numro de carte:]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Numero Carta:]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Numro de carte de credit:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[Creditcardnummer:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Numero Carta di credito:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_expiryDate</Name>
@@ -939,15 +941,17 @@
                 <VariableLocalized iso="GER"><![CDATA[Ablaufdatum:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Expiry date:]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Date d'expiration:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[Vervaldatum:]]></VariableLocalized>
                 <VariableLocalized iso="ITA"><![CDATA[Data scadenza:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_varificationCode</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[CVC/CVV:]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[CVV:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[CVC/CVV:]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[CVC/CVV:]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[CVC/CVV:]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[CVV:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[CVV:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[CVV:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>cvchint_1</Name>
