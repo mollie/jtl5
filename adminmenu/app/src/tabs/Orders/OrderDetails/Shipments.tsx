@@ -45,7 +45,7 @@ const Shipments = ({ kBestellung }: ShipmentsProps) => {
       {showShipments && (
         <DataTable striped fullWidth header={header} loadin={loading}>
           {data?.map((row) => (
-            <tr>
+            <tr key={row.cLieferscheinNr}>
               <td>
                 {row.shipment ? (
                   <TextLink color={'green'} href={mollie.data?._links.dashboard?.href} target="_blank">

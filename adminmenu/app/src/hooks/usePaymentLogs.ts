@@ -10,7 +10,7 @@ export type UseQueueReturn = {
   load: () => Promise<void>
 }
 
-const usePamentLogs = (kBestellung: number, id: string): UseQueueReturn => {
+const usePaymentLogs = (kBestellung: number, id: string): UseQueueReturn => {
   const [state, setState] = useState<Record<string, any>>({
     loading: false,
     error: null,
@@ -40,4 +40,4 @@ const usePamentLogs = (kBestellung: number, id: string): UseQueueReturn => {
   }
 }
 
-export default usePamentLogs
+export default usePaymentLogs

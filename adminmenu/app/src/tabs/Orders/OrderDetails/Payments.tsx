@@ -23,7 +23,7 @@ const Payments = () => {
       {showPayments && (
         <DataTable fullWidth striped header={header}>
           {payments.map((row: Record<string, any>) => (
-            <tr>
+            <tr key={row.id}>
               <td>{row.id}</td>
               <td>{molliePaymentStatusLabel(row.status)}</td>
               <td>

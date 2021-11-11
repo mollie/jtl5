@@ -29,7 +29,7 @@ const Logs = ({ kBestellung, mollieId }: LogsProps) => {
   return (
     <div className="mt-4 relative">
       <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowLogs((prev) => !prev)}>
-        Logs
+        Logs ({data?.length ?? 0})
         <FontAwesomeIcon className="float-right" icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft} />
         {showLogs && (
           <FontAwesomeIcon icon={faSync} onClick={reload} className="cursor-pointer float-right mx-2" fixedWidth />
@@ -42,7 +42,7 @@ const Logs = ({ kBestellung, mollieId }: LogsProps) => {
           <Loading loading={loading}>
             <DataTable striped fullWidth header={header} loading={loading}>
               {data?.map((row) => (
-                <tr>
+                <tr key={row.kZahlunglog}>
                   <td className="text-center">
                     {parseInt(row.nLevel) === 1 ? (
                       <Label color="red">ERROR</Label>

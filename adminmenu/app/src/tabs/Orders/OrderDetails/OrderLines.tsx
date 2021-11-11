@@ -79,7 +79,7 @@ const OrderLines = () => {
         </div>
         <DataTable striped fullWidth header={header}>
           {mollie.data?.lines.map((row: Record<string, any>) => (
-            <tr>
+            <tr key={row.id}>
               <td>{row.id ?? '-'}</td>
               <td className="text-center">{row.status ? molliePaymentStatusLabel(row.status) : '-'}</td>
               <td>

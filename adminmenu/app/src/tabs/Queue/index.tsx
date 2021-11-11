@@ -14,7 +14,7 @@ const Queue = () => {
   const [loading, setLoading] = useState(false)
   const api = useApi()
   const [showError] = useErrorSnack()
-  const { data, load, error } = useQueues()
+  const { data, load, error, loading: queueLoading } = useQueues()
   const [queuesState, setQueuesState] = useState({
     page: 0,
     perPage: 10,
@@ -114,7 +114,7 @@ const Queue = () => {
     </Alert>
   ) : (
     <DataTable
-      loading={loading || loading}
+      loading={loading || queueLoading}
       header={header}
       onSearch={handleSearch}
       fullWidth
@@ -126,57 +126,56 @@ const Queue = () => {
         onChange: handleTableChange,
       }}
     >
-      {data?.items &&
-        data?.items.map((row) => (
-          <tr>
-            <td>{row.kId}</td>
-            <td>
-              <code>{row.cType}</code>
-            </td>
-            <td>
-              <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cResult}</div>
-            </td>
-            <td>
-              <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cError}</div>
-            </td>
-            <td>{row.dDone ? <ReactTimeago date={row.dDone} /> : '-'}</td>
-            <td>{row.dCreated ? <ReactTimeago date={row.dCreated} /> : '-'}</td>
-            <td>
-              <div className="flex text-center justify-center items-center">
-                {row.bLock ? (
-                  <div className="flex flex-col text-center  items-center ">
-                    <Button
-                      onClick={() => (window.confirm('Wirklich entsperren?') ? unlockQueue(row.kId) : null)}
-                      color="orange"
-                      title="Unlock!"
-                      className="cursor-pointer p-1 ml-1"
-                    >
-                      <FontAwesomeIcon fixedWidth icon={faLock} />
-                    </Button>
-                    <ReactTimeago className="text-xs antialiased" date={row.bLock} />
-                  </div>
-                ) : (
+      {data?.items?.map((row) => (
+        <tr key={row.kId}>
+          <td>{row.kId}</td>
+          <td>
+            <code>{row.cType}</code>
+          </td>
+          <td>
+            <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cResult}</div>
+          </td>
+          <td>
+            <div className="truncate max-w-xs hover:overflow-clip hover:whitespace-pre-line">{row.cError}</div>
+          </td>
+          <td>{row.dDone ? <ReactTimeago date={row.dDone} /> : '-'}</td>
+          <td>{row.dCreated ? <ReactTimeago date={row.dCreated} /> : '-'}</td>
+          <td>
+            <div className="flex text-center justify-center items-center">
+              {row.bLock ? (
+                <div className="flex flex-col text-center  items-center ">
                   <Button
-                    onClick={() => (window.confirm('Wirklich erneut ausführen?') ? runQueue(row.kId) : null)}
-                    className="ml-1"
-                    color="blue"
-                    title="Run again!"
+                    onClick={() => (window.confirm('Wirklich entsperren?') ? unlockQueue(row.kId) : null)}
+                    color="orange"
+                    title="Unlock!"
+                    className="cursor-pointer p-1 ml-1"
                   >
-                    <FontAwesomeIcon fixedWidth icon={faBolt} />
+                    <FontAwesomeIcon fixedWidth icon={faLock} />
                   </Button>
-                )}
+                  <ReactTimeago className="text-xs antialiased" date={row.bLock} />
+                </div>
+              ) : (
                 <Button
-                  onClick={() => (window.confirm('Wirklich löschen?') ? deleteQueue(row.kId) : null)}
-                  title="Delete"
+                  onClick={() => (window.confirm('Wirklich erneut ausführen?') ? runQueue(row.kId) : null)}
                   className="ml-1"
-                  color="red"
+                  color="blue"
+                  title="Run again!"
                 >
-                  <FontAwesomeIcon fixedWidth icon={faTrash} />
+                  <FontAwesomeIcon fixedWidth icon={faBolt} />
                 </Button>
-              </div>
-            </td>
-          </tr>
-        ))}
+              )}
+              <Button
+                onClick={() => (window.confirm('Wirklich löschen?') ? deleteQueue(row.kId) : null)}
+                title="Delete"
+                className="ml-1"
+                color="red"
+              >
+                <FontAwesomeIcon fixedWidth icon={faTrash} />
+              </Button>
+            </div>
+          </td>
+        </tr>
+      ))}
     </DataTable>
   )
 

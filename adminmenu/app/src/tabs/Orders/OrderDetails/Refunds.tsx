@@ -54,7 +54,7 @@ const Refunds = () => {
       {showRefunds && (
         <Loading loading={loading}>
           <div>
-            {data?.id.substring(0, 3) === 'tr_' && parseFloat(data?.amountRemaining.value) > 0 && (
+            {data?.id?.substring(0, 3) === 'tr_' && parseFloat(data?.amountRemaining?.value) > 0 && (
               <div className="flex justify-end items-stretch">
                 <div className="p-2 bg-gray-400 rounded-l leading-9">Refund Amount:</div>
                 <div className="p-2 bg-gray-400 leading-9">
@@ -92,7 +92,7 @@ const Refunds = () => {
               <DataTable striped fullWidth header={header}>
                 {data?._embedded?.refunds?.length &&
                   data?._embedded?.refunds.map((row: Record<string, any>) => (
-                    <tr>
+                    <tr key={row.id}>
                       <td>
                         <pre>{row.id}</pre>
                       </td>

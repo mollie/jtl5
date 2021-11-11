@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import Alert from '@webstollen/react-jtl-plugin/lib/components/Alert'
 import { faExclamation } from '@fortawesome/pro-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -23,12 +23,13 @@ const OrderDetails = (props: OrderDetailsProps) => {
   const mollie = useMollie(props.id, true)
   const { loading: orderLoading, load: orderLoad, error: orderError, data: orderData } = useOrder(props.id)
 
-  const reload = useCallback(() => {
-    orderLoad().catch(alert)
-  }, [orderLoad])
+  const reload = () => {
+    orderLoad()
+    mollie.load()
+  }
 
   useEffect(() => {
-    orderLoad().catch(alert)
+    orderLoad()
   }, [orderLoad])
 
   if (mollie.error !== null || orderError !== null) {
@@ -88,7 +89,9 @@ const OrderDetails = (props: OrderDetailsProps) => {
                 </>
               )}
               <Refunds />
-              {mollie?.data && orderData && <Logs kBestellung={orderData.kBestellung} mollieId={mollie.data.id} />}
+              {mollie?.data && orderData?.kBestellung && (
+                <Logs kBestellung={orderData.kBestellung} mollieId={mollie.data.id} />
+              )}
               <Queue id={props.id} />
             </MollieContext.Provider>
           </Loading>

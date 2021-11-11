@@ -25,7 +25,7 @@ const Queue = ({ id }: QueueProps) => {
     e.stopPropagation()
   }
 
-  return data?.length ? (
+  return (
     <div className="mt-4 relative">
       <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowLogs((prev) => !prev)}>
         Queue {data?.length ? <>({data?.length})</> : null}{' '}
@@ -40,29 +40,28 @@ const Queue = ({ id }: QueueProps) => {
         ) : (
           <Loading loading={loading}>
             <DataTable striped fullWidth header={header}>
-              {data.length &&
-                data.map((row) => (
-                  <tr>
-                    <td>{row.kId}</td>
-                    <td>{row.cType}</td>
-                    <td>
-                      <pre>{row.cResult ?? 'n/a'}</pre>
-                    </td>
-                    <td>
-                      <pre>{row.cError ?? 'n/a'}</pre>
-                    </td>
-                    <td>{!row.dDone ? 'PENDING' : 'DONE'}</td>
-                    <td>
-                      <ReactTimeago date={row.dCreated} />
-                    </td>
-                    <td>{/*TODO: REDO*/}</td>
-                  </tr>
-                ))}
+              {data?.map((row) => (
+                <tr key={row.kId}>
+                  <td>{row.kId}</td>
+                  <td>{row.cType}</td>
+                  <td>
+                    <pre>{row.cResult ?? 'n/a'}</pre>
+                  </td>
+                  <td>
+                    <pre>{row.cError ?? 'n/a'}</pre>
+                  </td>
+                  <td>{!row.dDone ? 'PENDING' : 'DONE'}</td>
+                  <td>
+                    <ReactTimeago date={row.dCreated} />
+                  </td>
+                  <td>{/*TODO: REDO*/}</td>
+                </tr>
+              ))}
             </DataTable>
           </Loading>
         ))}
     </div>
-  ) : null
+  )
 }
 
 const header: Array<DataTableHeader> = [

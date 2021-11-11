@@ -122,7 +122,7 @@ const Orders = () => {
     >
       {ordersData?.items && ordersData?.items.length > 0
         ? ordersData?.items.map((row: Record<string, any>) => (
-            <tr>
+            <tr key={row.cOrderId}>
               <td>
                 <TextLink
                   color={'blue'}

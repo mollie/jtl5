@@ -5,7 +5,7 @@ export type UseOrderReturn = {
   loading: boolean
   data: null | Record<string, any>
   error: null | string
-  load: () => Promise<void>
+  load: () => void
 }
 
 const PluginAPI = useApi
@@ -17,31 +17,16 @@ const useOrder = (id: string): UseOrderReturn => {
     data: null,
   })
 
-  const load = useCallback(async () => {
+  const load = useCallback(() => {
     const api = PluginAPI()
     setState((p) => ({ ...p, loading: true, error: null }))
-
-    if (id.substring(0, 4) === 'ord_') {
-      api
-        .run('Orders', 'get', {
-          id: id,
-        })
-        .then((res) => {
-          setState((p) => ({ ...p, data: res.data.data }))
-        })
-        .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
-        .finally(() => setState((p) => ({ ...p, loading: false })))
-    } else if (id.substring(0, 3) === 'tr_') {
-      api
-        .run('mollie', 'getPayment', {
-          id: id,
-        })
-        .then((res) => {
-          setState((p) => ({ ...p, data: res.data.data }))
-        })
-        .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
-        .finally(() => setState((p) => ({ ...p, loading: false })))
-    }
+    api
+      .run('orders', 'get', {
+        id: id,
+      })
+      .then((res) => setState((p) => ({ ...p, data: res.data.data })))
+      .catch((e) => setState((p) => ({ ...p, error: `${e}` })))
+      .finally(() => setState((p) => ({ ...p, loading: false })))
   }, [id, setState])
 
   return {
