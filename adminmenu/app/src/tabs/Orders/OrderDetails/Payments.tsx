@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import TextLink from '@webstollen/react-jtl-plugin/lib/components/TextLink'
 import { formatAmount } from '@webstollen/react-jtl-plugin/lib'
 import { molliePaymentStatusLabel, PaymentMethod2img } from '../../../helper'
@@ -7,12 +7,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UseMollieReturn } from '../../../hooks/useMollie'
 import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
 import ReactTimeago from 'react-timeago'
+import MollieContext from '../../../context/MollieContext'
 
-export type PaymentsProps = {
-  mollie: UseMollieReturn
-}
-
-const Payments = ({ mollie }: PaymentsProps) => {
+const Payments = () => {
+  const mollie = useContext<UseMollieReturn>(MollieContext)
   const [showPayments, setShowPayments] = useState(false)
   const payments = mollie.data?._embedded?.payments || []
 

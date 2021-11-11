@@ -83,18 +83,19 @@ const Dashboard = () => {
   const validMethods: React.ReactNode[] = []
   const invalidMethods: React.ReactNode[] = []
 
-  Object.keys(methods).forEach((id) => {
-    if (
-      methods[id].mollie.status === 'activated' &&
-      methods[id].shipping.length &&
-      methods[id].paymentMethod &&
-      (!methods[id].duringCheckout || methods[id].allowDuringCheckout)
-    ) {
-      validMethods.push(<Valid key={id} cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
-    } else {
-      invalidMethods.push(<Invalid key={id} cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
-    }
-  })
+  methods &&
+    Object.keys(methods).forEach((id) => {
+      if (
+        methods[id].mollie.status === 'activated' &&
+        methods[id].shipping.length &&
+        methods[id].paymentMethod &&
+        (!methods[id].duringCheckout || methods[id].allowDuringCheckout)
+      ) {
+        validMethods.push(<Valid key={id} cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
+      } else {
+        invalidMethods.push(<Invalid key={id} cleanLogfiles={cleanLogfiles} method={methods[id] as MethodProps} />)
+      }
+    })
 
   return (
     <div className="mx-2">

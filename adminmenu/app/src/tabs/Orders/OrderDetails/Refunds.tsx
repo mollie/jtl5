@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useContext, useState } from 'react'
 import { formatAmount, Loading } from '@webstollen/react-jtl-plugin/lib'
 import { molliePaymentStatusLabel } from '../../../helper'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,12 +8,10 @@ import { UseMollieReturn } from '../../../hooks/useMollie'
 import useErrorSnack from '../../../hooks/useErrorSnack'
 import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
 import ReactTimeago from 'react-timeago'
+import MollieContext from '../../../context/MollieContext'
 
-export type RefundsProps = {
-  mollie: UseMollieReturn
-}
-
-const Refunds = ({ mollie: { data, refundOrder, refundAmount, cancelRefund, loading } }: RefundsProps) => {
+const Refunds = () => {
+  const { data, refundOrder, refundAmount, cancelRefund, loading } = useContext<UseMollieReturn>(MollieContext)
   const [showRefunds, setShowRefunds] = useState(false)
   const [amountToRefund, setAmountToRefund] = useState(0.0)
   const [showError] = useErrorSnack()
@@ -48,7 +46,7 @@ const Refunds = ({ mollie: { data, refundOrder, refundAmount, cancelRefund, load
   }
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 relative">
       <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowRefunds((prev) => !prev)}>
         Refunds ({data?._embedded?.refunds?.length ?? 0})
         <FontAwesomeIcon className=" float-right" icon={showRefunds ? faChevronDoubleDown : faChevronDoubleLeft} />

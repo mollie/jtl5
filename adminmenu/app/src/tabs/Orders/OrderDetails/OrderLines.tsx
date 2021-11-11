@@ -1,14 +1,11 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { formatAmount, Loading } from '@webstollen/react-jtl-plugin/lib'
 import { mollieOrderLineTypeLabel, molliePaymentStatusLabel, OrderLineType } from '../../../helper'
 import Button from '@webstollen/react-jtl-plugin/lib/components/Button'
 import { UseMollieReturn } from '../../../hooks/useMollie'
 import useErrorSnack from '../../../hooks/useErrorSnack'
 import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
-
-export type OrderLinesProps = {
-  mollie: UseMollieReturn
-}
+import MollieContext from '../../../context/MollieContext'
 
 type Variation = {
   name: string
@@ -17,7 +14,8 @@ type Variation = {
   kEigenschaftWert: number
 }
 
-const OrderLines = ({ mollie }: OrderLinesProps) => {
+const OrderLines = () => {
+  const mollie = useContext<UseMollieReturn>(MollieContext)
   const [showError] = useErrorSnack()
   const handleCancelOrderLine = (lineId: string, max: number) => {
     const quantity =

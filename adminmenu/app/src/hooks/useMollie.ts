@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import useApi from '@webstollen/react-jtl-plugin/lib/hooks/useAPI'
 
 export type UseMollieReturn = {
@@ -16,7 +16,7 @@ export type UseMollieReturn = {
 
 const PluginAPI = useApi
 
-const useMollie = (id: string): UseMollieReturn => {
+const useMollie = (id: string, autoload = false): UseMollieReturn => {
   const [state, setState] = useState<Record<string, any>>({
     loading: false,
     error: null,
@@ -172,6 +172,12 @@ const useMollie = (id: string): UseMollieReturn => {
     },
     [id, load, setState]
   )
+
+  useEffect(() => {
+    if (autoload) {
+      load().catch(alert)
+    }
+  }, [autoload, load])
 
   return {
     loading: state.loading,

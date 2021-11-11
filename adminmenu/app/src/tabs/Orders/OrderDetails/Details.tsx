@@ -1,15 +1,13 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import moment from 'moment'
 import TextLink from '@webstollen/react-jtl-plugin/lib/components/TextLink'
 import { formatAmount, Loading } from '@webstollen/react-jtl-plugin/lib'
 import { molliePaymentStatusLabel } from '../../../helper'
 import { UseMollieReturn } from '../../../hooks/useMollie'
+import MollieContext from '../../../context/MollieContext'
 
-export type DetailsProps = {
-  mollie: UseMollieReturn
-}
-
-const Details = ({ mollie }: DetailsProps) => {
+const Details = () => {
+  const mollie = useContext<UseMollieReturn>(MollieContext)
   return (
     <Loading loading={mollie.loading}>
       <table className="w-full my-2">

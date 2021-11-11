@@ -7,55 +7,47 @@ import Details from './Details'
 import useMollie from '../../../hooks/useMollie'
 import { faSync, faTimes } from '@fortawesome/pro-regular-svg-icons'
 import useOrder from '../../../hooks/useOrder'
-import useErrorSnack from '../../../hooks/useErrorSnack'
 import OrderLines from './OrderLines'
 import Payments from './Payments'
 import Shipments from './Shipments'
 import Refunds from './Refunds'
-import useQueue from '../../../hooks/useQueue'
 import Queue from './Queue'
 import Logs from './Logs'
+import MollieContext from '../../../context/MollieContext'
 
 export type OrderDetailsProps = {
   id: string
   onClose?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 }
 const OrderDetails = (props: OrderDetailsProps) => {
-  const mollie = useMollie(props.id)
-  const order = useOrder(props.id)
-  const queue = useQueue(props.id)
-
-  const [showError] = useErrorSnack()
+  const mollie = useMollie(props.id, true)
+  const { loading: orderLoading, load: orderLoad, error: orderError, data: orderData } = useOrder(props.id)
 
   const reload = useCallback(() => {
-    mollie.load().catch(showError)
-    order.load().catch(showError)
-    queue.load().catch(showError)
-  }, [])
+    orderLoad().catch(alert)
+  }, [orderLoad])
 
   useEffect(() => {
-    mollie.load().catch(showError)
-    order.load().catch(showError)
-    queue.load().catch(showError)
-  }, [])
+    orderLoad().catch(alert)
+  }, [orderLoad])
 
-  if (mollie.error !== null || order.error !== null) {
+  if (mollie.error !== null || orderError !== null) {
     return (
       <div className="relative flex-col mb-3 rounded-md w-full">
         <div className="flex flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
           <div className="flex-grow">
-            Bestellung: {order.data?.cBestellNr} (<pre className="inline text-ws_gray-light">{props.id}</pre>)
+            Bestellung: {orderData?.cBestellNr} (<pre className="inline text-ws_gray-light">{props.id}</pre>)
           </div>
           <div onClick={reload} className="cursor-pointer mr-2">
-            <FontAwesomeIcon icon={faSync} spin={order.loading} size={'sm'} />
+            <FontAwesomeIcon icon={faSync} spin={orderLoading} size={'sm'} />
           </div>
           <div onClick={props.onClose} className="cursor-pointer">
             <FontAwesomeIcon icon={faTimes} />
           </div>
         </div>
-        {order.error != null && (
+        {orderError != null && (
           <Alert variant={'error'} icon={{ icon: faExclamation }}>
-            Fehler beim laden der Bestellung "{props.id}": {order.error}
+            Fehler beim laden der Bestellung "{props.id}": {orderError}
           </Alert>
         )}
         {mollie.error != null && (
@@ -68,42 +60,38 @@ const OrderDetails = (props: OrderDetailsProps) => {
   }
 
   return (
-    <div className="relative mb-3 w-full">
-      <Loading loading={order.loading}>
+    <div className="relative mb-3 w-full relative">
+      <Loading loading={orderLoading}>
         <div className="flex flex-row bg-black p-3 rounded-md text-white font-bold text-2xl">
           <div className="flex-grow">
-            Bestellung: <span title={order.data?.kBestellung}>{order.data?.cBestellNr}</span> (
+            Bestellung: <span title={orderData?.kBestellung}>{orderData?.cBestellNr}</span> (
             <pre className="inline text-ws_gray-light">{props.id}</pre>)
           </div>
           <div onClick={reload} className="cursor-pointer mr-2">
-            <FontAwesomeIcon icon={faSync} spin={order.loading} size={'sm'} />
+            <FontAwesomeIcon icon={faSync} spin={orderLoading} size={'sm'} />
           </div>
           <div onClick={props.onClose} className="cursor-pointer">
             <FontAwesomeIcon icon={faTimes} />
           </div>
         </div>
-        <div className=" rounded-md">
-          {mollie && <Details mollie={mollie} />}
-
-          {mollie && mollie?.data?.resource === 'payment' ? (
-            <></>
-          ) : (
-            <>
-              {mollie.data && <OrderLines mollie={mollie} />}
-
-              {mollie.data && <Payments mollie={mollie} />}
-
-              {mollie.data && order && order?.data && (
-                <Shipments kBestellung={order?.data.kBestellung} mollie={mollie} />
+        <div className=" rounded-md relative">
+          <Loading loading={mollie.loading}>
+            <MollieContext.Provider value={mollie}>
+              <Details />
+              {mollie && mollie?.data?.resource === 'payment' ? (
+                <></>
+              ) : (
+                <>
+                  <OrderLines />
+                  <Payments />
+                  {orderData && <Shipments kBestellung={orderData?.kBestellung} />}
+                </>
               )}
-            </>
-          )}
-
-          {mollie.data && <Refunds mollie={mollie} />}
-
-          {queue.data && <Queue queue={queue} />}
-
-          {mollie.data && order?.data && <Logs order={order} mollie={mollie} />}
+              <Refunds />
+              {mollie?.data && orderData && <Logs kBestellung={orderData.kBestellung} mollieId={mollie.data.id} />}
+              <Queue id={props.id} />
+            </MollieContext.Provider>
+          </Loading>
         </div>
       </Loading>
     </div>

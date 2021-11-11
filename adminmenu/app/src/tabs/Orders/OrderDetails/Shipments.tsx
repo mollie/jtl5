@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Button from '@webstollen/react-jtl-plugin/lib/components/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronDoubleDown, faChevronDoubleLeft, faShippingFast, faSync } from '@fortawesome/pro-regular-svg-icons'
@@ -7,13 +7,14 @@ import { UseMollieReturn } from '../../../hooks/useMollie'
 import useShipments from '../../../hooks/useShipments'
 import useErrorSnack from '../../../hooks/useErrorSnack'
 import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
+import MollieContext from '../../../context/MollieContext'
 
 export type ShipmentsProps = {
   kBestellung: number
-  mollie: UseMollieReturn
 }
 
-const Shipments = ({ mollie, kBestellung }: ShipmentsProps) => {
+const Shipments = ({ kBestellung }: ShipmentsProps) => {
+  const mollie = useContext<UseMollieReturn>(MollieContext)
   const [showShipments, setShowShipments] = useState(false)
   const [showError] = useErrorSnack()
   const { load, data, loading, sync } = useShipments(kBestellung)
