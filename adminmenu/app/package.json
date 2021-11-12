@@ -14,7 +14,7 @@
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "@types/react-timeago": "^4.1.3",
-    "@webstollen/react-jtl-plugin": "^2.3.0-4",
+    "@webstollen/react-jtl-plugin": "^2.3.0-5",
     "axios": "^0.21.0",
     "jquery": "^3.5.1",
     "lodash": "^4.17.21",

@@ -29,7 +29,7 @@ const Logs = ({ kBestellung, mollieId }: LogsProps) => {
   return (
     <div className="mt-4 relative">
       <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowLogs((prev) => !prev)}>
-        Logs ({data?.length ?? 0})
+        Logs {data ? <>({data?.length ?? 0})</> : null}
         <FontAwesomeIcon className="float-right" icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft} />
         {showLogs && (
           <FontAwesomeIcon icon={faSync} onClick={reload} className="cursor-pointer float-right mx-2" fixedWidth />
