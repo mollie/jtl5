@@ -3,3 +3,4 @@ report
 vendor/
 node_modules
 adminmenu/js/dist
+auth.json
