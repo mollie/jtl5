@@ -18,7 +18,5 @@ if (window.MOLLIE_APPLEPAY_CHECK_URL) {
     } else if (window.console.warn) {
         console.warn('jQuery not loaded as yet, ApplePay not available!');
     }
-} else if (window.console.info) {
-    console.info('MOLLIE_APPLEPAY_CHECK_URL not loaded, do nothing!');
 }
 // -->
