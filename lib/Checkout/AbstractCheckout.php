@@ -192,7 +192,7 @@ abstract class AbstractCheckout
      * @param string          $id
      * @param bool            $bFill
      * @param null|Bestellung $order
-     *
+     * @throws RuntimeException
      * @return static
      */
     public static function fromID(string $id, bool $bFill = true, Bestellung $order = null): self
@@ -202,6 +202,9 @@ abstract class AbstractCheckout
 
         $oBestellung = $order;
         if (!$oBestellung) {
+            if(!$model->kBestellung){
+                throw new RuntimeException('Keine Bestell-ID hinterlegt.');
+            }
             $oBestellung = new Bestellung($model->kBestellung, $bFill);
         }
 
@@ -482,6 +485,9 @@ abstract class AbstractCheckout
     {
         $model = OrderModel::fromID($kBestellung, 'kBestellung', true);
 
+        if(!$model->kBestellung){
+            throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
+        }
         $oBestellung = new Bestellung($model->kBestellung, $fill);
         if (!$oBestellung->kBestellung) {
             throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));

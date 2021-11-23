@@ -79,8 +79,8 @@ const Orders = () => {
   }
 
   const reload = useCallback(
-    async () => await loadOrders(ordersState.page, ordersState.perPage),
-    [ordersState.page, ordersState.perPage, loadOrders]
+    async () => await loadOrders(ordersState.page, ordersState.perPage, ordersState.query),
+    [ordersState.page, ordersState.perPage, loadOrders, ordersState.query]
   )
   const handleTableChange = async (page: number, perPage: number) => {
     if (page === ordersState.page && perPage === ordersState.perPage) {
