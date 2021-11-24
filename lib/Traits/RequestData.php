@@ -46,7 +46,7 @@ trait RequestData
             $this->loadRequest();
         }
 
-        if(!array_key_exists($name, $this->requestData)) {
+        if (!array_key_exists($name, $this->requestData)) {
             return null;
         }
 

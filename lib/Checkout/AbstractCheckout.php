@@ -202,7 +202,7 @@ abstract class AbstractCheckout
 
         $oBestellung = $order;
         if (!$oBestellung) {
-            if(!$model->kBestellung){
+            if (!$model->kBestellung) {
                 throw new RuntimeException('Keine Bestell-ID hinterlegt.');
             }
             $oBestellung = new Bestellung($model->kBestellung, $bFill);
@@ -485,7 +485,7 @@ abstract class AbstractCheckout
     {
         $model = OrderModel::fromID($kBestellung, 'kBestellung', true);
 
-        if(!$model->kBestellung){
+        if (!$model->kBestellung) {
             throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
         }
         $oBestellung = new Bestellung($model->kBestellung, $fill);
