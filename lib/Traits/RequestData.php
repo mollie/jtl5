@@ -7,6 +7,8 @@
 
 namespace Plugin\ws5_mollie\lib\Traits;
 
+use Exception;
+
 trait RequestData
 {
     /**
@@ -15,6 +17,7 @@ trait RequestData
     protected $requestData;
 
     /**
+     * @throws Exception
      * @return array
      */
     public function jsonSerialize(): array
@@ -30,16 +33,21 @@ trait RequestData
      * @param array $options
      * @return $this
      */
-    abstract public function loadRequest(array &$options = []): self;
+    abstract public function loadRequest(array &$options = []);
 
     /**
      * @param string $name
+     * @throws Exception
      * @return false|mixed|string
      */
     public function __get(string $name)
     {
         if (!$this->requestData) {
             $this->loadRequest();
+        }
+
+        if (!array_key_exists($name, $this->requestData)) {
+            return null;
         }
 
         return is_string($this->requestData[$name]) ? utf8_decode($this->requestData[$name]) : $this->requestData[$name];

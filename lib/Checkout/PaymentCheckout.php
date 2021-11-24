@@ -8,9 +8,15 @@
 namespace Plugin\ws5_mollie\lib\Checkout;
 
 use Exception;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Shop;
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
-use Shop;
+use RuntimeException;
 use stdClass;
 
 /**
@@ -26,7 +32,8 @@ class PaymentCheckout extends AbstractCheckout
 
     /**
      * @param array $paymentOptions
-     * @throws Exception
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return Payment
      */
     public function create(array $paymentOptions = []): Payment
@@ -51,7 +58,7 @@ class PaymentCheckout extends AbstractCheckout
         } catch (Exception $e) {
             $this->Log(sprintf("PaymentCheckout::create: Neue Transaktion '%s' konnte nicht erstellt werden: %s.\n%s", $this->oBestellung->cBestellNr, $e->getMessage(), json_encode($req)), LOGLEVEL_ERROR);
 
-            throw new \RuntimeException(sprintf('Mollie-Payment \'%s\' konnte nicht geladen werden: %s', $this->getModel()->cOrderId, $e->getMessage()));
+            throw new RuntimeException(sprintf('Mollie-Payment \'%s\' konnte nicht geladen werden: %s', $this->getModel()->cOrderId, $e->getMessage()));
         }
 
         return $this->payment;
@@ -83,7 +90,7 @@ class PaymentCheckout extends AbstractCheckout
             try {
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId, ['embed' => 'refunds']);
             } catch (Exception $e) {
-                throw new \RuntimeException('Mollie-Payment konnte nicht geladen werden: ' . $e->getMessage());
+                throw new RuntimeException('Mollie-Payment konnte nicht geladen werden: ' . $e->getMessage());
             }
         }
 
@@ -128,6 +135,9 @@ class PaymentCheckout extends AbstractCheckout
     }
 
     /**
+     * @throws ApiException
+     * @throws IncompatiblePlatform
+     * @throws RuntimeException
      * @return string
      */
     public function cancelOrRefund(): string
@@ -143,11 +153,11 @@ class PaymentCheckout extends AbstractCheckout
             return 'Payment Refund initiiert, Status: ' . $res->status;
         }
 
-        throw new Exception('Bestellung ist derzeit nicht storniert, Status: ' . $this->getBestellung()->cStatus);
+        throw new RuntimeException('Bestellung ist derzeit nicht storniert, Status: ' . $this->getBestellung()->cStatus);
     }
 
     /**
-     * @param \Mollie\Api\Resources\Order|Payment $model
+     * @param Order|Payment $model
      *
      * @return static
      */
@@ -159,6 +169,8 @@ class PaymentCheckout extends AbstractCheckout
     }
 
     /**
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return static
      */
     protected function updateOrderNumber()

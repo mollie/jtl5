@@ -17,16 +17,16 @@ use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Plugin\Helper as PluginHelper;
 use JTL\Plugin\Payment\Method;
 use JTL\Session\Frontend;
+use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
-use Shop;
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 abstract class PaymentMethod extends Method
 {
-    use Plugin;
+    use Plugins;
 
     public const ALLOW_AUTO_STORNO = true;
 
@@ -163,12 +163,12 @@ abstract class PaymentMethod extends Method
 
     /**
      * @param $method
-     * @param $locale
+     * @param string $locale
      * @param $billingCountry
      * @param $currency
      * @param $amount
-     * @throws IncompatiblePlatform
      * @throws ApiException
+     * @throws IncompatiblePlatform
      * @return bool
      */
     protected static function isMethodPossible($method, string $locale, $billingCountry, $currency, $amount): bool
@@ -233,7 +233,7 @@ abstract class PaymentMethod extends Method
 
             $paymentOptions = [];
 
-            if ((int)Frontend::getCustomer()->nRegistriert && ($customerID = Customer::createOrUpdate(Frontend::getCustomer()))) {
+            if (Frontend::getCustomer()->nRegistriert && ($customerID = Customer::createOrUpdate(Frontend::getCustomer()))) {
                 $paymentOptions['customerId'] = $customerID;
             }
 
@@ -249,6 +249,15 @@ abstract class PaymentMethod extends Method
                 $checkout = OrderCheckout::factory($order);
                 $mOrder   = $checkout->create($paymentOptions);
                 $url      = $mOrder->getCheckoutUrl();
+            }
+
+            try {
+                if ($order->kBestellung > 0 && method_exists($this, 'generatePUI') && ($pui = $this->generatePUI($checkout))) {
+                    $order->cPUIZahlungsdaten = $pui;
+                    $order->updateInDB();
+                }
+            } catch (\Exception $e) {
+                $this->doLog('mollie::preparePaymentProcess: PUI - ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_NOTICE);
             }
 
             ifndef('MOLLIE_REDIRECT_DELAY', 3);
@@ -291,7 +300,7 @@ abstract class PaymentMethod extends Method
             }
             $checkout->handleNotification($hash);
         } catch (Exception $e) {
-            $this->doLog("ERROR: mollie::handleNotification: Bestellung '{$order->cBestellNr}': {$e->getMessage()}", LOGLEVEL_ERROR);
+            $this->doLog("ERROR: mollie::handleNotification: Bestellung '$order->cBestellNr': {$e->getMessage()}", LOGLEVEL_ERROR);
             Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
         }
     }

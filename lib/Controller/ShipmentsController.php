@@ -7,12 +7,12 @@
 
 namespace Plugin\ws5_mollie\lib\Controller;
 
-use Kunde;
+use JTL\Customer\Customer;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
-use Plugin\ws5_mollie\lib\Response;
 use Plugin\ws5_mollie\lib\Shipment;
 use stdClass;
+use WS\JTL5\Backend\AbstractResult;
 use WS\JTL5\Backend\Controller\AbstractController;
 use WS\JTL5\Exception\APIException;
 
@@ -20,14 +20,14 @@ class ShipmentsController extends AbstractController
 {
     /**
      * @param stdClass $data
-     * @throws IncompatiblePlatform
      * @throws \Mollie\Api\Exceptions\ApiException
-     * @return Response
+     * @throws IncompatiblePlatform
+     * @return AbstractResult
      */
-    public static function sync(stdClass $data): Response
+    public static function sync(stdClass $data): AbstractResult
     {
         if (!$data->kBestellung || !$data->kLieferschein || !$data->orderId) {
-            throw new APIException('Bestellung, Liefererschien oder Mollie OrderId fehlen.');
+            throw new APIException('Bestellung, Liefererschein oder Mollie OrderId fehlen.');
         }
 
         $checkout = OrderCheckout::fromID($data->orderId);
@@ -35,7 +35,7 @@ class ShipmentsController extends AbstractController
         if ($checkout->getModel()->kBestellung) {
             $shipment = new Shipment((int)$data->kLieferschein, $checkout);
 
-            $oKunde = new Kunde($checkout->getBestellung()->kKunde);
+            $oKunde = new Customer($checkout->getBestellung()->kKunde);
 
             $mode = self::Plugin('ws5_mollie')->getConfig()->getValue('shippingMode');
             switch ($mode) {
@@ -45,7 +45,7 @@ class ShipmentsController extends AbstractController
                         throw new APIException('Shipment konnte nicht gespeichert werden.');
                     }
 
-                    return new Response(true);
+                    return new AbstractResult(true);
                 case 'B':
                     // only ship if complete shipping
                     if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
@@ -53,7 +53,7 @@ class ShipmentsController extends AbstractController
                             throw new APIException('Shipment konnte nicht gespeichert werden.');
                         }
 
-                        return new Response(true);
+                        return new AbstractResult(true);
                     }
 
                     throw new APIException('Gastbestellung noch nicht komplett versendet!');
@@ -62,6 +62,6 @@ class ShipmentsController extends AbstractController
             throw new APIException('Bestellung konnte nicht geladen werden');
         }
 
-        return new Response($shipment);
+        return new AbstractResult($shipment);
     }
 }

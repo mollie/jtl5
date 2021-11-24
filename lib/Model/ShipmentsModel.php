@@ -8,6 +8,7 @@
 namespace Plugin\ws5_mollie\lib\Model;
 
 use JTL\Services\JTL\Validation\Rules\DateTime;
+use WS\JTL5\Model\AbstractModel;
 
 /**
  * Class OrderModel
@@ -24,11 +25,14 @@ use JTL\Services\JTL\Validation\Rules\DateTime;
  * @property DateTime $dCreated
  *
  */
-final class ShipmentsModel extends \WS\JTL5\Model\AbstractModel
+final class ShipmentsModel extends AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_shipments';
     public const PRIMARY = 'kId';
 
+    /**
+     * @return bool
+     */
     public function save(): bool
     {
         $this->dModified = date('Y-m-d H:i:s');

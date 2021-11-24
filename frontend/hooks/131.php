@@ -6,9 +6,11 @@
  */
 
 use JTL\Helpers\Request;
+use JTL\Helpers\Text;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\ExclusiveLock;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\Queue;
 
 try {
@@ -25,7 +27,7 @@ try {
     Queue::run(MOLLIE_QUEUE_MAX);
 
     if (array_key_exists('hash', $_REQUEST) && strpos($_SERVER['PHP_SELF'], 'bestellabschluss.php') !== false) {
-        $sessionHash    = trim(StringHandler::htmlentities(StringHandler::filterXSS($_REQUEST['hash'])), '_');
+        $sessionHash    = trim(Text::htmlentities(Text::filterXSS($_REQUEST['hash'])), '_');
         $paymentSession = Shop::Container()->getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash);
         if ($paymentSession && $paymentSession->kBestellung) {
             $oBestellung = new \JTL\Checkout\Bestellung($paymentSession->kBestellung);
@@ -48,13 +50,6 @@ try {
         }
     }
 
-    // TODO: DOKU
-    ifndef('MOLLIE_CLEANUP_PROP', 15);
-    /** @noinspection PhpUndefinedConstantInspection */
-    if (MOLLIE_CLEANUP_PROP && random_int(1, MOLLIE_CLEANUP_PROP) % MOLLIE_CLEANUP_PROP === 0) {
-        \Plugin\ws5_mollie\lib\Model\QueueModel::cleanUp();
-    }
-
     ifndef('MOLLIE_REMINDER_PROP', 10);
     if (random_int(1, MOLLIE_REMINDER_PROP) % MOLLIE_REMINDER_PROP === 0) {
         /** @noinspection PhpUndefinedConstantInspection */
@@ -63,6 +58,20 @@ try {
             AbstractCheckout::sendReminders();
             Queue::storno((int)$oPlugin->getConfig()->getValue('autoStorno'));
         }
+    }
+
+    // TODO: DOKU
+    ifndef('MOLLIE_DISABLE_USER_CLEANUP', false);
+
+    if (!MOLLIE_DISABLE_USER_CLEANUP) {
+        ifndef('MOLLIE_CLEANUP_PROP', 15);
+        /** @noinspection PhpUndefinedConstantInspection */
+        if (MOLLIE_CLEANUP_PROP && random_int(1, MOLLIE_CLEANUP_PROP) % MOLLIE_CLEANUP_PROP === 0) {
+            QueueModel::cleanUp();
+        }
+    }
+    if (array_key_exists('mollie_cleanup_cron', $_REQUEST)) {
+        exit((string)QueueModel::cleanUp());
     }
 } catch (Exception $e) {
     Shop::Container()->getLogService()->error($e->getMessage() . " (Trace: {$e->getTraceAsString()})");

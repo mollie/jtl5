@@ -7,8 +7,10 @@
 
 namespace Plugin\ws5_mollie\lib;
 
+use JTL\Session\Frontend;
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
+use stdClass;
 use WS\JTL5\Traits\Jsonable;
 
 /**
@@ -19,11 +21,30 @@ class Customer
 {
     use Jsonable;
 
+    /**
+     * @var string
+     */
     public $name;
+
+    /**
+     * @var string
+     */
     public $email;
+
+    /**
+     * @var string
+     */
     public $locale;
+
+    /**
+     * @var stdClass
+     */
     public $metadata;
 
+    /**
+     * @param \JTL\Customer\Customer $oKunde
+     * @return null|string
+     */
     public static function createOrUpdate(\JTL\Customer\Customer $oKunde): ?string
     {
         $mCustomer = CustomerModel::fromID($oKunde->kKunde, 'kKunde');
@@ -46,7 +67,7 @@ class Customer
 
         $customer->name     = trim($oKunde->cVorname . ' ' . $oKunde->cNachname);
         $customer->email    = $oKunde->cMail;
-        $customer->locale   = Locale::getLocale(\Session::get('cISOSprache', 'ger'), $oKunde->cLand);
+        $customer->locale   = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), $oKunde->cLand);
         $customer->metadata = (object)[
             'kKunde'        => $oKunde->getID(),
             'kKundengruppe' => $oKunde->getGroupID(),
@@ -58,6 +79,7 @@ class Customer
         } else {
             try {
                 $customer              = $api->getClient()->customers->create($customer->toArray());
+                $mCustomer->kKunde     = $oKunde->getID();
                 $mCustomer->customerId = $customer->id;
                 $mCustomer->save();
             } catch (ApiException $e) {

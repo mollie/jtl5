@@ -11,9 +11,12 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use JTL\Cart\CartItem;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Helpers\Tax;
 use JTL\Helpers\Text;
 use JTL\Session\Frontend;
+use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
@@ -22,7 +25,6 @@ use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Order\Address;
 use Plugin\ws5_mollie\lib\Order\OrderLine as WSOrderLine;
 use RuntimeException;
-use Shop;
 use stdClass;
 
 /**
@@ -154,7 +156,7 @@ class OrderCheckout extends AbstractCheckout
     /**
      * @param array $options
      * @throws Exception
-     * @return self
+     * @return $this
      */
     public function loadRequest(array &$options = [])
     {
@@ -289,11 +291,16 @@ class OrderCheckout extends AbstractCheckout
             ) {
                 $this->mollie = $payment;
 
+                $cHinweis = $payment->details->paypalReference ?? $payment->id;
+                if (self::Plugin('ws5_mollie')->getConfig()->getValue('paymentID') === 'api') {
+                    $cHinweis = $this->getMollie()->id;
+                }
+
                 return (object)[
                     'fBetrag'  => (float)$payment->amount->value,
                     'cISO'     => $payment->amount->currency,
                     'cZahler'  => $payment->details->paypalPayerId ?? $payment->customerId,
-                    'cHinweis' => $payment->details->paypalReference ?? $payment->id,
+                    'cHinweis' => $cHinweis,
                 ];
             }
         }
@@ -303,6 +310,7 @@ class OrderCheckout extends AbstractCheckout
 
     /**
      * @throws ApiException
+     * @throws Exception
      * @return string
      */
     public function cancelOrRefund(): string
@@ -322,8 +330,8 @@ class OrderCheckout extends AbstractCheckout
     }
 
     /**
-     * @throws \JTL\Exceptions\CircularReferenceException
-     * @throws \JTL\Exceptions\ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return static
      */
     protected function updateOrderNumber()

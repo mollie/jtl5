@@ -7,11 +7,11 @@
 
 namespace Plugin\ws5_mollie\lib;
 
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 class Locale
 {
-    use Plugin;
+    use Plugins;
 
     protected static $langs = [
         'ger' => ['lang' => 'de', 'country' => ['AT', 'DE', 'CH']],
@@ -31,8 +31,9 @@ class Locale
     ];
 
     /**
-     * @param null|string $country
      * @param mixed       $cISOSprache
+     * @param null|string $country
+     * @return string
      */
     public static function getLocale($cISOSprache, ?string $country = null): string
     {

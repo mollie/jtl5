@@ -8,7 +8,10 @@
 namespace Plugin\ws5_mollie\lib\Model;
 
 use Exception;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
+use WS\JTL5\Model\AbstractModel;
 
 /**
  * Class QueueModel
@@ -19,12 +22,13 @@ use JTL\Shop;
  * @property string $cData
  * @property string $cResult
  * @property string $dDone
+ * @property string $cError
  * @property string $dCreated
  * @property string $dModified
  * @property bool $bLock
  *
  */
-class QueueModel extends \WS\JTL5\Model\AbstractModel
+class QueueModel extends AbstractModel
 {
     public const TABLE   = 'xplugin_ws5_mollie_queue';
     public const PRIMARY = 'kId';
@@ -34,21 +38,21 @@ class QueueModel extends \WS\JTL5\Model\AbstractModel
      */
     public static function cleanUp()
     {
-        // TODO: DOKU
         ifndef('MOLLIE_CLEANUP_DAYS', 30);
         /** @noinspection PhpUndefinedConstantInspection */
         return Shop::Container()->getDB()->executeQuery(sprintf('DELETE FROM %s WHERE dDone IS NOT NULL AND (bLock IS NULL OR bLock = "0000-00-00 00:00:00") AND dCreated < DATE_SUB(NOW(), INTERVAL %d DAY)', self::TABLE, MOLLIE_CLEANUP_DAYS), 3);
     }
 
     /**
-     * @param string      $result
+     * @param null|string $result
      * @param null|string $date
      * @return bool
      */
-    public function done(string $result, string $date = null): bool
+    public function done(string $result = null, string $date = null): bool
     {
-        $this->cResult = $result;
-        $this->dDone   = $date ?? date('Y-m-d H:i:s');
+        $this->cResult = $result       ?? self::NULL;
+        $this->cError  = $this->cError ?? self::NULL;
+        $this->dDone   = $date         ?? date('Y-m-d H:i:s');
         $this->bLock   = self::NULL;
 
         return $this->save();
@@ -64,6 +68,14 @@ class QueueModel extends \WS\JTL5\Model\AbstractModel
         return parent::save();
     }
 
+    /**
+     * @param string $hook
+     * @param array  $args_arr
+     * @param string $type
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     * @return bool
+     */
     public static function saveToQueue(string $hook, array $args_arr, string $type = 'hook'): bool
     {
         $mQueue           = new self();

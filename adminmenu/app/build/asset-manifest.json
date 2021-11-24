@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.a3a26388.chunk.css",
-    "main.js": "/static/js/main.39db714b.chunk.js",
-    "main.js.map": "/static/js/main.39db714b.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.add5d385.js",
-    "runtime-main.js.map": "/static/js/runtime-main.add5d385.js.map",
-    "static/css/2.eb113cbe.chunk.css": "/static/css/2.eb113cbe.chunk.css",
-    "static/js/2.5ce88dd3.chunk.js": "/static/js/2.5ce88dd3.chunk.js",
-    "static/js/2.5ce88dd3.chunk.js.map": "/static/js/2.5ce88dd3.chunk.js.map",
-    "static/js/3.84e832b7.chunk.js": "/static/js/3.84e832b7.chunk.js",
-    "static/js/3.84e832b7.chunk.js.map": "/static/js/3.84e832b7.chunk.js.map",
+    "main.css": "/static/css/main.d99bf518.chunk.css",
+    "main.js": "/static/js/main.1a4a5bc3.chunk.js",
+    "main.js.map": "/static/js/main.1a4a5bc3.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.bea7b039.js",
+    "runtime-main.js.map": "/static/js/runtime-main.bea7b039.js.map",
+    "static/css/2.f56c35e0.chunk.css": "/static/css/2.f56c35e0.chunk.css",
+    "static/js/2.05a850e6.chunk.js": "/static/js/2.05a850e6.chunk.js",
+    "static/js/2.05a850e6.chunk.js.map": "/static/js/2.05a850e6.chunk.js.map",
+    "static/js/3.763a4bf1.chunk.js": "/static/js/3.763a4bf1.chunk.js",
+    "static/js/3.763a4bf1.chunk.js.map": "/static/js/3.763a4bf1.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/2.eb113cbe.chunk.css.map": "/static/css/2.eb113cbe.chunk.css.map",
-    "static/css/main.a3a26388.chunk.css.map": "/static/css/main.a3a26388.chunk.css.map",
-    "static/js/2.5ce88dd3.chunk.js.LICENSE.txt": "/static/js/2.5ce88dd3.chunk.js.LICENSE.txt",
+    "static/css/2.f56c35e0.chunk.css.map": "/static/css/2.f56c35e0.chunk.css.map",
+    "static/css/main.d99bf518.chunk.css.map": "/static/css/main.d99bf518.chunk.css.map",
+    "static/js/2.05a850e6.chunk.js.LICENSE.txt": "/static/js/2.05a850e6.chunk.js.LICENSE.txt",
     "static/media/Przelewy24.9dff65a7.svg": "/static/media/Przelewy24.9dff65a7.svg",
     "static/media/Voucher.aae7b29c.svg": "/static/media/Voucher.aae7b29c.svg",
     "static/media/applepay.fae6f981.svg": "/static/media/applepay.fae6f981.svg",
@@ -35,10 +35,10 @@
     "static/media/sofort.0634a619.svg": "/static/media/sofort.0634a619.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.add5d385.js",
-    "static/css/2.eb113cbe.chunk.css",
-    "static/js/2.5ce88dd3.chunk.js",
-    "static/css/main.a3a26388.chunk.css",
-    "static/js/main.39db714b.chunk.js"
+    "static/js/runtime-main.bea7b039.js",
+    "static/css/2.f56c35e0.chunk.css",
+    "static/js/2.05a850e6.chunk.js",
+    "static/css/main.d99bf518.chunk.css",
+    "static/js/main.1a4a5bc3.chunk.js"
   ]
 }

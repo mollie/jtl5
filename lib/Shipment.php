@@ -11,8 +11,7 @@ use Exception;
 use JTL\Checkout\Lieferschein;
 use JTL\Checkout\Lieferscheinpos;
 use JTL\Checkout\Versand;
-use JTL\Exceptions\CircularReferenceException;
-use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Shop;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Types\OrderStatus;
@@ -20,9 +19,8 @@ use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
-use Shop;
 use WS\JTL5\Exception\APIException;
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 /**
  * Class Shipment
@@ -34,7 +32,7 @@ use WS\JTL5\Traits\Plugin;
  */
 class Shipment
 {
-    use Plugin;
+    use Plugins;
     use RequestData;
 
     /**
@@ -94,8 +92,7 @@ class Shipment
 
     /**
      * @param OrderCheckout $checkout
-     * @throws CircularReferenceException
-     * @throws ServiceNotFoundException
+     * @throws Exception
      * @return array (\Mollie\Api\Resources\Shipment|null|string)[]
      */
     public static function syncBestellung(OrderCheckout $checkout): array
@@ -145,7 +142,7 @@ class Shipment
                     $shipments[] = $e->getMessage();
                 } catch (Exception $e) {
                     $shipments[] = $e->getMessage();
-                    Shop::Container()->getLogService()->addError("mollie: Shipment::syncBestellung (BestellNr. {$checkout->getBestellung()->cBestellNr}, Lieferschein: {$shipment->getLieferschein()->getLieferscheinNr()}) - " . $e->getMessage());
+                    Shop::Container()->getLogService()->error("mollie: Shipment::syncBestellung (BestellNr. {$checkout->getBestellung()->cBestellNr}, Lieferschein: {$shipment->getLieferschein()->getLieferscheinNr()}) - " . $e->getMessage());
                 }
             }
         }
@@ -176,7 +173,13 @@ class Shipment
         return $this->updateModel()->saveModel();
     }
 
-    public function getShipment($force = false): ?\Mollie\Api\Resources\Shipment
+    /**
+     * @param false $force
+     * @throws IncompatiblePlatform
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @return null|\Mollie\Api\Resources\Shipment
+     */
+    public function getShipment(bool $force = false): ?\Mollie\Api\Resources\Shipment
     {
         if (($force || !$this->shipment) && $this->getModel() && $this->getModel()->cShipmentId) {
             $this->shipment = $this->getCheckout()->getAPI()->getClient()->shipments->getForId($this->getModel()->cOrderId, $this->getModel()->cShipmentId);
@@ -226,17 +229,22 @@ class Shipment
         return $this;
     }
 
+    /**
+     * @throws Exception
+     * @return OrderCheckout
+     */
     public function getCheckout(): OrderCheckout
     {
         if (!$this->checkout) {
             //TODO evtl. load by lieferschien
-            throw new Exception('Should not happen, but it did!');
+            throw new R('Should not happen, but it did!');
         }
 
         return $this->checkout;
     }
 
     /**
+     * @throws Exception
      * @return static
      */
     public function loadRequest(): self
@@ -265,9 +273,9 @@ class Shipment
     }
 
     /**
-     * @return (float|int|string)[][]
+     * @throws Exception
+     * @return array (float|int|string)[][]
      *
-     * @psalm-return list<array{id: string, quantity: float|int}>
      */
     protected function getOrderLines(): array
     {

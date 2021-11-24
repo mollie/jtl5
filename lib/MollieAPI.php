@@ -11,15 +11,15 @@ use Composer\CaBundle\CaBundle;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\MollieApiClient;
-use Shop;
-use WS\JTL5\Traits\Plugin;
+use WS\JTL5\Traits\Plugins;
 
 class MollieAPI
 {
-    use Plugin;
+    use Plugins;
 
     /**
      * @var MollieApiClient
@@ -31,7 +31,10 @@ class MollieAPI
      */
     protected $test;
 
-    public function __construct($test = false)
+    /**
+     * @param false $test
+     */
+    public function __construct(bool $test = false)
     {
         $this->test = $test;
     }
