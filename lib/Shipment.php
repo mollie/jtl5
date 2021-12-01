@@ -237,7 +237,7 @@ class Shipment
     {
         if (!$this->checkout) {
             //TODO evtl. load by lieferschien
-            throw new R('Should not happen, but it did!');
+            throw new RuntimeException('Should not happen, but it did!');
         }
 
         return $this->checkout;
@@ -245,9 +245,9 @@ class Shipment
 
     /**
      * @throws Exception
-     * @return static
+     * @return $this
      */
-    public function loadRequest(): self
+    public function loadRequest(array &$options = [])
     {
         /** @var Versand $oVersand */
         $oVersand = $this->getLieferschein()->oVersand_arr[0];
