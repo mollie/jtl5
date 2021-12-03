@@ -38,7 +38,7 @@ class PaymentCheckout extends AbstractCheckout
      */
     public function create(array $paymentOptions = []): Payment
     {
-        if ($this->getModel()->orderId) {
+        if ($this->getModel()->cOrderId) {
             try {
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId);
                 if ($this->payment->status === PaymentStatus::STATUS_OPEN) {

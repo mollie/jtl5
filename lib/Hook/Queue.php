@@ -111,8 +111,7 @@ class Queue extends AbstractHook
                 if (self::Plugin('ws5_mollie')->getConfig()->getValue('resetMethod') !== 'on') {
                     $options['method'] = $checkout->getModel()->cMethod;
                 }
-
-                $mollie = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);
+                $mollie = $checkout->create($options);
                 $url    = $mollie->getCheckoutUrl();
 
                 header('Location: ' . $url);

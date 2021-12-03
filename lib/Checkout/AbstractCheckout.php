@@ -518,7 +518,7 @@ abstract class AbstractCheckout
             return;
         }
 
-        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND dCreated < NOW() - INTERVAL :d HOUR AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
+        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE (dReminder IS NULL OR dReminder = '0000-00-00 00:00:00') AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
             ':d' => $reminder
         ], 2);
         foreach ($remindables as $remindable) {
@@ -544,6 +544,9 @@ abstract class AbstractCheckout
 
         // filter paid and storno
         if (!$order->kBestellung || (int)$order->cStatus > BESTELLUNG_STATUS_IN_BEARBEITUNG || (int)$order->cStatus < 0) {
+            $order->dReminder = date('Y-m-d H:i:s');
+            $order->save();
+
             return true;
         }
         $oBestellung = new Bestellung($order->kBestellung);

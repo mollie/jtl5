@@ -54,9 +54,9 @@ class OrderCheckout extends AbstractCheckout
      */
     public function create(array $paymentOptions = []): Order
     {
-        if ($this->getModel()->orderId) {
+        if ($this->getModel()->cOrderId) {
             try {
-                $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->orderId, ['embed' => 'payments']);
+                $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->cOrderId, ['embed' => 'payments']);
                 if (in_array($this->order->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
                     throw new RuntimeException(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
