@@ -99,8 +99,8 @@ abstract class AbstractCheckout
      * @param string $id
      * @param bool   $test
      *
-     * @throws ServiceNotFoundException
      * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return void
      *
      */
@@ -279,9 +279,9 @@ abstract class AbstractCheckout
     /**
      * @param null|mixed $hash
      *
-     * @throws ServiceNotFoundException
      * @throws Exception
      * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return void
      *
      */
@@ -388,7 +388,7 @@ abstract class AbstractCheckout
     {
         if (
             $row = Shop::Container()->getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
-            ':kBestellung' => $this->oBestellung->kBestellung
+                ':kBestellung' => $this->oBestellung->kBestellung
             ], 1)
         ) {
             return (float)$row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor);
@@ -400,8 +400,8 @@ abstract class AbstractCheckout
     /**
      * @param Bestellung $oBestellung
      * @param OrderModel $model
-     * @throws ServiceNotFoundException
      * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return bool
      */
     public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
@@ -423,8 +423,8 @@ abstract class AbstractCheckout
     /**
      * @param $msg
      * @param int $level
-     * @throws ServiceNotFoundException
      * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
      * @return $this
      */
     public function Log(string $msg, $level = LOGLEVEL_NOTICE)
@@ -444,6 +444,11 @@ abstract class AbstractCheckout
 
         return $this;
     }
+
+    /**
+     * @return $this
+     */
+    abstract protected function updateOrderNumber();
 
     /**
      * @param int  $kBestellung
@@ -517,8 +522,9 @@ abstract class AbstractCheckout
 
             return;
         }
-
-        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE (dReminder IS NULL OR dReminder = '0000-00-00 00:00:00') AND dCreated > NOW() - INTERVAL 7 DAY AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
+        // TODO: DOKU
+        ifndef('MOLLIE_REMINDER_LIMIT_DAYS', 7);
+        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE (dReminder IS NULL OR dReminder = '0000-00-00 00:00:00') AND dCreated > NOW() - INTERVAL " . MOLLIE_REMINDER_LIMIT_DAYS . " DAY AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
             ':d' => $reminder
         ], 2);
         foreach ($remindables as $remindable) {
@@ -779,11 +785,6 @@ abstract class AbstractCheckout
             $oKunde->cFirma
         ], $descTemplate);
     }
-
-    /**
-     * @return $this
-     */
-    abstract protected function updateOrderNumber();
 
     /**
      * @param Order|Payment $model
