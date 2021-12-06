@@ -41,6 +41,11 @@ class PaymentCheckout extends AbstractCheckout
         if ($this->getModel()->cOrderId) {
             try {
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId);
+                if (in_array($this->payment->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
+                    $this->Log(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
+
+                    return $this->payment;
+                }
                 if ($this->payment->status === PaymentStatus::STATUS_OPEN) {
                     $this->updateModel()->updateModel();
 

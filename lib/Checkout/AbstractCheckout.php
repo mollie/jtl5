@@ -99,8 +99,8 @@ abstract class AbstractCheckout
      * @param string $id
      * @param bool   $test
      *
-     * @throws CircularReferenceException
      * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
      * @return void
      *
      */
@@ -279,9 +279,9 @@ abstract class AbstractCheckout
     /**
      * @param null|mixed $hash
      *
-     * @throws Exception
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
+     * @throws Exception
      * @return void
      *
      */
@@ -349,6 +349,15 @@ abstract class AbstractCheckout
             $this->getModel()->cCurrency = $this->getMollie()->amount->currency;
             $this->getModel()->cStatus   = $this->getMollie()->status;
         }
+
+        // TODO: DOKU
+        if (!defined('MOLLIE_DISABLE_REMINDER')) {
+            define('MOLLIE_DISABLE_REMINDER', []);
+        }
+        if (is_array(MOLLIE_DISABLE_REMINDER) && $this->getModel()->cMethod && in_array($this->getModel()->cMethod, MOLLIE_DISABLE_REMINDER)) {
+            $this->getModel()->dReminder = date('Y-m-d H:i:s');
+        }
+
         $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: ModelInterface::NULL;
         $this->getModel()->cBestellNr  = $this->getBestellung()->cBestellNr;
         $this->getModel()->bSynced     = $this->getModel()->bSynced ?? (self::Plugin('ws5_mollie')->getConfig()->getValue('onlyPaid') !== 'on');
@@ -400,8 +409,8 @@ abstract class AbstractCheckout
     /**
      * @param Bestellung $oBestellung
      * @param OrderModel $model
-     * @throws CircularReferenceException
      * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
      * @return bool
      */
     public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
@@ -423,8 +432,8 @@ abstract class AbstractCheckout
     /**
      * @param $msg
      * @param int $level
-     * @throws CircularReferenceException
      * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
      * @return $this
      */
     public function Log(string $msg, $level = LOGLEVEL_NOTICE)

@@ -167,8 +167,8 @@ abstract class PaymentMethod extends Method
      * @param $billingCountry
      * @param $currency
      * @param $amount
-     * @throws ApiException
      * @throws IncompatiblePlatform
+     * @throws ApiException
      * @return bool
      */
     protected static function isMethodPossible($method, string $locale, $billingCountry, $currency, $amount): bool
@@ -260,12 +260,14 @@ abstract class PaymentMethod extends Method
                 $this->doLog('mollie::preparePaymentProcess: PUI - ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_NOTICE);
             }
 
-            ifndef('MOLLIE_REDIRECT_DELAY', 3);
-            $checkoutMode = self::Plugin('ws5_mollie')->getConfig()->getValue('checkoutMode');
-            Shop::Smarty()->assign('redirect', $url)
-                ->assign('checkoutMode', $checkoutMode);
-            if ($checkoutMode === 'Y' && !headers_sent()) {
-                header('Location: ' . $url);
+            if ($url) {
+                ifndef('MOLLIE_REDIRECT_DELAY', 3);
+                $checkoutMode = self::Plugin('ws5_mollie')->getConfig()->getValue('checkoutMode');
+                Shop::Smarty()->assign('redirect', $url)
+                    ->assign('checkoutMode', $checkoutMode);
+                if ($checkoutMode === 'Y' && !headers_sent()) {
+                    header('Location: ' . $url);
+                }
             }
         } catch (Exception $e) {
             $this->doLog('mollie::preparePaymentProcess: ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_ERROR);
