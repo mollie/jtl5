@@ -313,7 +313,7 @@ abstract class AbstractCheckout
                     $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO));
 
                     $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
-                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
+                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden & ZAHLUNGSART_MAIL_EINGANG) {
                         $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
                     }
                 } else {
