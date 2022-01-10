@@ -67,7 +67,7 @@ msgid "Unbezahlte Bestellungen stornieren"
 msgstr "Cancel unpaid orders"
 
 msgid "Versand bei Mollie"
-msgstr "Shippments with Mollie"
+msgstr "Shipments with Mollie"
 
 msgid "Payment API Beschreibung"
 msgstr "Payment API description"
