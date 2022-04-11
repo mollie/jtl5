@@ -443,7 +443,7 @@
                 <ClassName>KlarnaPayNow</ClassName>
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
-                    <Name>Klarna Pay Later.</Name>
+                    <Name>Klarna Pay Now.</Name>
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem und direkt mit Klarna Pay Now.</InfoText>
                 </MethodLanguage>
