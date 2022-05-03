@@ -7,7 +7,7 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-12-06</CreateDate>
+    <CreateDate>2022-05-03</CreateDate>
     <Version>1.3.5</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
@@ -194,6 +194,19 @@
                     <SelectboxOptions>
                         <Option sort="1" value="api">Je nach API, Order- oder Payment-ID verwenden</Option>
                         <Option sort="2" value="tr">Immer Payment-ID verwenden</Option>
+                    </SelectboxOptions>
+                </Setting>
+
+                <Setting type="selectbox" initialValue="Y" sort="100" conf="Y">
+                    <Name>Mitteilungen (Glocke)</Name>
+                    <Description>
+                        <![CDATA[Welche Infos sollen in den Mitteilungen erschienen?]]></Description>
+                    <ValueName>notifications</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Queue &amp; Authorized</Option>
+                        <Option sort="2" value="Q">Nur Queue</Option>
+                        <Option sort="3" value="A">Nur Authorized</Option>
+                        <Option sort="4" value="N">Keine</Option>
                     </SelectboxOptions>
                 </Setting>
 
