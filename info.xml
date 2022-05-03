@@ -8,7 +8,7 @@
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2021-12-06</CreateDate>
-    <Version>1.3.4</Version>
+    <Version>1.3.5</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -692,6 +692,15 @@
                     <SelectboxOptions>
                         <Option value="order" sort="1">Order API</Option>
                         <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="selectbox" initialValue="N" sort="60" conf="Y">
+                    <Name>PUI Daten übergeben</Name>
+                    <Description>Macht den Auftrag in der WAWI ReadOnly.</Description>
+                    <ValueName>usePUI</ValueName>
+                    <SelectboxOptions>
+                        <Option value="Y" sort="1">Ja</Option>
+                        <Option value="N" sort="2">Nein</Option>
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="50" conf="Y">
