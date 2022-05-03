@@ -22,6 +22,11 @@ class Banktransfer extends PaymentMethod
 
     public function generatePUI(AbstractCheckout $checkout): string
     {
+
+        if(self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_usePUI') === 'N'){
+            return false;
+        }
+
         $template = self::Plugin('ws5_mollie')->getLocalization()->getTranslation('banktransferPUI');
 
         return str_replace(
