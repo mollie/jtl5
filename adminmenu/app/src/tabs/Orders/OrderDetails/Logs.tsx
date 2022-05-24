@@ -1,72 +1,85 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Label, useAPI } from '@webstollen/react-jtl-plugin/lib'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
-import { faChevronDoubleDown, faChevronDoubleLeft } from '@fortawesome/pro-regular-svg-icons'
+import React, { useEffect, useState } from 'react'
+import { Label, Loading } from '@webstollen/react-jtl-plugin/lib'
+import { faChevronDoubleDown, faChevronDoubleLeft, faSync } from '@fortawesome/pro-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import usePaymentLogs from '../../../hooks/usePaymentLogs'
+import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
+import ReactTimeago from 'react-timeago'
+import { parseInt } from 'lodash'
+import Alert from '@webstollen/react-jtl-plugin/lib/components/Alert'
 
 export type LogsProps = {
+  mollieId: string
   kBestellung: number
-  orderId: string
 }
 
-const Logs = ({ kBestellung, orderId }: LogsProps) => {
-  const api = useAPI()
-  const [logs, setLogs] = useState<null | any[]>(null)
+const Logs = ({ kBestellung, mollieId }: LogsProps) => {
   const [showLogs, setShowLogs] = useState(false)
-
-  const loadLogs = useCallback(() => {
-    setLogs(null)
-    api
-      .run('orders', 'zalog', {
-        kBestellung: kBestellung,
-        id: orderId,
-      })
-      .then((result) => {
-        setLogs(result.data.data)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [api, kBestellung, orderId])
+  const { load, loading, data, error } = usePaymentLogs(kBestellung, mollieId)
 
   useEffect(() => {
-    loadLogs()
-  }, [loadLogs])
+    load()
+  }, [load])
 
-  const template = {
-    nLevel: {
-      header: () => 'Level',
-      data: (row) =>
-        row.nLevel === 1 ? (
-          <Label color="red">ERROR</Label>
-        ) : row.nLevel === 2 ? (
-          <Label color="blue">NOTICE</Label>
-        ) : row.nLevel === 3 ? (
-          <Label color="gray">DEBUG</Label>
-        ) : (
-          row.nLevel
-        ),
-    },
-    cLog: {
-      header: () => 'Log',
-      data: (row) => row.cLog,
-    },
-    dDatum: {
-      header: () => 'Timestamp',
-      data: (row) => row.dDatum,
-    },
-  } as Record<string, ItemTemplate<Record<string, any>>>
+  const reload = (e: React.MouseEvent) => {
+    load()
+    e.stopPropagation()
+  }
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 relative">
       <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowLogs((prev) => !prev)}>
-        Logs
+        Logs {data ? <>({data?.length ?? 0})</> : null}
         <FontAwesomeIcon className="float-right" icon={showLogs ? faChevronDoubleDown : faChevronDoubleLeft} />
+        {showLogs && (
+          <FontAwesomeIcon icon={faSync} onClick={reload} className="cursor-pointer float-right mx-2" fixedWidth />
+        )}
       </h3>
       {showLogs &&
-        (!logs ? <>Loading...</> : !logs.length ? <>No Data!</> : <Table striped template={template} items={logs} />)}
+        (error ? (
+          <Alert variant="error">{error}</Alert>
+        ) : (
+          <Loading loading={loading}>
+            <DataTable striped fullWidth header={header} loading={loading}>
+              {data?.map((row) => (
+                <tr key={row.kZahlunglog}>
+                  <td className="text-center">
+                    {parseInt(row.nLevel) === 1 ? (
+                      <Label color="red">ERROR</Label>
+                    ) : parseInt(row.nLevel) === 2 ? (
+                      <Label color="blue">NOTICE</Label>
+                    ) : parseInt(row.nLevel) === 3 ? (
+                      <Label color="gray">DEBUG</Label>
+                    ) : (
+                      row.nLevel
+                    )}
+                  </td>
+                  <td>{row.cLog}</td>
+                  <td className="text-right">
+                    <ReactTimeago date={row.dDatum} />
+                  </td>
+                </tr>
+              ))}
+            </DataTable>
+          </Loading>
+        ))}
     </div>
   )
 }
+
+const header: Array<DataTableHeader> = [
+  {
+    title: 'Level',
+    column: 'level',
+  },
+  {
+    title: 'Log',
+    column: 'log',
+  },
+  {
+    title: 'Erstellt',
+    column: 'created',
+  },
+]
 
 export default Logs

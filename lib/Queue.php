@@ -68,7 +68,7 @@ class Queue
         if (!defined('MOLLIE_HOOK_DELAY')) {
             define('MOLLIE_HOOK_DELAY', 3);
         }
-        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE (dDone IS NULL OR dDone = '0000-00-00 00:00:00') AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%') AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE)) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
+        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE (dDone IS NULL OR dDone = '0000-00-00 00:00:00') AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%' AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE))) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
             ':LIMIT' => $limit,
             ':hd'    => MOLLIE_HOOK_DELAY
         ], 2);

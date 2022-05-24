@@ -34,6 +34,7 @@ use Mollie\Api\Types\PaymentStatus;
 use PaymentMethod;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order\Amount;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
@@ -173,9 +174,13 @@ abstract class AbstractCheckout
                         throw new Exception(sprintf('Bestellung nicht finalisiert: %s', print_r($order, 1)));
                     }
                 } else {
+                    QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+
                     throw new Exception(sprintf('PaymentSession bereits bezahlt: %s - ID: %s => Queue', $sessionHash, $id));
                 }
             } else {
+                QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+
                 throw new Exception(sprintf('PaymentSession nicht gefunden: %s - ID: %s => Queue', $sessionHash, $id));
             }
         } catch (Exception $e) {
@@ -187,7 +192,7 @@ abstract class AbstractCheckout
      * @param string          $id
      * @param bool            $bFill
      * @param null|Bestellung $order
-     *
+     * @throws RuntimeException
      * @return static
      */
     public static function fromID(string $id, bool $bFill = true, Bestellung $order = null): self
@@ -197,6 +202,9 @@ abstract class AbstractCheckout
 
         $oBestellung = $order;
         if (!$oBestellung) {
+            if (!$model->kBestellung) {
+                throw new RuntimeException('Keine Bestell-ID hinterlegt.');
+            }
             $oBestellung = new Bestellung($model->kBestellung, $bFill);
         }
 
@@ -271,9 +279,9 @@ abstract class AbstractCheckout
     /**
      * @param null|mixed $hash
      *
+     * @throws CircularReferenceException
      * @throws ServiceNotFoundException
      * @throws Exception
-     * @throws CircularReferenceException
      * @return void
      *
      */
@@ -282,6 +290,16 @@ abstract class AbstractCheckout
         if (!$hash) {
             $hash = $this->getModel()->cHash;
         }
+
+//        try{
+//            $pm = $this->getPaymentMethod();
+//            if(method_exists($pm, 'generatePUI') && ($pui = $pm->generatePUI($this))){
+//                $this->getBestellung()->cPUIZahlungsdaten = $pui;
+//                $this->getBestellung()->updateInDB();
+//            }
+//        }catch (\Exception $e){
+//
+//        }
 
         $this->updateModel()->saveModel();
         if (null === $this->getBestellung()->dBezahltDatum) {
@@ -295,7 +313,7 @@ abstract class AbstractCheckout
                     $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO));
 
                     $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
-                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden === 1) {
+                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden & ZAHLUNGSART_MAIL_EINGANG) {
                         $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
                     }
                 } else {
@@ -331,6 +349,15 @@ abstract class AbstractCheckout
             $this->getModel()->cCurrency = $this->getMollie()->amount->currency;
             $this->getModel()->cStatus   = $this->getMollie()->status;
         }
+
+        // TODO: DOKU
+        if (!defined('MOLLIE_DISABLE_REMINDER')) {
+            define('MOLLIE_DISABLE_REMINDER', []);
+        }
+        if (is_array(MOLLIE_DISABLE_REMINDER) && $this->getModel()->cMethod && in_array($this->getModel()->cMethod, MOLLIE_DISABLE_REMINDER)) {
+            $this->getModel()->dReminder = date('Y-m-d H:i:s');
+        }
+
         $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: ModelInterface::NULL;
         $this->getModel()->cBestellNr  = $this->getBestellung()->cBestellNr;
         $this->getModel()->bSynced     = $this->getModel()->bSynced ?? (self::Plugin('ws5_mollie')->getConfig()->getValue('onlyPaid') !== 'on');
@@ -370,7 +397,7 @@ abstract class AbstractCheckout
     {
         if (
             $row = Shop::Container()->getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
-            ':kBestellung' => $this->oBestellung->kBestellung
+                ':kBestellung' => $this->oBestellung->kBestellung
             ], 1)
         ) {
             return (float)$row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor);
@@ -428,6 +455,11 @@ abstract class AbstractCheckout
     }
 
     /**
+     * @return $this
+     */
+    abstract protected function updateOrderNumber();
+
+    /**
      * @param int  $kBestellung
      * @param bool $checkZA
      * @return bool
@@ -467,6 +499,9 @@ abstract class AbstractCheckout
     {
         $model = OrderModel::fromID($kBestellung, 'kBestellung', true);
 
+        if (!$model->kBestellung) {
+            throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
+        }
         $oBestellung = new Bestellung($model->kBestellung, $fill);
         if (!$oBestellung->kBestellung) {
             throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
@@ -496,8 +531,9 @@ abstract class AbstractCheckout
 
             return;
         }
-
-        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE dReminder IS NULL AND dCreated < NOW() - INTERVAL :d HOUR AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
+        // TODO: DOKU
+        ifndef('MOLLIE_REMINDER_LIMIT_DAYS', 7);
+        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE (dReminder IS NULL OR dReminder = '0000-00-00 00:00:00') AND dCreated > NOW() - INTERVAL " . MOLLIE_REMINDER_LIMIT_DAYS . " DAY AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
             ':d' => $reminder
         ], 2);
         foreach ($remindables as $remindable) {
@@ -523,6 +559,9 @@ abstract class AbstractCheckout
 
         // filter paid and storno
         if (!$order->kBestellung || (int)$order->cStatus > BESTELLUNG_STATUS_IN_BEARBEITUNG || (int)$order->cStatus < 0) {
+            $order->dReminder = date('Y-m-d H:i:s');
+            $order->save();
+
             return true;
         }
         $oBestellung = new Bestellung($order->kBestellung);
@@ -755,11 +794,6 @@ abstract class AbstractCheckout
             $oKunde->cFirma
         ], $descTemplate);
     }
-
-    /**
-     * @return $this
-     */
-    abstract protected function updateOrderNumber();
 
     /**
      * @param Order|Payment $model

@@ -1,131 +1,112 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import Table, { ItemTemplate } from '@webstollen/react-jtl-plugin/lib/components/Table'
-import { useAPI } from '@webstollen/react-jtl-plugin/lib'
+import React, { useContext, useEffect, useState } from 'react'
 import Button from '@webstollen/react-jtl-plugin/lib/components/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronDoubleDown, faChevronDoubleLeft, faShippingFast, faSync } from '@fortawesome/pro-regular-svg-icons'
 import TextLink from '@webstollen/react-jtl-plugin/lib/components/TextLink'
+import { UseMollieReturn } from '../../../hooks/useMollie'
+import useShipments from '../../../hooks/useShipments'
+import useErrorSnack from '../../../hooks/useErrorSnack'
+import DataTable, { DataTableHeader } from '@webstollen/react-jtl-plugin/lib/components/DataTable/DataTable'
+import MollieContext from '../../../context/MollieContext'
 
 export type ShipmentsProps = {
   kBestellung: number
-  mollie: Record<string, any>
 }
 
-const Shipments = ({ mollie, kBestellung }: ShipmentsProps) => {
-  const api = useAPI()
-  const [shipments, setShipments] = useState<null | any[]>(null)
+const Shipments = ({ kBestellung }: ShipmentsProps) => {
+  const mollie = useContext<UseMollieReturn>(MollieContext)
   const [showShipments, setShowShipments] = useState(false)
-
-  const loadShipments = useCallback(() => {
-    setShipments(null)
-    api
-      .run('orders', 'shipments', {
-        kBestellung: kBestellung,
-      })
-      .then((result) => {
-        setShipments(result.data.data)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [api, kBestellung])
+  const [showError] = useErrorSnack()
+  const { load, data, loading, sync } = useShipments(kBestellung)
 
   useEffect(() => {
-    loadShipments()
-  }, [loadShipments])
+    load()
+  }, [load])
 
   const syncShipping = (kLieferschein: number) => {
-    api
-      .run('shipments', 'sync', {
-        kLieferschein: kLieferschein,
-        orderId: mollie.id,
-        kBestellung: kBestellung,
-      })
-      .then((resp) => {
+    sync(mollie.data?.id, kLieferschein)
+      .then(async (resp) => {
         if (resp.data.error) {
-          alert(resp.data.error.message)
+          showError(resp.data.error.message)
         } else {
-          loadShipments()
-          console.log(resp)
+          await load()
         }
       })
-      .catch((err) => {
-        alert(err.message)
-      })
+      .catch(showError)
   }
-
-  const template = {
-    lsNr: {
-      header: () => 'LieferscheinNr',
-      data: (row) =>
-        row.shipment ? (
-          <TextLink color={'green'} href={mollie._links.dashboard?.href} target="_blank">
-            {row.cLieferscheinNr}
-          </TextLink>
-        ) : (
-          row.cLieferscheinNr
-        ),
-    },
-    shipmentId: {
-      header: () => 'Shipment ID',
-      data: (row) => (row.shipment?.cShipmentId ? row.shipment?.cShipmentId : '-'),
-    },
-    carrier: {
-      header: () => 'Carrier',
-      data: (row) => (row.shipment?.cCarrier ? row.shipment.cCarrier : 'n/a'),
-    },
-    code: {
-      header: () => 'Code',
-      data: (row) =>
-        row.shipment?.cCode ? (
-          <TextLink color={'blue'} target={'_blank'} href={row.shipment?.cUrl}>
-            {row.shipment?.cCode}
-          </TextLink>
-        ) : (
-          'n/a'
-        ),
-    },
-    actions: {
-      header: () => ' ',
-      align: 'right',
-      data: (row) => {
-        const actions: React.ReactNode[] = []
-        if (mollie.status !== 'completed' && row.shipment === null) {
-          actions.push(
-            <Button title="synchronize" onClick={() => syncShipping(row.kLieferschein)}>
-              <FontAwesomeIcon icon={faSync} />
-            </Button>
-          )
-        }
-        if (row.cUrl) {
-          actions.push(
-            <Button>
-              <FontAwesomeIcon icon={faShippingFast} />
-            </Button>
-          )
-        }
-        return <>{actions}</>
-      },
-    },
-  } as Record<string, ItemTemplate<Record<string, any>>>
 
   return (
     <div className="mt-4">
       <h3 className="font-bold text-2xl mb-1 cursor-pointer" onClick={() => setShowShipments((prev) => !prev)}>
-        Lieferungen ({mollie._embedded?.shipments?.length})
+        Lieferungen ({mollie.data?._embedded?.shipments?.length})
         <FontAwesomeIcon className=" float-right" icon={showShipments ? faChevronDoubleDown : faChevronDoubleLeft} />
       </h3>
 
-      {showShipments &&
-        (!shipments ? (
-          <>Loading...</>
-        ) : !shipments.length ? (
-          <>No Data!</>
-        ) : (
-          <Table striped template={template} items={shipments} />
-        ))}
+      {showShipments && (
+        <DataTable striped fullWidth header={header} loadin={loading}>
+          {data?.map((row) => (
+            <tr key={row.cLieferscheinNr}>
+              <td>
+                {row.shipment ? (
+                  <TextLink color={'green'} href={mollie.data?._links.dashboard?.href} target="_blank">
+                    {row.cLieferscheinNr}
+                  </TextLink>
+                ) : (
+                  row.cLieferscheinNr
+                )}
+              </td>
+              <td>{row.shipment?.cShipmentId ? row.shipment?.cShipmentId : '-'}</td>
+              <td>{row.shipment?.cCarrier ? row.shipment.cCarrier : 'n/a'}</td>
+              <td>
+                {row.shipment?.cCode ? (
+                  <TextLink color={'blue'} target={'_blank'} href={row.shipment?.cUrl}>
+                    {row.shipment?.cCode}
+                  </TextLink>
+                ) : (
+                  'n/a'
+                )}
+              </td>
+              <td>
+                {mollie.data?.status !== 'completed' && row.shipment === null && (
+                  <Button title="synchronize" onClick={() => syncShipping(row.kLieferschein)}>
+                    <FontAwesomeIcon icon={faSync} />
+                  </Button>
+                )}
+                {row.cUrl && (
+                  <Button>
+                    <FontAwesomeIcon icon={faShippingFast} />
+                  </Button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </DataTable>
+      )}
     </div>
   )
 }
+
+const header: Array<DataTableHeader> = [
+  {
+    title: 'Lieferschein',
+    column: 'cLieferschein',
+  },
+  {
+    title: 'Shipment ID',
+    column: 'id',
+  },
+  {
+    title: 'Carrier',
+    column: 'carrier',
+  },
+  {
+    title: 'Code',
+    column: 'code',
+  },
+  {
+    title: '',
+    column: '_actions',
+  },
+]
 
 export default Shipments

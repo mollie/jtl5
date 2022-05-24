@@ -78,7 +78,12 @@ class Queue extends AbstractHook
             } else {
                 QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
             }
-            exit();
+
+            // TODO: DOKU
+            ifndef('MOLLIE_STOP_EXEC_AFTER_WEBHOOK', true);
+            if (MOLLIE_STOP_EXEC_AFTER_WEBHOOK) {
+                exit();
+            }
         }
         if (array_key_exists('m_pay', $_REQUEST)) {
             try {
@@ -106,8 +111,7 @@ class Queue extends AbstractHook
                 if (self::Plugin('ws5_mollie')->getConfig()->getValue('resetMethod') !== 'on') {
                     $options['method'] = $checkout->getModel()->cMethod;
                 }
-
-                $mollie = $checkout->create($options); // Order::repayOrder($orderModel->getOrderId(), $options, $api);
+                $mollie = $checkout->create($options);
                 $url    = $mollie->getCheckoutUrl();
 
                 header('Location: ' . $url);

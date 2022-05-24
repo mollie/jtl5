@@ -44,7 +44,7 @@ class CreditCard extends PaymentMethod
         $components = self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_components');
         $profileId  = self::Plugin('ws5_mollie')->getConfig()->getValue('profileId');
 
-        if ($components === 'N' || !$profileId || trim($profileId) === '') {
+        if ($components === 'N' || !$profileId || trim($profileId) === '' || (array_key_exists('pruefekupon', $post) && $post['pruefekupon'] === '1')) {
             return parent::handleAdditional($post);
         }
 

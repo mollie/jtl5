@@ -49,6 +49,7 @@ composer:
       - vendor
     policy: pull
   script:
+    - if [ -f "composer.json" ]; then composer config gitlab-token.gitlab.webstollen.de $COMPOSER_CI_TOKEN; fi
     - if [ -f "composer.json" ]; then composer install --no-dev -o; else echo "Skipped Composer, no composer.json"; fi
     - if [ -f "composer.json" ]; then rm -rf vendor/webstollen/jtl5-plugin/tests vendor/webstollen/jtl5-plugin/core vendor/webstollen/jtl5-plugin/docker; else echo "Skipped Composer, no composer.json"; fi
   artifacts:

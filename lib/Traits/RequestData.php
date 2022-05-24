@@ -46,6 +46,10 @@ trait RequestData
             $this->loadRequest();
         }
 
+        if (!array_key_exists($name, $this->requestData)) {
+            return null;
+        }
+
         return is_string($this->requestData[$name]) ? utf8_decode($this->requestData[$name]) : $this->requestData[$name];
     }
 

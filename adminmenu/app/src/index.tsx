@@ -3,12 +3,14 @@ import ReactDOM from 'react-dom'
 import './assets/main.css'
 import { App } from '@webstollen/react-jtl-plugin/lib'
 import reportWebVitals from './reportWebVitals'
-
+import SnackbarProvider from 'react-simple-snackbar'
 import tabs from './tabs'
 
 ReactDOM.render(
   <React.StrictMode>
-    <App tabs={tabs}  />
+    <SnackbarProvider>
+      <App tabs={tabs} />
+    </SnackbarProvider>
   </React.StrictMode>,
   document.getElementById('root')
 )

@@ -11,7 +11,7 @@
   },
   "require": {
     "php": ">=7.3.0",
-    "mollie/mollie-api-php": "^2.31.1",
+    "mollie/mollie-api-php": "^v2.39.0",
     "webstollen/jtl5-plugin": "^0.2"
   },
   "require-dev": {
@@ -35,7 +35,6 @@
     "email": "support@webstollen.de",
     "source": "https://github.com/mollie/jtl5",
     "wiki": "https://github.com/mollie/jtl5/wiki",
-    "issues": "https://github.com/mollie/jtl5/issues",
     "forum": "https://ws-url.de/help",
     "docs": "https://ws-url.de/doku-mollie"
   },

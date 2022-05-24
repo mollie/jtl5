@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-09-28</CreateDate>
-    <Version>1.2.2</Version>
+    <CreateDate>2022-05-03</CreateDate>
+    <Version>1.3.5</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -147,10 +147,18 @@
                     </SelectboxOptions>
                 </Setting>
 
+                <Setting type="text" initialValue="" sort="65" conf="Y">
+                    <Name>Klarna EID</Name>
+                    <Description>
+                        <![CDATA[Von Klarna vergebene und dem Händler bekannte ShopID. Benötigt für die korrekte Checkbox-Verlinkung bei Klarna Zahlarten.]]>
+                    </Description>
+                    <ValueName>klarnaEID</ValueName>
+                </Setting>
+
                 <Setting type="zahl" initialValue="0" sort="70" conf="Y">
                     <Name>Zahlungserinnerung</Name>
                     <Description>
-                        <![CDATA[Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)]]>
+                        <![CDATA[Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Minuten nach Bestellung. (0 = deaktiviert)]]>
                     </Description>
                     <ValueName>reminder</ValueName>
                 </Setting>
@@ -180,11 +188,25 @@
 
                 <Setting type="selectbox" initialValue="tr" sort="48" conf="Y">
                     <Name>ID im Zahlungseingang</Name>
-                    <Description><![CDATA[Welche ID soll im Zahlungseingang hinterlegt werden? (außer PayPal))]]></Description>
+                    <Description>
+                        <![CDATA[Welche ID soll im Zahlungseingang hinterlegt werden? (außer PayPal))]]></Description>
                     <ValueName>paymentID</ValueName>
                     <SelectboxOptions>
                         <Option sort="1" value="api">Je nach API, Order- oder Payment-ID verwenden</Option>
                         <Option sort="2" value="tr">Immer Payment-ID verwenden</Option>
+                    </SelectboxOptions>
+                </Setting>
+
+                <Setting type="selectbox" initialValue="Y" sort="100" conf="Y">
+                    <Name>Mitteilungen (Glocke)</Name>
+                    <Description>
+                        <![CDATA[Welche Infos sollen in den Mitteilungen erschienen?]]></Description>
+                    <ValueName>notifications</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Queue &amp; Authorized</Option>
+                        <Option sort="2" value="Q">Nur Queue</Option>
+                        <Option sort="3" value="A">Nur Authorized</Option>
+                        <Option sort="4" value="N">Keine</Option>
                     </SelectboxOptions>
                 </Setting>
 
@@ -375,6 +397,15 @@
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
+                <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
+                    <Name>AGB Checkbox für Klarna anzeigen</Name>
+                    <Description>Klarna Integration konform mit Trusted Shops</Description>
+                    <ValueName>trustedShopsCheckbox</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Ja</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Klarna Slice It</Name>
@@ -400,6 +431,15 @@
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
+                <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
+                    <Name>AGB Checkbox für Klarna anzeigen</Name>
+                    <Description>Klarna Integration konform mit Trusted Shops</Description>
+                    <ValueName>trustedShopsCheckbox</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Ja</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
             </Method>
             <Method>
                 <Name>Klarna Pay Now</Name>
@@ -412,14 +452,23 @@
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
-                <ClassFile>KlarnaPayLater.php</ClassFile>
-                <ClassName>KlarnaPayLater</ClassName>
+                <ClassFile>KlarnaPayNow.php</ClassFile>
+                <ClassName>KlarnaPayNow</ClassName>
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
-                    <Name>Klarna Pay Later.</Name>
+                    <Name>Klarna Pay Now.</Name>
                     <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem auf Rechnung mit Klarna.</InfoText>
+                    <InfoText>Bezahlen Sie bequem und direkt mit Klarna Pay Now.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
+                    <Name>AGB Checkbox für Klarna anzeigen</Name>
+                    <Description>Klarna Integration konform mit Trusted Shops</Description>
+                    <ValueName>trustedShopsCheckbox</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Ja</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="zahl" initialValue="28" sort="45" conf="Y">
                     <Name>Gültigkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
@@ -658,6 +707,15 @@
                         <Option value="payment" sort="2">Payment API</Option>
                     </SelectboxOptions>
                 </Setting>
+                <Setting type="selectbox" initialValue="N" sort="60" conf="Y">
+                    <Name>PUI Daten übergeben</Name>
+                    <Description>Macht den Auftrag in der WAWI ReadOnly.</Description>
+                    <ValueName>usePUI</ValueName>
+                    <SelectboxOptions>
+                        <Option value="Y" sort="1">Ja</Option>
+                        <Option value="N" sort="2">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="zahl" initialValue="100" sort="50" conf="Y">
                     <Name>Gültigkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Überweisung zu tätigen?</Description>
@@ -884,18 +942,20 @@
             <Variable>
                 <Name>lbl_cardHolder</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Karteninhaber:]]></VariableLocalized>
-                <VariableLocalized iso="ENG"><![CDATA[Card holder:]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[Titulaire de la carte:]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Titolare della Carta:]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[Name des Karteninhabers:]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Name on Card:]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Nom du titulaire de la carte:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[Naam kaarthouder:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Nome de titolare della carta:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_cardNumber</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Kartennummer:]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[Kreditkartennummer:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Card number:]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[Numro de carte:]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Numero Carta:]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Numro de carte de credit:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[Creditcardnummer:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Numero Carta di credito:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_expiryDate</Name>
@@ -903,15 +963,17 @@
                 <VariableLocalized iso="GER"><![CDATA[Ablaufdatum:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Expiry date:]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Date d'expiration:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[Vervaldatum:]]></VariableLocalized>
                 <VariableLocalized iso="ITA"><![CDATA[Data scadenza:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_varificationCode</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[CVC/CVV:]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[CVV:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[CVC/CVV:]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[CVC/CVV:]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[CVC/CVV:]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[CVV:]]></VariableLocalized>
+                <VariableLocalized iso="DUT"><![CDATA[CVV:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[CVV:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>cvchint_1</Name>
@@ -1005,6 +1067,31 @@
                     <![CDATA[Cela peut accélérer le processus pour la prochaine commande.]]></VariableLocalized>
                 <VariableLocalized iso="ITA">
                     <![CDATA[Questo può accelerare il processo di ordinazione per l'ordine successivo.]]></VariableLocalized>
+            </Variable>
+
+            <Variable>
+                <Name>klarnaAGBText</Name>
+                <Description></Description>
+                <VariableLocalized iso="GER"><![CDATA[Mit der Übermittlung der für die Abwicklung der gewählten Klarna Zahlungsmethode und einer Identitätsund Bonitätsprüfung erforderlichen Daten an Klarna bin ich einverstanden.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[I consent to the transmission of the data required for processing the Klarna payment method selected and an identity and credit check to Klarna.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Je consens à la transmission des données nécessaires au traitement du mode de paiement Klarna sélectionné et à une vérification d'identité et de crédit à Klarna.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Acconsento alla trasmissione dei dati necessari per l'elaborazione del metodo di pagamento Klarna selezionato e una verifica dell'identità e del credito a Klarna.]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>klarnaAGBDesc</Name>
+                <Description></Description>
+                <VariableLocalized iso="GER"><![CDATA[Meine <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/de_de/consent');">Einwilligung</a> kann ich jederzeit mit Wirkung für die Zukunft widerrufen.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[I can give my <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/en_en/consent');">consent</a> can be revoked at any time with effect for the future.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Je peux donner mon <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/fr_fr/consent');">consentement</a> peut être révoqué à tout moment avec effet pour l'avenir.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Posso dare il mio <a href="#" onClick="javascript:window.open('https://cdn.klarna.com/1.0/shared/content/legal/terms/%s/it_it/consent');">consenso</a> può essere revocato in qualsiasi momento con effetto per il futuro.]]></VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>banktransferPUI</Name>
+                <Description></Description>
+                <VariableLocalized iso="GER"><![CDATA[Bitte überweisen Sie den Betrag in Höhe von %amount% bis zum %expiresAt% auf das unten angegebene Konto:\nEmpfänger: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nReferenznummer: %transferReference%]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Please transfer the amount of %amount% to the account given below by %expiresAt%:\nRecipient: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nReference number: %transferReference%]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Veuillez virer le montant de %amount% sur le compte indiqué ci-dessous avant le %expiresAt%:\nBénéficiaire: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNuméro de référence : %transferReference%]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Si prega di trasferire l'importo di %amount% sul conto indicato di seguito entro il %expiresAt%:\nDestinatario: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNumero di riferimento: %transferReference%]]></VariableLocalized>
             </Variable>
 
         </Locales>

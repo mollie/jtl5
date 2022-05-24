@@ -12,7 +12,10 @@ use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Resources\Refund;
 use Mollie\Api\Types\PaymentMethod;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use stdClass;
 use WS\JTL5\Backend\AbstractResult;
@@ -50,7 +53,7 @@ class MollieController extends AbstractController
             $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
 
             $methods[$method->id] = (object)[
-                'log'                 => Shop::Container()->getDB()->getAffectedRows('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId]),
+                'log'                 => Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId], 3),
                 'settings'            => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
                 'mollie'              => $method,
                 'duringCheckout'      => (int)$oZahlungsart->nWaehrendBestellung === 1,
@@ -129,5 +132,158 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
         }, $result), array_values($result));
 
         return new AbstractResult($response);
+    }
+
+    /**
+     * @param stdClass $data
+     * @throws \Exception
+     * @throws ApiException
+     * @return AbstractResult
+     */
+    public static function cancelOrderLine(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'ord_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        if (strpos($data->lineId, 'odl_') !== 0) {
+            throw new \RuntimeException('Invalid Orderline ID!');
+        }
+        if (!$data->quantity || $data->quantity <= 0) {
+            throw new \RuntimeException('Invalid Quantity!');
+        }
+
+        $checkout = OrderCheckout::fromID($data->id);
+        $checkout->getMollie()->cancelLines([
+            'lines' => [
+                [
+                    'id'       => $data->lineId,
+                    'quantity' => $data->quantity,
+                ],
+            ],
+        ]);
+
+        return new AbstractResult(true);
+    }
+
+    public static function cancelOrder(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'ord_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+
+        $checkout = OrderCheckout::fromID($data->id);
+
+        return new AbstractResult($checkout->getMollie()->cancel()->isCanceled());
+    }
+
+    /**
+     * @throws ApiException
+     * @throws \Exception
+     */
+    public static function refundOrder(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'tr_') !== false) {
+            $checkout = PaymentCheckout::fromID($data->id);
+            $checkout->getMollie()->refund([
+                'amount' => $checkout->getMollie()->amountRemaining,
+            ]);
+        } else {
+            $checkout = OrderCheckout::fromID($data->id);
+            $checkout->getMollie()->refundAll();
+        }
+
+        return new AbstractResult(true);
+    }
+
+    public static function cancelRefund(stdClass $data): AbstractResult
+    {
+        if (!$data->id || !$data->refundId) {
+            throw new \RuntimeException('Missing Mollie ID or Refund ID!');
+        }
+
+        if (strpos($data->id, 'tr_') !== false) {
+            $checkout = PaymentCheckout::fromID($data->id);
+        } else {
+            $checkout = OrderCheckout::fromID($data->id);
+        }
+        $refunds = $checkout->getMollie()->refunds();
+        /** @var Refund $refund */
+        foreach ($refunds as $refund) {
+            if ($refund->id === $data->refundId) {
+                $refund->cancel();
+
+                return new AbstractResult(true);
+            }
+        }
+
+        throw new \RuntimeException('Refund not found!');
+    }
+
+    public static function refundOrderLine(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'ord_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        if (strpos($data->lineId, 'odl_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        if (!$data->quantity || $data->quantity <= 0) {
+            throw new \RuntimeException('Invalid Quantity!');
+        }
+
+        $checkout = OrderCheckout::fromID($data->id);
+        $checkout->getMollie()->refund([
+            'lines' => [
+                [
+                    'id'       => $data->lineId,
+                    'quantity' => $data->quantity,
+                ],
+            ],
+        ]);
+
+        return new AbstractResult(true);
+    }
+
+
+    public static function refundAmount(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'tr_') !== 0) {
+            throw new \RuntimeException('Invalid Payment ID!');
+        }
+
+        if (!$data->amount) {
+            throw new \RuntimeException('Invalid Amount!');
+        }
+
+        $checkout = PaymentCheckout::fromID($data->id);
+        $result   = $checkout->getMollie()->refund([
+            'amount' => [
+                'value'    => number_format((float)$data->amount, 2),
+                'currency' => $checkout->getMollie()->amount->currency,
+            ],
+            'description' => 'Refund for order ' . $checkout->getBestellung()->cBestellNr,
+        ]);
+
+        return new AbstractResult($result->id);
+    }
+
+    public static function getOrder(stdClass $data)
+    {
+        if (strpos($data->id, 'ord_') !== 0) {
+            throw new \RuntimeException('Invalid Order ID!');
+        }
+        $checkout = OrderCheckout::fromID($data->id);
+
+        return new AbstractResult($checkout->getMollie());
+    }
+
+    public static function getPayment(stdClass $data)
+    {
+        if (strpos($data->id, 'tr_') !== 0) {
+            throw new \RuntimeException('Invalid Payment ID!');
+        }
+        $checkout = PaymentCheckout::fromID($data->id);
+
+        return new AbstractResult($checkout->getMollie());
     }
 }
