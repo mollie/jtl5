@@ -11,7 +11,7 @@
 </div>
 
 
-<div class="form-horizontal" id="mollie-components">
+<div class="form-horizontal card-container" id="mollie-components">
 
     <div id="mollieError"></div>
 
@@ -27,28 +27,32 @@
         </div>
     {else}
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label">{$mollieLang.lbl_cardHolder}</label>
+            <label for="card-holder" class="col-sm-2 control-label" data-bind="i18n: 'Name on card'"></label>
             <div class="col-sm-10">
                 <div class="form-control" id="card-holder"></div>
             </div>
+            <div id="card-holder-error" class="component-error"></div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label">{$mollieLang.lbl_cardNumber}</label>
+            <label for="card-number" class="col-sm-2 control-label"
+                   data-bind="i18n: 'Card Number'"></label>
             <div class="col-sm-10">
                 <div class="form-control" id="card-number"></div>
             </div>
+            <div id="card-number-error" class="component-error"></div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label">{$mollieLang.lbl_expiryDate}</label>
+            <label for="expirey-date" class="col-sm-2 control-label"
+                   data-bind="i18n: 'Expiry Date'"></label>
             <div class="col-sm-10">
                 <div class="form-control" id="expiry-date"></div>
             </div>
+            <div id="expiry-date-error" class="component-error"></div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label">
-                <a onclick="$('.cvchint').fadeToggle(); return false;"
-                   style="background: #333;cursor: help; border-radius: 50%;color: white;padding: 0 5px;font-size: 10px;margin-right: 5px;">?</a>{$mollieLang.lbl_varificationCode}
-            </label>
+            <a onclick="$('.cvchint').fadeToggle(); return false;"
+               style="background: #333;cursor: help; border-radius: 50%;color: white;padding: 0 5px;font-size: 10px;margin-right: 5px;">?</a>
+            <label for="verification-code" class="col-sm-2 control-label" data-bind="i18n: 'CVC/CVV'"></label>
             <div class="col-sm-10">
                 <div class="form-control" id="verification-code"></div>
 
@@ -84,26 +88,22 @@
 <script defer>
     // <!--
 
-    var form = document.getElementById("form_payment_extra");
-    var submit = form.getElementsByClassName('submit_once');
-    var cardToken = document.getElementById('cardToken');
-    var errorMessage = {if isset($errorMessage)}{$errorMessage}{else}null{/if};
-    var mollie = Mollie('{$profileId}', {
+    const form = document.getElementById("form_payment_extra");
+    const submit = form.getElementsByClassName('submit_once');
+    const cardToken = document.getElementById('cardToken');
+    const errorMessage = {if isset($errorMessage)}{$errorMessage}{else}null{/if};
+    const mollie = Mollie('{$profileId}', {
         locale: '{$locale}'{if $testMode}, testMode: true{/if}
     });
 
-    var cardHolder = mollie.createComponent('cardHolder');
+    const cardHolder = mollie.createComponent('cardHolder');
+    const cardNumber = mollie.createComponent('cardNumber');
+    const expiryDate = mollie.createComponent('expiryDate');
+    const verificationCode = mollie.createComponent('verificationCode');
     cardHolder.mount('#card-holder');
-
-    var cardNumber = mollie.createComponent('cardNumber');
     cardNumber.mount('#card-number');
-
-    var expiryDate = mollie.createComponent('expiryDate');
     expiryDate.mount('#expiry-date');
-
-    var verificationCode = mollie.createComponent('verificationCode');
     verificationCode.mount('#verification-code');
-
 
     form.addEventListener('submit', function (e) {
 
@@ -113,12 +113,12 @@
         }
 
         e.preventDefault();
-        var errorDiv = document.getElementById("mollieError");
+        const errorDiv = document.getElementById("mollieError");
         errorDiv.innerHTML = '';
 
         mollie.createToken().then(function (result) {
             if (result.error) {
-                var alert = document.createElement('div');
+                const alert = document.createElement('div');
                 alert.className = 'alert alert-danger';
                 alert.id = 'mollieErrorContent';
                 alert.textContent = errorMessage ? errorMessage : result.error.message;
