@@ -267,6 +267,10 @@ abstract class PaymentMethod extends Method
                     ->assign('checkoutMode', $checkoutMode);
                 if ($checkoutMode === 'Y' && !headers_sent()) {
                     header('Location: ' . $url);
+                    ifndef('MOLLIE_STOP_EXEC_AFTER_WEBHOOK', true);
+                    if (MOLLIE_STOP_EXEC_AFTER_WEBHOOK) {
+                        exit();
+                    }
                 }
             }
         } catch (Exception $e) {
