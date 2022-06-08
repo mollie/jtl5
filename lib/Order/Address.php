@@ -53,13 +53,13 @@ class Address extends \Plugin\ws5_mollie\lib\Payment\Address
     {
         parent::__construct($address);
 
-        $this->title      = substr(trim(($address->cAnrede === 'm' ? Shop::Lang()->get('mr') : Shop::Lang()->get('mrs')) . ' ' . $address->cTitel), 0, 20) ?? null;
-        $this->givenName  = $address->cVorname;
-        $this->familyName = $address->cNachname;
-        $this->email      = $address->cMail ?? null;
+        $this->title = html_entity_decode(substr(trim(($address->cAnrede === 'm' ? Shop::Lang()->get('mr') : Shop::Lang()->get('mrs')) . ' ' . $address->cTitel), 0, 20)) ?? null;
+        $this->givenName = html_entity_decode($address->cVorname);
+        $this->familyName = html_entity_decode($address->cNachname);
+        $this->email = html_entity_decode($address->cMail) ?? null;
 
         if ($organizationName = trim($address->cFirma)) {
-            $this->organizationName = $organizationName;
+            $this->organizationName = html_entity_decode($organizationName);
         }
     }
 }

@@ -50,16 +50,16 @@ class Address implements JsonSerializable
      */
     public function __construct($address)
     {
-        $this->streetAndNumber = $address->cStrasse . ' ' . $address->cHausnummer;
-        $this->postalCode      = $address->cPLZ;
-        $this->city            = $address->cOrt;
-        $this->country         = $address->cLand;
+        $this->streetAndNumber = html_entity_decode($address->cStrasse . ' ' . $address->cHausnummer);
+        $this->postalCode      = html_entity_decode($address->cPLZ);
+        $this->city            = html_entity_decode($address->cOrt);
+        $this->country         = html_entity_decode($address->cLand);
 
         if (
             isset($adresse->cAdressZusatz)
             && trim($adresse->cAdressZusatz) !== ''
         ) {
-            $this->streetAdditional = trim($adresse->cAdressZusatz);
+            $this->streetAdditional = html_entity_decode(trim($adresse->cAdressZusatz));
         }
     }
 }
