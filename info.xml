@@ -1093,7 +1093,14 @@
                 <VariableLocalized iso="FRE"><![CDATA[Veuillez virer le montant de %amount% sur le compte indiqué ci-dessous avant le %expiresAt%:\nBénéficiaire: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNuméro de référence : %transferReference%]]></VariableLocalized>
                 <VariableLocalized iso="ITA"><![CDATA[Si prega di trasferire l'importo di %amount% sul conto indicato di seguito entro il %expiresAt%:\nDestinatario: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNumero di riferimento: %transferReference%]]></VariableLocalized>
             </Variable>
-
+            <Variable>
+                <Name>paymentNotCompleted</Name>
+                <Description>Error Nachricht, die der Kunde sieht, wenn die Zahlung fehlschlägt und er zurück in den Bestellvorgang weitergeleitet wird.</Description>
+                <VariableLocalized iso="GER"><![CDATA[Bei der Bezahlung über Mollie ist etwas schief gelaufen. Bitte erneut versuchen.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Something went wrong with the payment via Mollie. Please try again.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Quelque chose s'est mal passé lors du paiement via Mollie. Veuillez réessayer.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Qualcosa è andato storto con il pagamento tramite Mollie. Si prega di riprovare.]]></VariableLocalized>
+            </Variable>
         </Locales>
         <Emailtemplate>
             <Template>

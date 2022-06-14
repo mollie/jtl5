@@ -16,6 +16,7 @@ use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Hook\ApplePay;
 use Plugin\ws5_mollie\lib\Hook\Checkbox;
+use Plugin\ws5_mollie\lib\Hook\IncompletePaymentHandler;
 use Plugin\ws5_mollie\lib\Hook\Queue;
 use Plugin\ws5_mollie\lib\Mapper\MollieUpgradeMapper;
 use WS\JTL5\Mapper\UpgradeMapperInterface;
@@ -58,6 +59,8 @@ class Bootstrap extends \WS\JTL5\Bootstrap
         }
 
         $this->listen(HOOK_SMARTY_OUTPUTFILTER, [ApplePay::class, 'execute']);
+
+        $this->listen(HOOK_BESTELLVORGANG_PAGE, [IncompletePaymentHandler::class, 'checkForIncompletePayment']);
 
         $this->listen(HOOK_BESTELLABSCHLUSS_INC_BESTELLUNGINDB, [Queue::class, 'bestellungInDB']);
 
