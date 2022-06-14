@@ -129,9 +129,9 @@ const Dashboard = () => {
               style={{ maxWidth: '100px' }}
             />
             <div className="text-xl">
-              Integireren Sie alle wichtigen
+              Integriere alle wichtigen
               <br />
-              Zahlungsmethoden in kürzester zeit.
+              Zahlungsarten in kürzester Zeit.
             </div>
             <div>
               <Button onClick={() => window.open('https://mollie.com/dashboard', '_blank')?.focus()} className={'mx-8'}>
