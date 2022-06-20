@@ -50,6 +50,11 @@ class MollieController extends AbstractController
                 ':cModulID' => $id
             ], 1);
 
+            // If Mollie has new payment method that we don't support currently
+            if (!$oZahlungsart) {
+                continue;
+            }
+
             $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
 
             $methods[$method->id] = (object)[
