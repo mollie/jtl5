@@ -1,2 +1,65 @@
-<?php /* Checksum e23ae1b5 */
-$j3b8ffdc0=file(__FILE__);eval(base64_decode('JGNkYjhlOTEyMj1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0NzJdO3JldHVybiAoJGo9PTEwOSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00ODYpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09OTk0KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($cdb8e9122($j3b8ffdc0[1],486)));return eval($a42bb319f($cdb8e9122($j3b8ffdc0[1],994), $cdb8e9122($j3b8ffdc0[1], 109), $j3b8ffdc0[1]));__halt_compiler();//JGE0MmJiMzE5Zj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307b2c434d7H4sIAAAAAAAA/2ySwcrbMBCE73qKOQRswZ8QCr3YOCGXHkqaBhp6MgRF3tgCSTaS3DYNefdiN3XtPwadZr8dDSNZYcg3QhKOui2VzX/6j2dTa60o1+qSf3UFuZSx1hM+n/b5t6puUsaY1MJ77IrCkfegX4Fs4ZHPmxzFzZAN+RNndwaGpr1oJbGoXSms+i2Cqu1BGErZeBpU0O+kUv2gGfIqjNK3V52MUHoqNVVtp9S1tbILgPNZ1tYH18oQL8TfvJzhztAIRzYkySzRmS1Cpfxy0ydGBt9efHBxcMrEA7jcyJ11VBCyLENkImzRVZoke2HLmC83JYU4Mi7iSOYnPuIcK0SIsMLI96QCaf6G9Rs+rDm2W9hW63TINdSGbLz2vXa27+wf97/HKXgQspqSfbNT6EunDFczqCvilxdGhr6V0d4n5YzgvOv5aT6zNPNV8OjO408AAAD//7XhOuLGAgAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Order;
+
+use JTL\Shop;
+
+/**
+ * Class Address
+ * @package Mollie\Order
+ */
+class Address extends \Plugin\ws5_mollie\lib\Payment\Address
+{
+    /**
+     * @var null|string
+     */
+    public $organizationName;
+
+    /**
+     * @var null|string
+     */
+    public $title;
+
+    /**
+     * @var string
+     */
+    public $givenName;
+
+    /**
+     * @var string
+     */
+    public $familyName;
+
+    /**
+     * @var string
+     */
+    public $email;
+
+    /**
+     * @var null|string
+     */
+    public $phone;
+
+    /**
+     * Address constructor.
+     * @param $address
+     */
+    public function __construct($address)
+    {
+        parent::__construct($address);
+
+        $this->title = html_entity_decode(substr(trim(($address->cAnrede === 'm' ? Shop::Lang()->get('mr') : Shop::Lang()->get('mrs')) . ' ' . $address->cTitel), 0, 20)) ?? null;
+        $this->givenName = html_entity_decode($address->cVorname);
+        $this->familyName = html_entity_decode($address->cNachname);
+        $this->email = html_entity_decode($address->cMail) ?? null;
+
+        if ($organizationName = trim($address->cFirma)) {
+            $this->organizationName = html_entity_decode($organizationName);
+        }
+    }
+}

@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2021-11-24</CreateDate>
-    <Version>1.3.1</Version>
+    <CreateDate>2022-05-03</CreateDate>
+    <Version>1.3.6</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -158,7 +158,7 @@
                 <Setting type="zahl" initialValue="0" sort="70" conf="Y">
                     <Name>Zahlungserinnerung</Name>
                     <Description>
-                        <![CDATA[Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)]]>
+                        <![CDATA[Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Minuten nach Bestellung. (0 = deaktiviert)]]>
                     </Description>
                     <ValueName>reminder</ValueName>
                 </Setting>
@@ -194,6 +194,19 @@
                     <SelectboxOptions>
                         <Option sort="1" value="api">Je nach API, Order- oder Payment-ID verwenden</Option>
                         <Option sort="2" value="tr">Immer Payment-ID verwenden</Option>
+                    </SelectboxOptions>
+                </Setting>
+
+                <Setting type="selectbox" initialValue="Y" sort="100" conf="Y">
+                    <Name>Mitteilungen (Glocke)</Name>
+                    <Description>
+                        <![CDATA[Welche Infos sollen in den Mitteilungen erschienen?]]></Description>
+                    <ValueName>notifications</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Queue &amp; Authorized</Option>
+                        <Option sort="2" value="Q">Nur Queue</Option>
+                        <Option sort="3" value="A">Nur Authorized</Option>
+                        <Option sort="4" value="N">Keine</Option>
                     </SelectboxOptions>
                 </Setting>
 
@@ -443,7 +456,7 @@
                 <ClassName>KlarnaPayNow</ClassName>
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <MethodLanguage iso="GER">
-                    <Name>Klarna Pay Later.</Name>
+                    <Name>Klarna Pay Now.</Name>
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem und direkt mit Klarna Pay Now.</InfoText>
                 </MethodLanguage>
@@ -692,6 +705,15 @@
                     <SelectboxOptions>
                         <Option value="order" sort="1">Order API</Option>
                         <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="selectbox" initialValue="N" sort="60" conf="Y">
+                    <Name>PUI Daten übergeben</Name>
+                    <Description>Macht den Auftrag in der WAWI ReadOnly.</Description>
+                    <ValueName>usePUI</ValueName>
+                    <SelectboxOptions>
+                        <Option value="Y" sort="1">Ja</Option>
+                        <Option value="N" sort="2">Nein</Option>
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="50" conf="Y">
