@@ -62,7 +62,7 @@ class OrderLine implements JsonSerializable
 
         $orderLine = new self();
 
-        $orderLine->type = self::getType($oPosition->nPosTyp);
+        $orderLine->type = self::getType($oPosition->nPosTyp, $oPosition->fPreis >= 0);
         // TODO: FktAttr? $orderLine->category
 
         $orderLine->name = $oPosition->cName;
@@ -134,7 +134,7 @@ class OrderLine implements JsonSerializable
      * @throws Exception
      * @return string
      */
-    protected static function getType($nPosTyp): string
+    protected static function getType($nPosTyp, $positive = true): string
     {
         switch ($nPosTyp) {
             case C_WARENKORBPOS_TYP_ARTIKEL:
@@ -153,6 +153,9 @@ class OrderLine implements JsonSerializable
             case C_WARENKORBPOS_TYP_KUPON:
             case C_WARENKORBPOS_TYP_NEUKUNDENKUPON:
                 return OrderLineType::TYPE_DISCOUNT;
+            default:
+                return $positive ? OrderLineType::TYPE_SURCHARGE : OrderLineType::TYPE_DISCOUNT;
+
         }
 
         throw new Exception('Unknown PosTyp.', (int)$nPosTyp);

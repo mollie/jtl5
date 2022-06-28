@@ -146,7 +146,7 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
             throw new \RuntimeException('Invalid Order ID!');
         }
         if (strpos($data->lineId, 'odl_') !== 0) {
-            throw new \RuntimeException('Invalid Order ID!');
+            throw new \RuntimeException('Invalid Orderline ID!');
         }
         if (!$data->quantity || $data->quantity <= 0) {
             throw new \RuntimeException('Invalid Quantity!');

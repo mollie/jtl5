@@ -14,10 +14,10 @@ if ($_SERVER['HTTP_HOST'] === 'localhost') {
 
 /** @global \JTL\Backend\AdminAccount $oAccount */
 require_once __DIR__ . '/../../../admin/includes/admininclude.php';
-ini_set('display_errors', 0);
+ini_set('display_errors', array_key_exists('debug', $_REQUEST));
 
 try {
     API::Init('ws5_mollie');
 } catch (Exception $exception) {
-    Shop::Container()->getLogService()->error($exception->getMessage());
+    \JTL\Shop::Container()->getLogService()->error($exception->getMessage());
 }

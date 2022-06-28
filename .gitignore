@@ -15,4 +15,6 @@ adminmenu/app/yarn.lock
 adminmenu/app/src
 adminmenu/app/public
 adminmenu/app/test
+adminmenu/app/package.json
 *.map
+.idea
