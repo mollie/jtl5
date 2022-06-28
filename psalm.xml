@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<psalm>
-    <projectFiles>
-        <directory name="lib"/>
-    </projectFiles>
-    <extraFiles>
-        <directory name="../../includes/src"/>
-    </extraFiles>
-</psalm>
