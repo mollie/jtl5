@@ -16,14 +16,12 @@ class Migration20211206112100 extends Migration implements IMigration
     {
         $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` DROP INDEX `cOrderId`;');
         $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` DROP INDEX `kBestellung`;');
-        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` ADD UNIQUE( `kBestellung`, `cOrderId`);');
+        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` ADD UNIQUE(`kBestellung`, `cOrderId`);');
     }
 
     public function down()
     {
-        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` DROP INDEX `kBestellung`;');
-        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` ADD UNIQUE(`kBestellung`);');
-        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` ADD UNIQUE(`cOrderId`);');
+        // No need to change since 'xplugin_ws5_mollie_orders' is removed in Migration where it is created, and we don't support downgrading of Plugins
     }
 
     public function getDescription(): string
