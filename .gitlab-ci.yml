@@ -3,6 +3,7 @@ image: registry.webstollen.de/docker/jtl-plugin-ci:master
 stages:
   - test
   - build
+  - pack-and-cleanup
   - release
   - deploy
 
@@ -14,9 +15,8 @@ include:
 code_navigation:
   image: node:14
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-      exists:
-        - adminmenu/app/package.json
+    - exists:
+      - adminmenu/app/package.json
   allow_failure: true # recommended
   script:
     - npm install -g @sourcegraph/lsif-tsc
@@ -29,18 +29,16 @@ phpunit:
   image: registry.webstollen.de/docker/jtl-plugin-ci:php73
   stage: test
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-      exists:
-        - phpunit.xml
+    - exists:
+      - phpunit.xml
   script:
     - if [ -f "phpunit.xml" ]; then composer install -o && ./vendor/bin/phpunit; else echo "Skipped PHPUnit, no phpunit.xml"; fi
 
 composer:
   stage: build
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-      exists:
-        - composer.json
+    - exists:
+      - composer.json
   cache:
     key:
       files:
@@ -59,9 +57,8 @@ composer:
 node:
   stage: build
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-      exists:
-        - adminmenu/app/package.json
+    - exists:
+      - adminmenu/app/package.json
   cache:
     key:
       files:
@@ -91,10 +88,8 @@ node:
       - adminmenu/app/build
 
 pack:
-  stage: release
-  #  needs: [ "node", "composer" ]
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
+  stage: pack-and-cleanup
+  needs: [ "node", "composer" ]
   script:
     - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/
     - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml
@@ -119,21 +114,21 @@ pack:
     paths:
       - "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip"
 
-#release_job:
-#  stage: release
-#  image: registry.gitlab.com/gitlab-org/release-cli:latest
-#  only:
-#  - tags
-#  script:
-#    - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi
-#  release:
-#    tag_name: $CI_COMMIT_TAG
-#    ref: $CI_COMMIT_SHA
-#    description: 'Release $CI_COMMIT_TAG'
-#    assets:
-#      links:
-#      - name: 'CDN'
-#        url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
+release_job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: '$CI_COMMIT_TAG' # Only on tag
+  script:
+    - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi
+  release:
+    tag_name: $CI_COMMIT_TAG
+    ref: $CI_COMMIT_SHA
+    description: 'Release $CI_COMMIT_TAG'
+    assets:
+      links:
+      - name: 'CDN'
+        url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
 
 
 upload:
@@ -142,9 +137,8 @@ upload:
   artifacts:
     paths:
       - $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip
-  only:
-    - tags
-    - master
+  rules:
+    - if: '$CI_COMMIT_TAG' # Only on tag
   script:
     - aws configure set region eu-central-1
     - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi
