@@ -91,7 +91,7 @@ pack:
   stage: pack-and-cleanup
   needs: [ "node", "composer" ]
   script:
-    - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/
+    - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/ adminmenu/app/build/static/css/*.map adminmenu/app/build/static/js/*.map
     - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml
     - |
       if [[ $SKIP_COMPILE = 1 ]]; then

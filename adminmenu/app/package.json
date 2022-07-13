@@ -48,7 +48,7 @@
     "build:css": "postcss src/assets/tailwind.css -o src/assets/main.css",
     "watch:css": "postcss src/assets/tailwind.css -o src/assets/main.css -w",
     "start-js": "react-scripts start",
-    "build-js": "react-scripts GENERATE_SOURCEMAP=false build"
+    "build-js": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [
