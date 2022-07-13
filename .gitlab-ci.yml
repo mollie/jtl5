@@ -15,8 +15,9 @@ include:
 code_navigation:
   image: node:14
   rules:
-    - exists:
-      - adminmenu/app/package.json
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
+      exists:
+        - adminmenu/app/package.json
   allow_failure: true # recommended
   script:
     - npm install -g @sourcegraph/lsif-tsc
@@ -29,16 +30,18 @@ phpunit:
   image: registry.webstollen.de/docker/jtl-plugin-ci:php73
   stage: test
   rules:
-    - exists:
-      - phpunit.xml
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
+      exists:
+        - phpunit.xml
   script:
     - if [ -f "phpunit.xml" ]; then composer install -o && ./vendor/bin/phpunit; else echo "Skipped PHPUnit, no phpunit.xml"; fi
 
 composer:
   stage: build
   rules:
-    - exists:
-      - composer.json
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
+      exists:
+        - composer.json
   cache:
     key:
       files:
@@ -57,8 +60,9 @@ composer:
 node:
   stage: build
   rules:
-    - exists:
-      - adminmenu/app/package.json
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
+      exists:
+        - adminmenu/app/package.json
   cache:
     key:
       files:
@@ -91,8 +95,8 @@ pack:
   stage: pack-and-cleanup
   needs: [ "node", "composer" ]
   script:
-    - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/ adminmenu/app/build/static/css/*.map adminmenu/app/build/static/js/*.map
-    - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml
+    - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/
+    - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml adminmenu/app/build/static/css/*.map adminmenu/app/build/static/js/*.map
     - |
       if [[ $SKIP_COMPILE = 1 ]]; then
         echo "Skipped Compiler.";
@@ -118,7 +122,7 @@ release_job:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   rules:
-    - if: '$CI_COMMIT_TAG' # Only on tag
+    - if: '$CI_COMMIT_TAG' # Only on tag creation
   script:
     - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi
   release:
@@ -127,8 +131,8 @@ release_job:
     description: 'Release $CI_COMMIT_TAG'
     assets:
       links:
-      - name: 'CDN'
-        url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
+        - name: 'CDN'
+          url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
 
 
 upload:
@@ -138,7 +142,7 @@ upload:
     paths:
       - $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip
   rules:
-    - if: '$CI_COMMIT_TAG' # Only on tag
+    - if: '$CI_COMMIT_TAG' # Only on tag creation
   script:
     - aws configure set region eu-central-1
     - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi
