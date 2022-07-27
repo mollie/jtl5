@@ -9,6 +9,7 @@ import epsImg from './assets/img/eps.svg';
 import giftcardImg from './assets/img/giftcard.svg';
 import giropayImg from './assets/img/giropay.svg';
 import idealImg from './assets/img/ideal.svg';
+import in3Img from './assets/img/in3.svg';
 import inghomepayImg from './assets/img/inghomepay.svg';
 import kbcImg from './assets/img/kbc.svg';
 import klarnaImg from './assets/img/klarna.svg';
@@ -168,6 +169,7 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
             giftcard: giftcardImg,
             giropay: giropayImg,
             ideal: idealImg,
+            in3: in3Img,
             inghomepay: inghomepayImg,
             kbc: kbcImg,
             klarna: klarnaImg,
@@ -189,6 +191,7 @@ export const PaymentMethod2img = ({method}: { method: string }) => {
             case 'giftcard':
             case 'giropay':
             case 'ideal':
+            case 'in3':
             case 'inghomepay':
             case 'kbc':
             case 'mybank':
