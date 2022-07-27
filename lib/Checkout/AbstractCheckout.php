@@ -37,6 +37,7 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order\Amount;
+use Plugin\ws5_mollie\lib\Shipment;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
 use stdClass;
@@ -321,6 +322,7 @@ abstract class AbstractCheckout
                 }
             }
         }
+
     }
 
     /**
@@ -350,7 +352,7 @@ abstract class AbstractCheckout
             $this->getModel()->cStatus   = $this->getMollie()->status;
         }
 
-        // TODO: DOKU
+        // TODO: DOKU, Reminder Email, name der paymentmethod in array
         if (!defined('MOLLIE_DISABLE_REMINDER')) {
             define('MOLLIE_DISABLE_REMINDER', []);
         }

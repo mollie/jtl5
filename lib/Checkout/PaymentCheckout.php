@@ -180,6 +180,16 @@ class PaymentCheckout extends AbstractCheckout
      */
     protected function updateOrderNumber()
     {
+        //only ordernumber
+        try {
+            if ($this->getMollie()) {
+                $this->getMollie()->description = $this->getDescription();
+                $this->getMollie()->update(true);
+            }
+        } catch (Exception $e) {
+            $this->Log('OrderCheckout::updateOrderNumber:' . $e->getMessage(), LOGLEVEL_ERROR);
+        }
+
         try {
             if ($this->getMollie()) {
                 $this->getMollie()->description = $this->getDescription();
