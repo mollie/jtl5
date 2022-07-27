@@ -858,6 +858,39 @@
                     <ValueName>dueDays</ValueName>
                 </Setting>
             </Method>
+            <Method>
+                <Name>in3</Name>
+                <PictureURL>images/Payment_methods/in3@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>OTHER</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>In3.php</ClassFile>
+                <ClassName>in3</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>in3</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem in 3 Raten mit in3.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="100" sort="45" conf="Y">
+                    <Name>Gültigkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
         </PaymentMethod>
         <Locales>
             <Variable>
