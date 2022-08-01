@@ -27,7 +27,7 @@ const Invalid = ({
     errors.push('Keine Zahlungsart im Shop gefunden.')
   }
   if (method.paymentMethod && method.duringCheckout && !method.allowDuringCheckout) {
-    errors.push('Zahlung vor Bestellabschluss leider nicht möglich.')
+    errors.push('Zahlung vor Bestellabschluss ist zur Zeit leider technisch noch nicht möglich.')
   }
 
   return (
