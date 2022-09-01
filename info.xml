@@ -86,7 +86,19 @@
                         <Option value="N" sort="3"><![CDATA[Nein, ich mache alles manuell.]]></Option>
                     </SelectboxOptions>
                 </Setting>
-                <Setting type="text" initialValue="Order {orderNumber}" sort="47" conf="Y">
+                <Setting type="selectbox" initialValue="N" sort="47" conf="Y">
+                    <Name>Tracking URL den Versandinformationen anfügen?</Name>
+                    <Description>
+                        <![CDATA[Soll die Tracking URL für OrderAPI Methoden an Mollie gesendet werden?
+                        Achtung wenn die Tracking URL nicht im korrekt URL Format ist, wird dies von mollie abgelehnt. In diesem Fall kann der gesamte Versandstatus nicht an mollie übergeben werden.]]>
+                    </Description>
+                    <ValueName>trackingActive</ValueName>
+                    <SelectboxOptions>
+                        <Option value="N" sort="1"><![CDATA[Nein]]></Option>
+                        <Option value="Y" sort="2"><![CDATA[Ja]]></Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="text" initialValue="Order {orderNumber}" sort="48" conf="Y">
                     <Name>Payment API Beschreibung</Name>
                     <Description>
                         <![CDATA[Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung: {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}]]>

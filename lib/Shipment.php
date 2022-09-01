@@ -139,6 +139,7 @@ class Shipment
                             throw new APIException('Gastbestellung noch nicht komplett versendet!');
                     }
                 } catch (APIException $e) {
+                    //TODO: handle url entity error
                     $shipments[] = $e->getMessage();
                 } catch (Exception $e) {
                     $shipments[] = $e->getMessage();
@@ -251,16 +252,20 @@ class Shipment
     {
         /** @var Versand $oVersand */
         $oVersand = $this->getLieferschein()->oVersand_arr[0];
+        //TODO: add setting for url
         if ($oVersand->getIdentCode() && $oVersand->getLogistik()) {
             $tracking = [
                 'carrier' => $oVersand->getLogistik(),
                 'code'    => $oVersand->getIdentCode(),
             ];
-            if ($oVersand->getLogistikVarUrl()) {
+            if ($oVersand->getLogistikVarUrl() && self::Plugin('ws5_mollie')->getConfig()->getValue('trackingActive') === 'Y') {
                 $tracking['url'] = $oVersand->getLogistikURL();
             }
             $this->tracking = $tracking;
         }
+
+        $this->tracking = $tracking;
+
 
         // TODO: Wenn alle Lieferschiene in der WAWI erstellt wurden, aber nicht im Shop, kommt status 4.
         if ((int)$this->getCheckout()->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
