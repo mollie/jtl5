@@ -340,9 +340,11 @@ class OrderCheckout extends AbstractCheckout
     {
         //update only order number
         try {
-            if ($this->getMollie()) {
-                $this->getMollie()->orderNumber = $this->getBestellung()->cBestellNr;
-                $this->getMollie()->update(true);
+            if ($order = $this->getMollie()) {
+                $body = [
+                    'orderNumber' => $this->getBestellung()->cBestellNr
+                ];
+                $this->getAPI()->getClient()->orders->update($order->id, $body);
             }
             if ($this->getModel()->cTransactionId) {
                 $this->getAPI()->getClient()->payments->update($this->getModel()->cTransactionId, [
@@ -350,7 +352,7 @@ class OrderCheckout extends AbstractCheckout
                 ]);
             }
         } catch (Exception $e) {
-            $this->Log('OrderCheckout::updateOrderNumber:' . $e->getMessage(), LOGLEVEL_ERROR);
+            $this->Log('Update only orderNumber nOrderCheckout::updateOrderNumber:' . $e->getMessage(), LOGLEVEL_ERROR);
         }
 
         try {
