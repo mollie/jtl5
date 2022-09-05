@@ -7,8 +7,8 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2022-05-03</CreateDate>
-    <Version>1.3.6</Version>
+    <CreateDate>2022-09-05</CreateDate>
+    <Version>1.3.8</Version>
     <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
     <Install>
         <Hooks>
@@ -86,7 +86,19 @@
                         <Option value="N" sort="3"><![CDATA[Nein, ich mache alles manuell.]]></Option>
                     </SelectboxOptions>
                 </Setting>
-                <Setting type="text" initialValue="Order {orderNumber}" sort="47" conf="Y">
+                <Setting type="selectbox" initialValue="N" sort="47" conf="Y">
+                    <Name>Tracking URL den Versandinformationen anfügen?</Name>
+                    <Description>
+                        <![CDATA[Soll die Tracking URL für OrderAPI Methoden an Mollie gesendet werden?
+                        Achtung wenn die Tracking URL nicht im korrekt URL Format ist, wird dies von mollie abgelehnt. In diesem Fall kann der gesamte Versandstatus nicht an mollie übergeben werden.]]>
+                    </Description>
+                    <ValueName>trackingActive</ValueName>
+                    <SelectboxOptions>
+                        <Option value="N" sort="1"><![CDATA[Nein]]></Option>
+                        <Option value="Y" sort="2"><![CDATA[Ja]]></Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="text" initialValue="Order {orderNumber}" sort="48" conf="Y">
                     <Name>Payment API Beschreibung</Name>
                     <Description>
                         <![CDATA[Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung: {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}]]>
@@ -858,6 +870,39 @@
                     <ValueName>dueDays</ValueName>
                 </Setting>
             </Method>
+            <Method>
+                <Name>in3</Name>
+                <PictureURL>images/Payment_methods/in3@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>OTHER</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>In3.php</ClassFile>
+                <ClassName>in3</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>in3</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem in 3 Raten mit in3.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="100" sort="45" conf="Y">
+                    <Name>Gültigkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
         </PaymentMethod>
         <Locales>
             <Variable>
@@ -1093,7 +1138,14 @@
                 <VariableLocalized iso="FRE"><![CDATA[Veuillez virer le montant de %amount% sur le compte indiqué ci-dessous avant le %expiresAt%:\nBénéficiaire: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNuméro de référence : %transferReference%]]></VariableLocalized>
                 <VariableLocalized iso="ITA"><![CDATA[Si prega di trasferire l'importo di %amount% sul conto indicato di seguito entro il %expiresAt%:\nDestinatario: %bankName%\nIBAN: %bankAccount%\nBIC: %bankBic%\nNumero di riferimento: %transferReference%]]></VariableLocalized>
             </Variable>
-
+            <Variable>
+                <Name>paymentNotCompleted</Name>
+                <Description>Error Nachricht, die der Kunde sieht, wenn die Zahlung fehlschlägt und er zurück in den Bestellvorgang weitergeleitet wird.</Description>
+                <VariableLocalized iso="GER"><![CDATA[Bei der Bezahlung über Mollie ist etwas schief gelaufen. Bitte erneut versuchen.]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Something went wrong with the payment via Mollie. Please try again.]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Quelque chose s'est mal passé lors du paiement via Mollie. Veuillez réessayer.]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Qualcosa è andato storto con il pagamento tramite Mollie. Si prega di riprovare.]]></VariableLocalized>
+            </Variable>
         </Locales>
         <Emailtemplate>
             <Template>

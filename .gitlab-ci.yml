@@ -3,6 +3,7 @@ image: registry.webstollen.de/docker/jtl-plugin-ci:master
 stages:
   - test
   - build
+  - pack-and-cleanup
   - release
   - deploy
 
@@ -14,7 +15,7 @@ include:
 code_navigation:
   image: node:14
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
       exists:
         - adminmenu/app/package.json
   allow_failure: true # recommended
@@ -29,7 +30,7 @@ phpunit:
   image: registry.webstollen.de/docker/jtl-plugin-ci:php73
   stage: test
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
       exists:
         - phpunit.xml
   script:
@@ -38,7 +39,7 @@ phpunit:
 composer:
   stage: build
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
       exists:
         - composer.json
   cache:
@@ -59,7 +60,7 @@ composer:
 node:
   stage: build
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
+    - if: $CI_PIPELINE_SOURCE != 'merge_request_event' # prevent unnecessary pipelines on merge-request-branch commit
       exists:
         - adminmenu/app/package.json
   cache:
@@ -91,13 +92,11 @@ node:
       - adminmenu/app/build
 
 pack:
-  stage: release
-  #  needs: [ "node", "composer" ]
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
+  stage: pack-and-cleanup
+  needs: [ "node", "composer" ]
   script:
     - rm -rf .git/ adminmenu/app/src/ adminmenu/app/test/ adminmenu/app/public/ tests/
-    - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml
+    - rm -f .gitlab-ci.yml adminmenu/app/*.js* adminmenu/app/yarn.lock adminmenu/app/README.md adminmenu/cra.sh psalm.xml .php_cs phpcs.xml phpcs-gitlab.xml adminmenu/app/build/static/css/*.map adminmenu/app/build/static/js/*.map
     - |
       if [[ $SKIP_COMPILE = 1 ]]; then
         echo "Skipped Compiler.";
@@ -119,21 +118,21 @@ pack:
     paths:
       - "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip"
 
-#release_job:
-#  stage: release
-#  image: registry.gitlab.com/gitlab-org/release-cli:latest
-#  only:
-#  - tags
-#  script:
-#    - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi
-#  release:
-#    tag_name: $CI_COMMIT_TAG
-#    ref: $CI_COMMIT_SHA
-#    description: 'Release $CI_COMMIT_TAG'
-#    assets:
-#      links:
-#      - name: 'CDN'
-#        url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
+release_job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: '$CI_COMMIT_TAG' # Only on tag creation
+  script:
+    - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi
+  release:
+    tag_name: $CI_COMMIT_TAG
+    ref: $CI_COMMIT_SHA
+    description: 'Release $CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'CDN'
+          url: 'https://ws-download.de/jtl-plugins/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip'
 
 
 upload:
@@ -142,9 +141,8 @@ upload:
   artifacts:
     paths:
       - $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip
-  only:
-    - tags
-    - master
+  rules:
+    - if: '$CI_COMMIT_TAG' # Only on tag creation
   script:
     - aws configure set region eu-central-1
     - if [[ $SKIP_COMPILE = 1 ]]; then export SRC_PREFIX="-src"; fi

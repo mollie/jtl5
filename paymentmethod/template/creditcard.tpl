@@ -27,33 +27,39 @@
         </div>
     {else}
         <div class="form-group">
-            <label for="card-holder" class="col-sm-2 control-label" data-bind="i18n: 'Name on card'"></label>
             <div class="col-sm-10">
+                <label for="card-holder" class="col-sm-2 control-label"
+                       style="display: inline; position: revert; left: revert; padding-inline: 0; margin-inline:0;"
+                       data-bind="i18n: 'Name on card'">{$mollieLang.lbl_cardHolder}</label>
                 <div class="form-control" id="card-holder"></div>
             </div>
             <div id="card-holder-error" class="component-error"></div>
         </div>
         <div class="form-group">
-            <label for="card-number" class="col-sm-2 control-label"
-                   data-bind="i18n: 'Card Number'"></label>
             <div class="col-sm-10">
+                <label for="card-number" class="col-sm-2 control-label"
+                       style="display: inline; position: revert; left: revert; padding-inline: 0; margin-inline:0;"
+                       data-bind="i18n: 'Card Number'">{$mollieLang.lbl_cardNumber}</label>
                 <div class="form-control" id="card-number"></div>
             </div>
             <div id="card-number-error" class="component-error"></div>
         </div>
         <div class="form-group">
-            <label for="expirey-date" class="col-sm-2 control-label"
-                   data-bind="i18n: 'Expiry Date'"></label>
             <div class="col-sm-10">
+                <label for="expirey-date" class="col-sm-2 control-label"
+                       style="display: inline; position: revert; left: revert; padding-inline: 0; margin-inline:0;"
+                       data-bind="i18n: 'Expiry Date'">{$mollieLang.lbl_expiryDate}</label>
                 <div class="form-control" id="expiry-date"></div>
             </div>
             <div id="expiry-date-error" class="component-error"></div>
         </div>
         <div class="form-group">
-            <a onclick="$('.cvchint').fadeToggle(); return false;"
-               style="background: #333;cursor: help; border-radius: 50%;color: white;padding: 0 5px;font-size: 10px;margin-right: 5px;">?</a>
-            <label for="verification-code" class="col-sm-2 control-label" data-bind="i18n: 'CVC/CVV'"></label>
             <div class="col-sm-10">
+                <label for="verification-code" class="col-sm-2 control-label"
+                       style="display: inline; position: revert; left: revert; padding-inline: 0; margin-inline:0;"
+                       data-bind="i18n: 'CVC/CVV'">{$mollieLang.lbl_varificationCode}</label>
+                <a onclick="$('.cvchint').fadeToggle(); return false;"
+                   style="background: #333;cursor: help; border-radius: 50%;color: white;padding: 0 5px;font-size: 10px;margin-right: 5px;">?</a>
                 <div class="form-control" id="verification-code"></div>
 
                 <div class="cvchint" style="display: none; padding: 15px">
@@ -86,8 +92,6 @@
 
 <script src="https://js.mollie.com/v1/mollie.js"></script>
 <script defer>
-    // <!--
-
     const form = document.getElementById("form_payment_extra");
     const submit = form.getElementsByClassName('submit_once');
     const cardToken = document.getElementById('cardToken');
@@ -135,6 +139,5 @@
             }
         });
     });
-    // -->
 </script>
 
