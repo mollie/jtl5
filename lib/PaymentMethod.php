@@ -14,7 +14,7 @@ use JTL\Alert\Alert;
 use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
-use JTL\Plugin\Helper as PluginHelper;
+use JTL\Plugin\Helper as JtlPluginHelper;
 use JTL\Plugin\Payment\Method;
 use JTL\Session\Frontend;
 use JTL\Shop;
@@ -22,7 +22,7 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
-use WS\JTL5\Traits\Plugins;
+use WS\JTL5\V1_0_16\Traits\Plugins;
 
 abstract class PaymentMethod extends Method
 {
@@ -48,7 +48,7 @@ abstract class PaymentMethod extends Method
     {
         parent::init($nAgainCheckout);
 
-        $this->kPlugin = PluginHelper::getIDByModuleID($this->moduleID);
+        $this->kPlugin = JtlPluginHelper::getIDByModuleID($this->moduleID);
 
         return $this;
     }
@@ -78,9 +78,9 @@ abstract class PaymentMethod extends Method
     public function isSelectable(): bool
     {
         if (MollieAPI::getMode()) {
-            $selectable = trim(self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey')) !== '';
+            $selectable = trim(PluginHelper::getSetting('test_apiKey')) !== '';
         } else {
-            $selectable = trim(self::Plugin('ws5_mollie')->getConfig()->getValue('apiKey')) !== '';
+            $selectable = trim(PluginHelper::getSetting('apiKey')) !== '';
             if (!$selectable) {
                 $this->doLog('Live API Key missing!', LOGLEVEL_ERROR);
             }
@@ -122,19 +122,16 @@ abstract class PaymentMethod extends Method
                 if ($country === 'CH') {
                     return 'de_CH';
                 }
-
                 return 'de_DE';
             case 'fre':
                 if ($country === 'BE') {
                     return 'fr_BE';
                 }
-
                 return 'fr_FR';
             case 'dut':
                 if ($country === 'BE') {
                     return 'nl_BE';
                 }
-
                 return 'nl_NL';
             case 'spa':
                 return 'es_ES';
@@ -237,18 +234,19 @@ abstract class PaymentMethod extends Method
                 $paymentOptions['customerId'] = $customerID;
             }
 
+            // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
             $api = self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_api');
 
             $paymentOptions = array_merge($paymentOptions, $this->getPaymentOptions($order, $api));
 
             if ($api === 'payment') {
                 $checkout = PaymentCheckout::factory($order);
-                $payment  = $checkout->create($paymentOptions);
-                $url      = $payment->getCheckoutUrl();
+                $payment = $checkout->create($paymentOptions);
+                $url = $payment->getCheckoutUrl();
             } else {
                 $checkout = OrderCheckout::factory($order);
-                $mOrder   = $checkout->create($paymentOptions);
-                $url      = $mOrder->getCheckoutUrl();
+                $mOrder = $checkout->create($paymentOptions);
+                $url = $mOrder->getCheckoutUrl();
             }
 
             try {
@@ -262,7 +260,7 @@ abstract class PaymentMethod extends Method
 
             if ($url) {
                 ifndef('MOLLIE_REDIRECT_DELAY', 3);
-                $checkoutMode = self::Plugin('ws5_mollie')->getConfig()->getValue('checkoutMode');
+                $checkoutMode = PluginHelper::getSetting('checkoutMode');
                 Shop::Smarty()->assign('redirect', $url)
                     ->assign('checkoutMode', $checkoutMode);
                 if ($checkoutMode === 'Y' && !headers_sent()) {
@@ -278,7 +276,7 @@ abstract class PaymentMethod extends Method
 
             Shop::Container()->getAlertService()->addAlert(
                 Alert::TYPE_ERROR,
-                self::Plugin('ws5_mollie')->getLocalization()->getTranslation('error_create'),
+                PluginHelper::getPlugin()->getLocalization()->getTranslation('error_create'),
                 'paymentFailed'
             );
         }
@@ -307,7 +305,7 @@ abstract class PaymentMethod extends Method
             $checkout->handleNotification($hash);
         } catch (Exception $e) {
             $this->doLog("ERROR: mollie::handleNotification: Bestellung '$order->cBestellNr': {$e->getMessage()}", LOGLEVEL_ERROR);
-            Shop::Container()->getBackendLogService()->addCritical($e->getMessage(), $_REQUEST);
+            Shop::Container()->getBackendLogService()->critical($e->getMessage(), $_REQUEST);
         }
     }
 }

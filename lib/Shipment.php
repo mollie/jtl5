@@ -19,8 +19,8 @@ use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
-use WS\JTL5\Exception\APIException;
-use WS\JTL5\Traits\Plugins;
+use WS\JTL5\V1_0_16\Exception\APIException;
+use WS\JTL5\V1_0_16\Traits\Plugins;
 
 /**
  * Class Shipment
@@ -101,7 +101,7 @@ class Shipment
         if ($checkout->getBestellung()->kBestellung) {
             $oKunde = $checkout->getBestellung()->oKunde ?? new \JTL\Customer\Customer($checkout->getBestellung()->kKunde);
 
-            $shippingActive = self::Plugin('ws5_mollie')->getConfig()->getValue('shippingActive');
+            $shippingActive = PluginHelper::getSetting('shippingActive');
             if ($shippingActive === 'N') {
                 throw new RuntimeException('Shipping deaktiviert');
             }
@@ -115,7 +115,7 @@ class Shipment
                 try {
                     $shipment = new self($oLieferschein->getLieferschein(), $checkout);
 
-                    $mode = self::Plugin('ws5_mollie')->getConfig()->getValue('shippingMode');
+                    $mode = PluginHelper::getSetting('shippingMode');
                     switch ($mode) {
                         case 'A':
                             // ship directly
@@ -258,7 +258,7 @@ class Shipment
                 'carrier' => $oVersand->getLogistik(),
                 'code'    => $oVersand->getIdentCode(),
             ];
-            if ($oVersand->getLogistikVarUrl() && self::Plugin('ws5_mollie')->getConfig()->getValue('trackingActive') === 'Y') {
+            if ($oVersand->getLogistikVarUrl() && PluginHelper::getSetting('trackingActive')) {
                 $tracking['url'] = $oVersand->getLogistikURL();
             }
             $this->tracking = $tracking;
@@ -295,7 +295,7 @@ class Shipment
 
         /** @var Lieferscheinpos $oLieferschienPos */
         foreach ($this->getLieferschein()->oLieferscheinPos_arr as $oLieferschienPos) {
-            $wkpos = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM twarenkorbpos WHERE kBestellpos = :kBestellpos', [
+            $wkpos = PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM twarenkorbpos WHERE kBestellpos = :kBestellpos', [
                 ':kBestellpos' => $oLieferschienPos->getBestellPos()
             ], 1);
 

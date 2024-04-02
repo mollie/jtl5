@@ -1,0 +1,283 @@
+[
+  {
+    "settingType": "heading",
+    "label": "Mollie API"
+  },
+  {
+    "id": "apiKey",
+    "label": "Live Key",
+    "description": "Füge hier deinen Mollie API Key ein",
+    "settingType": "input",
+    "type": "string",
+    "defaultValue": ""
+  },
+  {
+    "id": "test_apiKey",
+    "label": "Test Key",
+    "description": "Füge hier deinen Mollie Test-API Key ein",
+    "settingType": "input",
+    "type": "string",
+    "defaultValue": ""
+  },
+  {
+    "id": "profileId",
+    "label": "Profil ID",
+    "description": "Die ProfilID wird benötigt, um Mollie Components zu verwenden",
+    "settingType": "input",
+    "type": "string",
+    "defaultValue": ""
+  },
+  {
+    "id": "testAsAdmin",
+    "label": "Test API als Admin",
+    "description": "Wenn diese Einstellung aktiviert ist, wird im Shop automatisch die TestAPI verwendet, wenn man als Admin im Backend eingeloggt ist.",
+    "settingType": "checkbox",
+    "defaultValue": true
+  },
+  {
+    "settingType": "heading",
+    "label": "Bestellung und Versand"
+  },
+  {
+    "id": "hideCompleted",
+    "label": "Abgeschlossene Bestellungen ausblenden",
+    "description": "Wenn diese Einstellung aktiviert ist, werden versendete, bezahlte Bestellungen nicht in der Tabelle angezeigt.",
+    "settingType": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "id": "autoRefund",
+    "label": "Bestellungen automatisch bei Mollie stornieren",
+    "description": "Wenn diese Einstellung aktiviert ist, werden komplett stornierte Bestellungen auch bei Mollie storniert oder rückerstattet.",
+    "settingType": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "id": "autoStorno",
+    "label": "Unbezahlte Bestellungen stornieren",
+    "description": "Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)",
+    "settingType": "input",
+    "type": "int",
+    "defaultValue": 0
+  },
+  {
+    "id": "onlyPaid",
+    "label": "Nur bezahlte Bestellungen in die WAWI übertragen",
+    "description": "Wenn diese Einstellung deaktiviert ist, können alle Bestellungen direkt von der WAWI abgerufen werden.",
+    "settingType": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "id": "shippingActive",
+    "label": "Versand bei Mollie",
+    "description": "Soll Versandinformation für OrderAPI Methoden an Mollie gesendet werden?",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "Y",
+    "selectItems": [
+      {"value": "Y" , "label": "Ja"},
+      {"value": "K" , "label": "Nur Kunden & Komplettversand"},
+      {"value": "N" , "label": "Nein, ich mache alles manuell."}
+    ]
+  },
+  {
+    "id": "shippingMode",
+    "label": "Teilversand Verhalten",
+    "description": "Bei Gastbestellungen und Teilversand.",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "B",
+    "selectItems": [
+      {"value": "A" , "label": "Direkt alles versenden"},
+      {"value": "B" , "label": "Erst bei komplett Versand versenden"}
+    ]
+  },
+  {
+    "id": "trackingActive",
+    "label": "Tracking URL den Versandinformationen anfügen?",
+    "description": "Soll die Tracking URL für OrderAPI Methoden an Mollie gesendet werden?\n                        Achtung wenn die Tracking URL nicht im korrekt URL Format ist, wird dies von mollie abgelehnt. In diesem Fall kann der gesamte Versandstatus nicht an mollie übergeben werden.",
+    "settingType": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "settingType": "heading",
+    "label": "Allgemein"
+  },
+  {
+    "id": "paymentDescTpl",
+    "label": "Payment API Beschreibung",
+    "description": "Beschreibung der Zahlung in Mollie. Folgende Variablen stehen zur Verfgung: {orderNumber}, {storeName}, {customer.firstname}, {customer.lastname}, {customer.company}",
+    "settingType": "input",
+    "type": "string",
+    "defaultValue": "Order {orderNumber}"
+  },
+  {
+    "id": "resetMethod",
+    "label": "Zahlart bei erneutem Zahlvorgang zurücksetzen",
+    "description": "Wenn diese Einstellung aktiviert ist, wird versucht, die im Bestellvorgang ausgewählte Mollie-Zahlungsart zurückzusetzen, somit kann der Kunde zwischen allen aktiven Mollie-Zahlarten zu wählen.",
+    "settingType": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "id": "fallbackLocale",
+    "label": "Fallback-Locale",
+    "description": "Fallback, falls Locale nicht erkannt oder nicht vorhanden.",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "de_DE",
+    "selectItems": [
+      {
+        "value": "en_US",
+        "label": "en_US"
+      },
+      {
+        "value": "nl_NL",
+        "label": "nl_NL"
+      },
+      {
+        "value": "nl_BE",
+        "label": "nl_BE"
+      },
+      {
+        "value": "fr_FR",
+        "label": "fr_FR"
+      },
+      {
+        "value": "fr_BE",
+        "label": "fr_BE"
+      },
+      {
+        "value": "de_DE",
+        "label": "de_DE"
+      },
+      {
+        "value": "de_AT",
+        "label": "de_AT"
+      },
+      {
+        "value": "de_CH",
+        "label": "de_CH"
+      },
+      {
+        "value": "es_ES",
+        "label": "es_ES"
+      },
+      {
+        "value": "ca_ES",
+        "label": "ca_ES"
+      },
+      {
+        "value": "pt_PT",
+        "label": "pt_PT"
+      },
+      {
+        "value": "it_IT",
+        "label": "it_IT"
+      },
+      {
+        "value": "nb_NO",
+        "label": "nb_NO"
+      },
+      {
+        "value": "sv_SE",
+        "label": "sv_SE"
+      },
+      {
+        "value": "fi_FI",
+        "label": "fi_FI"
+      },
+      {
+        "value": "da_DK",
+        "label": "da_DK"
+      },
+      {
+        "value": "is_IS",
+        "label": "is_IS"
+      },
+      {
+        "value": "hu_HU",
+        "label": "hu_HU"
+      },
+      {
+        "value": "pl_PL",
+        "label": "pl_PL"
+      },
+      {
+        "value": "lv_LV",
+        "label": "lv_LV"
+      },
+      {
+        "value": "lt_LT",
+        "label": "lt_LT"
+      }
+    ]
+  },
+  {
+    "id": "klarnaEID",
+    "label": "Klarna EID",
+    "description": "Von Klarna vergebene und dem Händler bekannte ShopID. Benötigt für die korrekte Checkbox-Verlinkung bei Klarna Zahlarten.",
+    "settingType": "input",
+    "type": "string",
+    "defaultValue": ""
+  },
+  {
+    "id": "reminder",
+    "label": "Zahlungserinnerung",
+    "description": "Soll bei fehlgeschlagener Zahlung ein Zahlungslink verschickt werden? Angabe in Minuten nach Bestellung. (0 = deaktiviert)",
+    "settingType": "input",
+    "type": "int",
+    "defaultValue": 0
+  },
+  {
+    "id": "useCustomerAPI",
+    "label": "Kunden bei Mollie anlegen (Customer API)",
+    "description": "Wenn diese Einstellung aktiviert ist, hat der Kunde die Möglichkeit, per Checkbox, seine Kundendaten bei Mollie zu speichern. Z.B. für Single-Click Checkout benötigt.",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "C",
+    "selectItems": [
+      {"value": "C" , "label": "Ja, Checkbox"},
+      {"value": "N" , "label": "Nein"}
+    ]
+  },
+  {
+    "id": "checkoutMode",
+    "label": "Bestellabschluss Weiterleitung",
+    "description": "Hier kann das Bestellabschluss-Verhalten eingestellt werden.",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "Y",
+    "selectItems": [
+      {"value": "Y" , "label": "Direkt weiterleiten"},
+      {"value": "D" , "label": "Nach 3 Sekunden weiterleiten"},
+      {"value": "N" , "label": "Nicht automatisch weiterleiten"}
+    ]
+  },
+  {
+    "id": "paymentID",
+    "label": "ID im Zahlungseingang",
+    "description": "Welche ID soll im Zahlungseingang hinterlegt werden? (außer PayPal))",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "tr",
+    "selectItems": [
+      {"value": "api" , "label": "Je nach API, Order- oder Payment-ID verwenden"},
+      {"value": "tr" , "label": "Immer Payment-ID verwenden"}
+    ]
+  },
+  {
+    "id": "notifications",
+    "label": "Mitteilungen (Glocke)",
+    "description": "Welche Infos sollen in den Mitteilungen erschienen?",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "Y",
+    "isHidden": true,
+    "selectItems": [
+      {"value": "Y" , "label": "Queue &amp; Authorized"},
+      {"value": "Q" , "label": "Nur Queue"},
+      {"value": "A" , "label": "Nur Authorized"},
+      {"value": "N" , "label": "Keine"}
+    ]
+  }
+]

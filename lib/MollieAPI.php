@@ -15,7 +15,7 @@ use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\MollieApiClient;
-use WS\JTL5\Traits\Plugins;
+use WS\JTL5\V1_0_16\Traits\Plugins;
 
 class MollieAPI
 {
@@ -49,7 +49,7 @@ class MollieAPI
     public static function getMode(): bool
     {
         try {
-            if (self::Plugin('ws5_mollie')->getConfig()->getValue('testAsAdmin') === 'on' && self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey') !== '') {
+            if (PluginHelper::getSetting('testAsAdmin') && PluginHelper::getSetting('test_apiKey') !== '') {
                 $_GET['fromAdmin'] = 'yes';
 
                 return Shop::isAdmin(true);
@@ -75,7 +75,7 @@ class MollieAPI
             ]));
             $this->client->setApiKey(self::getAPIKey($this->test));
             $this->client->addVersionString('JTL-Shop/' . APPLICATION_VERSION);
-            $this->client->addVersionString('ws5_mollie/' . self::Plugin('ws5_mollie')->getCurrentVersion());
+            $this->client->addVersionString('ws5_mollie/' . PluginHelper::getPlugin()->getCurrentVersion());
         }
 
         return $this->client;
@@ -88,10 +88,10 @@ class MollieAPI
     protected static function getAPIKey(bool $test): string
     {
         if ($test) {
-            return self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey');
+            return PluginHelper::getSetting('test_apiKey');
         }
 
-        return self::Plugin('ws5_mollie')->getConfig()->getValue('apiKey');
+        return PluginHelper::getSetting('apiKey');
     }
 
     /**

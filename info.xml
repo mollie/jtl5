@@ -7,9 +7,9 @@
     <XMLVersion>102</XMLVersion>
     <ShopVersion>5.0.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
-    <CreateDate>2022-09-05</CreateDate>
-    <Version>1.3.8</Version>
-    <ExsID>689388c6-9f04-4648-b516-e67d96b0dc1d</ExsID>
+    <CreateDate>2023-02-13</CreateDate>
+    <Version>1.5.0</Version>
+    <ExsID></ExsID>
     <Install>
         <Hooks>
             <Hook id="131">hooks/131.php</Hook>
@@ -244,7 +244,6 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Wähle eine aus vielen Zahlungsmöglichkeiten.</InfoText>
                 </MethodLanguage>
-
                 <Setting type="selectbox" initialValue="order" sort="10" conf="Y">
                     <Name>API</Name>
                     <Description>Welche API soll verwendet werden?</Description>
@@ -255,7 +254,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="20" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -268,7 +267,7 @@
                 <SendMail>1</SendMail>
                 <Provider>Mollie</Provider>
                 <TSCode>CREDIT_CARD</TSCode>
-                <PreOrder>0</PreOrder>
+                <PreOrder>1</PreOrder>
                 <Soap>0</Soap>
                 <Curl>1</Curl>
                 <Sockets>0</Sockets>
@@ -277,9 +276,9 @@
                 <TemplateFile>template/index.tpl</TemplateFile>
                 <AdditionalTemplateFile>template/creditcard.tpl</AdditionalTemplateFile>
                 <MethodLanguage iso="GER">
-                    <Name>Kreditkarte</Name>
+                    <Name>Kredit-/Debitkarte</Name>
                     <ChargeName>Mollie</ChargeName>
-                    <InfoText>Bezahlen Sie bequem mit Kreditkarte.</InfoText>
+                    <InfoText>Bezahlen Sie bequem mit Kredit-/Debitkarte.</InfoText>
                 </MethodLanguage>
                 <Setting type="selectbox" initialValue="S" sort="30" conf="Y">
                     <Name>Mollie Components</Name>
@@ -312,7 +311,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -346,7 +345,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -380,7 +379,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -404,8 +403,16 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem auf Rechnung mit Klarna.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="zahl" initialValue="28" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -438,8 +445,16 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem in Raten mit Klarna.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="zahl" initialValue="28" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -472,6 +487,14 @@
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem und direkt mit Klarna Pay Now.</InfoText>
                 </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                    </SelectboxOptions>
+                </Setting>
                 <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
                     <Name>AGB Checkbox für Klarna anzeigen</Name>
                     <Description>Klarna Integration konform mit Trusted Shops</Description>
@@ -482,7 +505,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="28" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -516,7 +539,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -550,7 +573,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -584,7 +607,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -618,7 +641,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -652,7 +675,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -686,7 +709,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -729,7 +752,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="50" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Überweisung zu tätigen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -763,7 +786,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -797,7 +820,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -831,7 +854,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -865,7 +888,7 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
@@ -898,8 +921,109 @@
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="100" sort="45" conf="Y">
-                    <Name>Gültigkeit in Tagen</Name>
+                    <Name>Fälligkeit in Tagen</Name>
                     <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
+            <Method>
+                <Name>Billie</Name>
+                <PictureURL>images/Payment_methods/billie@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>INVOICE</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Billie.php</ClassFile>
+                <ClassName>Billie</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Rechnungskauf für Firmenkunden</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem auf Rechnung mit Billie.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="28" sort="45" conf="Y">
+                    <Name>Fälligkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
+            <Method>
+                <Name>Twint</Name>
+                <PictureURL>images/Payment_methods/twint@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>INVOICE</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Twint.php</ClassFile>
+                <ClassName>Twint</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>TWINT</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit TWINT.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="28" sort="45" conf="Y">
+                    <Name>Fälligkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
+            <Method>
+                <Name>Blik</Name>
+                <PictureURL>images/Payment_methods/blik@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>INVOICE</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Blik.php</ClassFile>
+                <ClassName>Blik</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Blik</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit Blik.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="28" sort="45" conf="Y">
+                    <Name>Fälligkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
                     <ValueName>dueDays</ValueName>
                 </Setting>
             </Method>
@@ -916,10 +1040,10 @@
             <Variable>
                 <Name>cctitle</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Kreditkarten-Informationen]]></VariableLocalized>
-                <VariableLocalized iso="ENG"><![CDATA[Enter your credit card information]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[Kredit-/Debitkarten Informationen]]></VariableLocalized>
+                <VariableLocalized iso="ENG"><![CDATA[Enter your credit/debit card information]]></VariableLocalized>
                 <VariableLocalized iso="FRE"><![CDATA[Informations de paiement]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Informazioni sulla Carta di Credito]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Informazioni sulla Carta di Credito/Debito]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>error_canceled</Name>
@@ -996,11 +1120,11 @@
             <Variable>
                 <Name>lbl_cardNumber</Name>
                 <Description></Description>
-                <VariableLocalized iso="GER"><![CDATA[Kreditkartennummer:]]></VariableLocalized>
+                <VariableLocalized iso="GER"><![CDATA[Kredit-/Debitkartennummer:]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Card number:]]></VariableLocalized>
-                <VariableLocalized iso="FRE"><![CDATA[Numro de carte de credit:]]></VariableLocalized>
+                <VariableLocalized iso="FRE"><![CDATA[Numro de carte de credit/debit:]]></VariableLocalized>
                 <VariableLocalized iso="DUT"><![CDATA[Creditcardnummer:]]></VariableLocalized>
-                <VariableLocalized iso="ITA"><![CDATA[Numero Carta di credito:]]></VariableLocalized>
+                <VariableLocalized iso="ITA"><![CDATA[Numero Carta di credito/debito:]]></VariableLocalized>
             </Variable>
             <Variable>
                 <Name>lbl_expiryDate</Name>
@@ -1094,7 +1218,7 @@
                 <Name>checkboxText</Name>
                 <Description>Text der Checkbox, um einen Kunden bei Mollie anzulegen</Description>
                 <VariableLocalized iso="GER">
-                    <![CDATA[Zahlungsinformationen beim Anbieter speichen]]></VariableLocalized>
+                    <![CDATA[Zahlungsinformationen beim Anbieter speichern]]></VariableLocalized>
                 <VariableLocalized iso="ENG"><![CDATA[Save payment information with the provider]]></VariableLocalized>
                 <VariableLocalized iso="FRE">
                     <![CDATA[Enregistrer les informations de paiement avec le fournisseur]]></VariableLocalized>

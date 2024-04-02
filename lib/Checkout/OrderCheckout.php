@@ -24,6 +24,7 @@ use Mollie\Api\Types\OrderStatus;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Order\Address;
 use Plugin\ws5_mollie\lib\Order\OrderLine as WSOrderLine;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use RuntimeException;
 use stdClass;
 
@@ -58,7 +59,7 @@ class OrderCheckout extends AbstractCheckout
             try {
                 $this->order = $this->getAPI()->getClient()->orders->get($this->getModel()->cOrderId, ['embed' => 'payments']);
                 if (in_array($this->order->status, [OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_PAID, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PENDING], true)) {
-                    $this->Log(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
+                    $this->Log(PluginHelper::getPlugin()->getLocalization()->getTranslation('errAlreadyPaid'));
 
                     return $this->order;
                 }
@@ -208,9 +209,10 @@ class OrderCheckout extends AbstractCheckout
             define('MOLLIE_KLARNA_MAX_EXPIRY_LIMIT', 28);
         }
 
+        // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
         if (($dueDays = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->getPaymentMethod()->moduleID . '_dueDays')) && $dueDays > 0) {
-            $max             = $this->method && strpos($this->method, 'klarna') !== false ? MOLLIE_KLARNA_MAX_EXPIRY_LIMIT : MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT;
-            $date            = new DateTime(sprintf('+%d DAYS', min($dueDays, $max)), new DateTimeZone('UTC'));
+            $max = $this->method && strpos($this->method, 'klarna') !== false ? MOLLIE_KLARNA_MAX_EXPIRY_LIMIT : MOLLIE_DEFAULT_MAX_EXPIRY_LIMIT;
+            $date = new DateTime(sprintf('+%d DAYS', min($dueDays, $max)), new DateTimeZone('UTC'));
             $this->expiresAt = $date->format('Y-m-d');
         }
 
@@ -294,7 +296,7 @@ class OrderCheckout extends AbstractCheckout
                 $this->mollie = $payment;
 
                 $cHinweis = $payment->details->paypalReference ?? $payment->id;
-                if (self::Plugin('ws5_mollie')->getConfig()->getValue('paymentID') === 'api') {
+                if (PluginHelper::getSetting('paymentID') === 'api') {
                     $cHinweis = $this->getMollie()->id;
                 }
 

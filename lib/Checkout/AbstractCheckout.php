@@ -37,12 +37,12 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\Order\Amount;
-use Plugin\ws5_mollie\lib\Shipment;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
 use stdClass;
-use WS\JTL5\Model\ModelInterface;
-use WS\JTL5\Traits\Plugins;
+use WS\JTL5\V1_0_16\Model\ModelInterface;
+use WS\JTL5\V1_0_16\Traits\Plugins;
 
 /**
  * Class AbstractCheckout
@@ -110,7 +110,7 @@ abstract class AbstractCheckout
         $logger = Shop::Container()->getLogService();
 
         try {
-            if ($paymentSession = Shop::Container()->getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash)) {
+            if ($paymentSession = PluginHelper::getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash)) {
                 if (session_id() !== $paymentSession->cSID) {
                     session_destroy();
                     session_id($paymentSession->cSID);
@@ -146,7 +146,7 @@ abstract class AbstractCheckout
 
                     if ($order->kBestellung) {
                         $paymentSession->kBestellung = $order->kBestellung;
-                        Shop::Container()->getDB()->update('tzahlungsession', 'cZahlungsID', $sessionHash, $paymentSession);
+                        PluginHelper::getDB()->update('tzahlungsession', 'cZahlungsID', $sessionHash, $paymentSession);
 
                         try {
                             $checkout = self::fromID($id, false, $order);
@@ -185,7 +185,7 @@ abstract class AbstractCheckout
                 throw new Exception(sprintf('PaymentSession nicht gefunden: %s - ID: %s => Queue', $sessionHash, $id));
             }
         } catch (Exception $e) {
-            $logger->error($e->getMessage());
+            $logger->notice(__NAMESPACE__ . ' finalize order:' . $e->getMessage());
         }
     }
 
@@ -313,7 +313,7 @@ abstract class AbstractCheckout
 
                     $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO));
 
-                    $oZahlungsart = Shop::Container()->getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
+                    $oZahlungsart = PluginHelper::getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
                     if ($oZahlungsart && (int)$oZahlungsart->nMailSenden & ZAHLUNGSART_MAIL_EINGANG) {
                         $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
                     }
@@ -361,8 +361,8 @@ abstract class AbstractCheckout
         }
 
         $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: ModelInterface::NULL;
-        $this->getModel()->cBestellNr  = $this->getBestellung()->cBestellNr;
-        $this->getModel()->bSynced     = $this->getModel()->bSynced ?? (self::Plugin('ws5_mollie')->getConfig()->getValue('onlyPaid') !== 'on');
+        $this->getModel()->cBestellNr = $this->getBestellung()->cBestellNr;
+        $this->getModel()->bSynced = $this->getModel()->bSynced ?? !PluginHelper::getSetting('onlyPaid');
 
         return $this;
     }
@@ -398,7 +398,7 @@ abstract class AbstractCheckout
     public function completlyPaid(): bool
     {
         if (
-            $row = Shop::Container()->getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
+            $row = PluginHelper::getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
                 ':kBestellung' => $this->oBestellung->kBestellung
             ], 1)
         ) {
@@ -418,7 +418,7 @@ abstract class AbstractCheckout
     public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
     {
         if ($oBestellung->cAbgeholt === 'Y' && !$model->bSynced) {
-            Shop::Container()->getDB()->update('tbestellung', 'kBestellung', $oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
+            PluginHelper::getDB()->update('tbestellung', 'kBestellung', $oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
             $model->bSynced = true;
 
             try {
@@ -469,15 +469,15 @@ abstract class AbstractCheckout
     public static function isMollie(int $kBestellung, bool $checkZA = false): bool
     {
         if ($checkZA) {
-            $res = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId LIKE :cModulId AND kZahlungsart = :kZahlungsart', [
+            $res = PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId LIKE :cModulId AND kZahlungsart = :kZahlungsart', [
                 ':kZahlungsart' => $kBestellung,
-                ':cModulId'     => 'kPlugin_' . self::Plugin('ws5_mollie')->getID() . '%'
+                ':cModulId' => 'kPlugin_' . PluginHelper::getPlugin()->getID() . '%'
             ], 1);
 
             return (bool)$res;
         }
 
-        return ($res = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
+        return ($res = PluginHelper::getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
                 ':kBestellung' => $kBestellung,
             ], 1)) && $res->kId;
     }
@@ -524,10 +524,10 @@ abstract class AbstractCheckout
      */
     public static function sendReminders(): void
     {
-        $reminder = (int)self::Plugin('ws5_mollie')->getConfig()->getValue('reminder');
+        $reminder = (int)PluginHelper::getSetting('reminder');
 
         if (!$reminder) {
-            Shop::Container()->getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET dReminder = :dReminder WHERE dReminder IS NULL', [
+            PluginHelper::getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET dReminder = :dReminder WHERE dReminder IS NULL', [
                 ':dReminder' => date('Y-m-d H:i:s')
             ], 3);
 
@@ -535,7 +535,7 @@ abstract class AbstractCheckout
         }
         // TODO: DOKU
         ifndef('MOLLIE_REMINDER_LIMIT_DAYS', 7);
-        $remindables = Shop::Container()->getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE (dReminder IS NULL OR dReminder = '0000-00-00 00:00:00') AND dCreated > NOW() - INTERVAL " . MOLLIE_REMINDER_LIMIT_DAYS . " DAY AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
+        $remindables = PluginHelper::getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE (dReminder IS NULL OR dReminder = '0000-00-00 00:00:00') AND dCreated > NOW() - INTERVAL " . MOLLIE_REMINDER_LIMIT_DAYS . " DAY AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
             ':d' => $reminder
         ], 2);
         foreach ($remindables as $remindable) {
@@ -569,7 +569,7 @@ abstract class AbstractCheckout
         $oBestellung = new Bestellung($order->kBestellung);
         $repayURL    = Shop::getURL() . '/?m_pay=' . md5($order->kId . '-' . $order->kBestellung);
 
-        $data         = new stdClass();
+        $data = new stdClass();
         $data->tkunde = new Customer($oBestellung->kKunde);
         if (!$data->tkunde->kKunde) {
             $order->dReminder = date('Y-m-d H:i:s');
@@ -578,12 +578,12 @@ abstract class AbstractCheckout
             throw new Exception("Kunde '$oBestellung->kKunde' nicht gefunden.");
         }
         $data->Bestellung = $oBestellung;
-        $data->PayURL     = $repayURL;
-        $data->Amount     = Preise::getLocalizedPriceString($order->fAmount, Currency::fromISO($order->cCurrency), false);
+        $data->PayURL = $repayURL;
+        $data->Amount = Preise::getLocalizedPriceString($order->fAmount, Currency::fromISO($order->cCurrency), false);
 
         $mailer = Shop::Container()->get(Mailer::class);
-        $mail   = new Mail();
-        $mail->createFromTemplateID('kPlugin_' . self::Plugin('ws5_mollie')->getID() . '_zahlungserinnerung', $data);
+        $mail = new Mail();
+        $mail->createFromTemplateID('kPlugin_' . PluginHelper::getPlugin()->getID() . '_zahlungserinnerung', $data);
 
         $order->dReminder = date('Y-m-d H:i:s');
         $order->save();
@@ -625,7 +625,7 @@ abstract class AbstractCheckout
 
             if (
                 defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
-                && (self::Plugin('ws5_mollie')->getConfig()->getValue('resetMethod') !== 'on' || !$this->getMollie())
+                && (!PluginHelper::getSetting('resetMethod') || !$this->getMollie())
             ) {
                 $this->method = $this->getPaymentMethod()::METHOD;
             }
@@ -700,7 +700,7 @@ abstract class AbstractCheckout
             }
             $log[] = sprintf("Cancel order '%s'.", $this->getBestellung()->cBestellNr);
 
-            if (Shop::Container()->getDB()->executeQueryPrepared('UPDATE tbestellung SET cAbgeholt = "N", cStatus = :cStatus WHERE kBestellung = :kBestellung', [':cStatus' => '-1', ':kBestellung' => $this->getBestellung()->kBestellung], 3)) {
+            if (PluginHelper::getDB()->executeQueryPrepared('UPDATE tbestellung SET cAbgeholt = "N", cStatus = :cStatus WHERE kBestellung = :kBestellung', [':cStatus' => '-1', ':kBestellung' => $this->getBestellung()->kBestellung], 3)) {
                 $this->Log(implode('\n', $log));
             }
         }
@@ -709,7 +709,7 @@ abstract class AbstractCheckout
     protected static function aktualisiereLagerbestand(Artikel $product, int $amount, array $attributeValues, int $productFilter = 1)
     {
         $inventory = $product->fLagerbestand;
-        $db        = Shop::Container()->getDB();
+        $db = PluginHelper::getDB();
         if ($product->cLagerBeachten !== 'Y') {
             return $inventory;
         }
@@ -779,8 +779,8 @@ abstract class AbstractCheckout
      */
     public function getDescription(): string
     {
-        $descTemplate = trim(self::Plugin('ws5_mollie')->getConfig()->getValue('paymentDescTpl')) ?: 'Order {orderNumber}';
-        $oKunde       = $this->getBestellung()->oKunde ?: $_SESSION['Kunde'];
+        $descTemplate = trim(PluginHelper::getSetting('paymentDescTpl')) ?: 'Order {orderNumber}';
+        $oKunde = $this->getBestellung()->oKunde ?: $_SESSION['Kunde'];
 
         return str_replace([
             '{orderNumber}',

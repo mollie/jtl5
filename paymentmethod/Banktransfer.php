@@ -12,6 +12,7 @@ use JTL\Session\Frontend;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\PaymentMethod;
+use Plugin\ws5_mollie\lib\PluginHelper;
 
 class Banktransfer extends PaymentMethod
 {
@@ -23,11 +24,12 @@ class Banktransfer extends PaymentMethod
     public function generatePUI(AbstractCheckout $checkout): string
     {
 
-        if(self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_usePUI') === 'N'){
+        // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
+        if (self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_usePUI') === 'N') {
             return false;
         }
 
-        $template = self::Plugin('ws5_mollie')->getLocalization()->getTranslation('banktransferPUI');
+        $template = PluginHelper::getPlugin()->getLocalization()->getTranslation('banktransferPUI');
 
         return str_replace(
             [
@@ -55,8 +57,9 @@ class Banktransfer extends PaymentMethod
         $paymentOptions = [];
         if ($apiType === 'payment') {
             $paymentOptions['billingEmail'] = $order->oRechnungsadresse->cMail;
-            $paymentOptions['locale']       = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), $order->oRechnungsadresse->cLand);
-            $dueDays                        = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_dueDays');
+            $paymentOptions['locale'] = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), $order->oRechnungsadresse->cLand);
+            // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
+            $dueDays = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_dueDays');
             if ($dueDays > 3) {
                 $paymentOptions['dueDate'] = date('Y-m-d', strtotime("+{$dueDays} DAYS"));
             }

@@ -16,6 +16,7 @@ use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use RuntimeException;
 use stdClass;
 
@@ -42,7 +43,7 @@ class PaymentCheckout extends AbstractCheckout
             try {
                 $this->payment = $this->getAPI()->getClient()->payments->get($this->getModel()->cOrderId);
                 if (in_array($this->payment->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID], true)) {
-                    $this->Log(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
+                    $this->Log(PluginHelper::getPlugin()->getLocalization()->getTranslation('errAlreadyPaid'));
 
                     return $this->payment;
                 }

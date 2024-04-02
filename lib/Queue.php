@@ -17,7 +17,8 @@ use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use RuntimeException;
-use WS\JTL5\Traits\Plugins;
+use WS\JTL5\V1_0_16\Helper\AbstractPluginHelper;
+use WS\JTL5\V1_0_16\Traits\Plugins;
 
 class Queue
 {
@@ -49,7 +50,7 @@ class Queue
                             break;
                     }
                 } catch (Exception $e) {
-                    Shop::Container()->getLogService()->error('Mollie Queue Fehler: ' . $e->getMessage() . " ($type, $id)");
+                    Shop::Container()->getLogService()->notice('Mollie Queue Fehler: ' . $e->getMessage() . " ($type, $id)");
                     $todo->cError = "{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
                     $todo->done();
                 }
@@ -68,9 +69,9 @@ class Queue
         if (!defined('MOLLIE_HOOK_DELAY')) {
             define('MOLLIE_HOOK_DELAY', 3);
         }
-        $open = Shop::Container()->getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE (dDone IS NULL OR dDone = '0000-00-00 00:00:00') AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%' AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE))) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
+        $open = PluginHelper::getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE (dDone IS NULL OR dDone = '0000-00-00 00:00:00') AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%' AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE))) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
             ':LIMIT' => $limit,
-            ':hd'    => MOLLIE_HOOK_DELAY
+            ':hd' => MOLLIE_HOOK_DELAY
         ], 2);
 
         foreach ($open as $_raw) {
@@ -84,7 +85,12 @@ class Queue
      */
     protected static function lock(QueueModel $todo): bool
     {
-        return $todo->kId && Shop::Container()->getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NOW() WHERE `bLock` IS NULL AND kId = :kId', QueueModel::TABLE), [
+        // Validation should not be necessary here since QueueModel::TABLE is a constant, but we do it anyway to lead by example
+        if (!AbstractPluginHelper::isAlphaNumericPlus(QueueModel::TABLE)) {
+            return false;
+        }
+
+        return $todo->kId && PluginHelper::getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NOW() WHERE `bLock` IS NULL AND kId = :kId', QueueModel::TABLE), [
                 'kId' => $todo->kId
             ], 3) >= 1;
     }
@@ -109,15 +115,15 @@ class Queue
 
     /**
      * @param int        $hook
-     * @param QueueModel $qm
-     * @throws Exception
+     * @param QueueModel $queueModel
+     * @return bool
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
-     * @return bool
+     * @throws Exception
      */
-    protected static function handleHook(int $hook, QueueModel $qm): bool
+    protected static function handleHook(int $hook, QueueModel $queueModel): bool
     {
-        $data = unserialize($qm->cData); //, [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
+        $data = unserialize($queueModel->cData); //, [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
         if (array_key_exists('kBestellung', $data)) {
             switch ($hook) {
                 case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
@@ -126,17 +132,17 @@ class Queue
 
                         $result = '';
                         if ((int)$checkout->getBestellung()->cStatus < BESTELLUNG_STATUS_VERSANDT) {
-                            return $qm->done("Bestellung noch nicht versendet: {$checkout->getBestellung()->cStatus}");
+                            return $queueModel->done("Bestellung noch nicht versendet: {$checkout->getBestellung()->cStatus}");
                         }
 
                         if (!count($checkout->getBestellung()->oLieferschein_arr)) {
                             if (!defined('MOLLIE_HOOK_DELAY')) {
                                 define('MOLLIE_HOOK_DELAY', 3);
                             }
-                            $qm->dCreated = date('Y-m-d H:i:s', strtotime(sprintf('+%d MINUTES', MOLLIE_HOOK_DELAY)));
-                            $qm->cResult  = 'Noch keine Lieferscheine, delay...';
+                            $queueModel->dCreated = date('Y-m-d H:i:s', strtotime(sprintf('+%d MINUTES', MOLLIE_HOOK_DELAY)));
+                            $queueModel->cResult  = 'Noch keine Lieferscheine, delay...';
 
-                            return $qm->save();
+                            return $queueModel->save();
                         }
 
                         if (
@@ -181,17 +187,20 @@ class Queue
                             $result = 'Nothing to do.';
                         }
 
-                        return $qm->done($result);
+                        return $queueModel->done($result);
                     }
 
-                    return $qm->done('kBestellung missing');
+                    return $queueModel->done('kBestellung missing');
                 case HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO:
-                    if (self::Plugin('ws5_mollie')->getConfig()->getValue('autoRefund') !== 'on') {
+                    if (!PluginHelper::getSetting('autoRefund')) {
                         throw new RuntimeException('Auto-Refund disabled');
                     }
                     $checkout = AbstractCheckout::fromBestellung((int)$data['kBestellung']);
 
-                    return $qm->done($checkout->cancelOrRefund());
+                    if (!isset($checkout)){
+                        return $queueModel->done("No Checkout found for kBestellung:" . (int)$data['kBestellung']);
+                    }
+                    return $queueModel->done($checkout->cancelOrRefund());
             }
         }
 
@@ -204,7 +213,12 @@ class Queue
      */
     protected static function unlock(QueueModel $qm): bool
     {
-        return $qm->kId && Shop::Container()->getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NULL WHERE kId = :kId OR bLock < DATE_SUB(NOW(), INTERVAL 15 MINUTE)', QueueModel::TABLE), [
+        // Validation should not be necessary here since QueueModel::TABLE is a constant, but we do it anyway to lead by example
+        if (!AbstractPluginHelper::isAlphaNumericPlus(QueueModel::TABLE)) {
+            return false;
+        }
+
+        return $qm->kId && PluginHelper::getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NULL WHERE kId = :kId OR bLock < DATE_SUB(NOW(), INTERVAL 15 MINUTE)', QueueModel::TABLE), [
                 'kId' => $qm->kId
             ], 3) >= 1;
     }
@@ -221,7 +235,7 @@ class Queue
             return true;
         }
 
-        $open = Shop::Container()->getDB()->executeQueryPrepared(
+        $open = PluginHelper::getDB()->executeQueryPrepared(
             "SELECT p.kId, b.cBestellNr, p.kBestellung, b.cStatus FROM xplugin_ws5_mollie_orders p JOIN tbestellung b ON b.kBestellung = p.kBestellung WHERE b.cStatus IN ('1', '2') AND p.dCreated < NOW() - INTERVAL :d HOUR",
             [':d' => $delay],
             2
@@ -232,7 +246,7 @@ class Queue
                 $checkout = AbstractCheckout::fromBestellung($o->kBestellung);
                 $pm       = $checkout->getPaymentMethod();
                 if ($pm::ALLOW_AUTO_STORNO && $pm::METHOD === $checkout->getMollie()->method) {
-                    if ($checkout->getBestellung()->cAbgeholt === 'Y' && (bool)$checkout->getModel()->bSynced === false) {
+                    if ($checkout->getBestellung()->cAbgeholt === 'N' && (bool)$checkout->getModel()->bSynced === false) {
                         if (!in_array($checkout->getMollie()->status, [OrderStatus::STATUS_PAID, OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_AUTHORIZED], true)) {
                             $checkout->storno();
                         } else {

@@ -7,12 +7,12 @@
 
 namespace Plugin\ws5_mollie\lib\Controller;
 
-use JTL\Shop;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use stdClass;
-use WS\JTL5\Backend\AbstractResult;
-use WS\JTL5\Backend\Controller\AbstractController;
-use WS\JTL5\Model\ModelInterface;
+use WS\JTL5\V1_0_16\Backend\AbstractResult;
+use WS\JTL5\V1_0_16\Backend\Controller\AbstractController;
+use WS\JTL5\V1_0_16\Model\ModelInterface;
 
 class QueueController extends AbstractController
 {
@@ -28,7 +28,7 @@ class QueueController extends AbstractController
     public static function delete(stdClass $data): AbstractResult
     {
         if (isset($data->id) && ($id = (int)$data->id)) {
-            return new AbstractResult(Shop::Container()->getDB()->delete('xplugin_ws5_mollie_queue', 'kId', $id));
+            return new AbstractResult(PluginHelper::getDB()->delete('xplugin_ws5_mollie_queue', 'kId', $id));
         }
 
         return new AbstractResult(false);
@@ -37,7 +37,7 @@ class QueueController extends AbstractController
     public static function unlock(stdClass $data): AbstractResult
     {
         if (isset($data->id) && ($id = (int)$data->id)) {
-            return new AbstractResult(Shop::Container()->getDB()->update('xplugin_ws5_mollie_queue', 'kId', $id, (object)[
+            return new AbstractResult(PluginHelper::getDB()->update('xplugin_ws5_mollie_queue', 'kId', $id, (object)[
                 'bLock' => ModelInterface::NULL
             ]));
         }
