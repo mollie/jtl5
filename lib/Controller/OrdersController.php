@@ -11,15 +11,15 @@ use Exception;
 use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
-use JTL\Shop;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use stdClass;
-use WS\JTL5\Backend\AbstractResult;
-use WS\JTL5\Backend\Controller\AbstractController;
+use WS\JTL5\V1_0_16\Backend\AbstractResult;
+use WS\JTL5\V1_0_16\Backend\Controller\AbstractController;
 
 /**
  * Class OrdersController
@@ -48,19 +48,19 @@ class OrdersController extends AbstractController
     {
         $response = [];
         if ($data->kBestellung) {
-            $lieferschien_arr = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tlieferschein WHERE kInetBestellung = :kBestellung', [
+            $lieferschein_arr = PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM tlieferschein WHERE kInetBestellung = :kBestellung', [
                 ':kBestellung' => (int)$data->kBestellung
             ], 2);
 
-            foreach ($lieferschien_arr as $lieferschein) {
+            foreach ($lieferschein_arr as $lieferschein) {
                 $shipmentsModel = ShipmentsModel::fromID((int)$lieferschein->kLieferschein, 'kLieferschein', false);
 
                 $response[] = (object)[
-                    'kLieferschein'   => $lieferschein->kLieferschein,
+                    'kLieferschein' => $lieferschein->kLieferschein,
                     'cLieferscheinNr' => $lieferschein->cLieferscheinNr,
-                    'cHinweis'        => $lieferschein->cHinweis,
-                    'dErstellt'       => date('Y-m-d H:i:s', $lieferschein->dErstellt),
-                    'shipment'        => $shipmentsModel->kBestellung ? $shipmentsModel : null,
+                    'cHinweis' => $lieferschein->cHinweis,
+                    'dErstellt' => date('Y-m-d H:i:s', $lieferschein->dErstellt),
+                    'shipment' => $shipmentsModel->kBestellung ? $shipmentsModel : null,
                 ];
             }
         }
@@ -74,7 +74,7 @@ class OrdersController extends AbstractController
      */
     public static function all(stdClass $data): AbstractResult
     {
-        if (self::Plugin('ws5_mollie')->getConfig()->getValue('hideCompleted') === 'on') {
+        if (PluginHelper::getSetting('hideCompleted')) {
             $query = 'SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme '
                 . 'FROM xplugin_ws5_mollie_orders o '
                 . 'JOIN tbestellung b ON b.kbestellung = o.kBestellung '
@@ -105,12 +105,12 @@ class OrdersController extends AbstractController
         $result['mollie']     = $checkout->getMollie();
         $result['order']      = $checkout->getModel()->jsonSerialize();
         $result['bestellung'] = $checkout->getBestellung();
-        $result['logs']       = Shop::Container()->getDB()
+        $result['logs'] = PluginHelper::getDB()
             ->executeQueryPrepared(
                 'SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook',
                 [
                     ':cTypeWebhook' => "%{$checkout->getModel()->cOrderId}%",
-                    ':cTypeHook'    => "%:{$checkout->getModel()->kBestellung}%"
+                    ':cTypeHook' => "%:{$checkout->getModel()->kBestellung}%"
                 ],
                 2
             );
@@ -145,12 +145,12 @@ class OrdersController extends AbstractController
 
         $checkout->updateModel()->saveModel();
 
-        return new AbstractResult(Shop::Container()->getDB()
+        return new AbstractResult(PluginHelper::getDB()
             ->executeQueryPrepared(
                 'SELECT * FROM `xplugin_ws5_mollie_queue` WHERE cType LIKE :cTypeWebhook OR cType LIKE :cTypeHook',
                 [
                     ':cTypeWebhook' => "%{$checkout->getModel()->cOrderId}%",
-                    ':cTypeHook'    => "%:{$checkout->getModel()->kBestellung}%"
+                    ':cTypeHook' => "%:{$checkout->getModel()->kBestellung}%"
                 ],
                 2
             ));
@@ -174,7 +174,7 @@ class OrdersController extends AbstractController
     public static function zalog(stdClass $data)
     {
         if ($data->id && $data->kBestellung) {
-            $logs = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cLogData LIKE :cLogData1 OR cLogData LIKE :cLogData2 ORDER BY dDatum DESC', [
+            $logs = PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cLogData LIKE :cLogData1 OR cLogData LIKE :cLogData2 ORDER BY dDatum DESC', [
                 ':cLogData1' => sprintf('%%#%d%%', (int)$data->kBestellung),
                 ':cLogData2' => sprintf('%%$%s%%', trim($data->id))
             ], 2);

@@ -17,8 +17,9 @@ use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use RuntimeException;
-use WS\JTL5\Hook\AbstractHook;
+use WS\JTL5\V1_0_16\Hook\AbstractHook;
 
 class Queue extends AbstractHook
 {
@@ -31,7 +32,7 @@ class Queue extends AbstractHook
     {
         if (
             array_key_exists('oBestellung', $args_arr)
-            && self::Plugin('ws5_mollie')->getConfig()->getValue('onlyPaid') === 'on'
+            && PluginHelper::getSetting('onlyPaid')
             && AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)
         ) {
             $args_arr['oBestellung']->cAbgeholt = 'Y';
@@ -73,10 +74,14 @@ class Queue extends AbstractHook
     public static function headPostGet(): void
     {
         if (array_key_exists('mollie', $_REQUEST) && (int)$_REQUEST['mollie'] === 1 && array_key_exists('id', $_REQUEST)) {
-            if (array_key_exists('hash', $_REQUEST) && $hash = trim(Text::htmlentities(Text::filterXSS($_REQUEST['hash'])), '_')) {
-                AbstractCheckout::finalizeOrder($hash, $_REQUEST['id'], array_key_exists('test', $_REQUEST));
-            } else {
-                QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+            try {
+                if (array_key_exists('hash', $_REQUEST) && $hash = trim(Text::htmlentities(Text::filterXSS($_REQUEST['hash'])), '_')) {
+                    AbstractCheckout::finalizeOrder($hash, $_REQUEST['id'], array_key_exists('test', $_REQUEST));
+                } else {
+                    QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+                }
+            } catch (Exception $e) {
+                Shop::Container()->getLogService()->error(__NAMESPACE__ . ' could not finalize order or add to queue: ' . $e->getMessage() . "\n" . json_encode($_REQUEST));
             }
 
             // TODO: DOKU
@@ -87,12 +92,12 @@ class Queue extends AbstractHook
         }
         if (array_key_exists('m_pay', $_REQUEST)) {
             try {
-                $raw = Shop::Container()->getDB()->executeQueryPrepared('SELECT kId, cOrderId FROM `xplugin_ws5_mollie_orders` WHERE dReminder IS NOT NULL AND MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
+                $raw = PluginHelper::getDB()->executeQueryPrepared('SELECT kId, cOrderId FROM `xplugin_ws5_mollie_orders` WHERE dReminder IS NOT NULL AND MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
                     ':md5' => $_REQUEST['m_pay']
                 ], 1);
 
                 if (!$raw) {
-                    throw new RuntimeException(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errOrderNotFound'));
+                    throw new RuntimeException(PluginHelper::getPlugin()->getLocalization()->getTranslation('errOrderNotFound'));
                 }
 
                 if (strpos($raw->cOrderId, 'tr_') === 0) {
@@ -104,11 +109,11 @@ class Queue extends AbstractHook
                 $checkout->updateModel()->saveModel();
 
                 if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->cStatus, ['completed', 'paid', 'authorized', 'pending'])) {
-                    throw new RuntimeException(self::Plugin('ws5_mollie')->getLocalization()->getTranslation('errAlreadyPaid'));
+                    throw new RuntimeException(PluginHelper::getPlugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
 
                 $options = [];
-                if (self::Plugin('ws5_mollie')->getConfig()->getValue('resetMethod') !== 'on') {
+                if (!PluginHelper::getSetting('resetMethod')) {
                     $options['method'] = $checkout->getModel()->cMethod;
                 }
                 $mollie = $checkout->create($options);

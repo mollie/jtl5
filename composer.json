@@ -12,7 +12,7 @@
   "require": {
     "php": ">=7.3.0",
     "mollie/mollie-api-php": "^v2.39.0",
-    "webstollen/jtl5-plugin": "^0.2"
+    "webstollen/jtl5-core-plugin-library-v1_0_16": "1.0.16"
   },
   "require-dev": {
     "thibautselingue/local-php-security-checker-installer": "^1.0.3",

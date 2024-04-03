@@ -7,7 +7,7 @@
 
 namespace Plugin\ws5_mollie\lib\Model;
 
-use WS\JTL5\Model\AbstractModel;
+use WS\JTL5\V1_0_16\Model\AbstractModel;
 
 /**
  * Class CustomerModel

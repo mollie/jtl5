@@ -58,7 +58,7 @@ class Address extends \Plugin\ws5_mollie\lib\Payment\Address
         $this->familyName = html_entity_decode($address->cNachname);
         $this->email = html_entity_decode($address->cMail) ?? null;
 
-        if ($organizationName = trim($address->cFirma)) {
+        if ($organizationName = isset($address->cFirma) ? trim($address->cFirma) : null) {
             $this->organizationName = html_entity_decode($organizationName);
         }
     }

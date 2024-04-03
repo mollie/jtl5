@@ -11,7 +11,7 @@ use JTL\Session\Frontend;
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use stdClass;
-use WS\JTL5\Traits\Jsonable;
+use WS\JTL5\V1_0_16\Traits\Jsonable;
 
 /**
  * Class Customer
@@ -51,7 +51,7 @@ class Customer
 
         $api = new MollieAPI(MollieAPI::getMode());
 
-        if (!$mCustomer->customerId) {
+        if (!$mCustomer->customerId && isset($_SESSION['cPost_arr']) && is_array($_SESSION['cPost_arr'])) {
             if (!array_key_exists('mollie_create_customer', $_SESSION['cPost_arr']) || $_SESSION['cPost_arr']['mollie_create_customer'] !== 'on') {
                 return null;
             }

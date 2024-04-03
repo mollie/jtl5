@@ -7,6 +7,7 @@
 
 namespace Plugin\ws5_mollie\lib\Controller;
 
+use JTL\DB\ReturnType;
 use JTL\Plugin\Helper;
 use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Shop;
@@ -17,22 +18,23 @@ use Mollie\Api\Types\PaymentMethod;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\MollieAPI;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use stdClass;
-use WS\JTL5\Backend\AbstractResult;
-use WS\JTL5\Backend\Controller\AbstractController;
+use WS\JTL5\V1_0_16\Backend\AbstractResult;
+use WS\JTL5\V1_0_16\Backend\Controller\AbstractController;
 
 class MollieController extends AbstractController
 {
     /**
      * @param stdClass $data
-     * @throws IncompatiblePlatform
-     * @throws ApiException
      * @return AbstractResult
+     * @throws ApiException
+     * @throws IncompatiblePlatform
      */
     public static function methods(stdClass $data): AbstractResult
     {
         $test = false;
-        if (self::Plugin('ws5_mollie')->getConfig()->getValue('apiKey') === '' && self::Plugin('ws5_mollie')->getConfig()->getValue('test_apiKey') !== '') {
+        if (PluginHelper::getSetting('apiKey') === '' && PluginHelper::getSetting('test_apiKey') !== '') {
             $test = true;
         }
         $api = new MollieAPI($test);
@@ -46,7 +48,7 @@ class MollieController extends AbstractController
                 continue;
             }
             $id           = 'kPlugin_' . Helper::getIDByPluginID('ws5_mollie') . '_' . $method->id;
-            $oZahlungsart = Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId = :cModulID;', [
+            $oZahlungsart = PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId = :cModulID;', [
                 ':cModulID' => $id
             ], 1);
 
@@ -58,13 +60,13 @@ class MollieController extends AbstractController
             $oPaymentMethod = LegacyMethod::create($oZahlungsart->cModulId);
 
             $methods[$method->id] = (object)[
-                'log'                 => Shop::Container()->getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId], 3),
-                'settings'            => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
-                'mollie'              => $method,
-                'duringCheckout'      => (int)$oZahlungsart->nWaehrendBestellung === 1,
+                'log' => PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM tzahlungslog WHERE cModulId = :cModulId AND dDatum < DATE_SUB(NOW(), INTERVAL 30 DAY)', [':cModulId' => $oZahlungsart->cModulId], ReturnType::AFFECTED_ROWS),
+                'linkToSettingsPage' => Shop::getURL() . "/admin/zahlungsarten.php?kZahlungsart=$oZahlungsart->kZahlungsart&token={$_SESSION['jtl_token']}",
+                'mollie' => $method,
+                'duringCheckout' => (int)$oZahlungsart->nWaehrendBestellung === 1,
                 'allowDuringCheckout' => $oPaymentMethod::ALLOW_PAYMENT_BEFORE_ORDER ?? null,
-                'paymentMethod'       => $oZahlungsart,
-                'shipping'            => Shop::Container()->getDB()->executeQueryPrepared('SELECT v.* FROM tversandart v
+                'paymentMethod' => $oZahlungsart,
+                'linkedShippingMethods' => PluginHelper::getDB()->executeQueryPrepared('SELECT v.* FROM tversandart v
 JOIN tversandartzahlungsart vz ON v.kVersandart = vz.kVersandart
 JOIN tzahlungsart z ON vz.kZahlungsart = z.kZahlungsart
 WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
@@ -91,7 +93,7 @@ WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
     public static function cleanlog(stdClass $data): AbstractResult
     {
         if (isset($data->cModulId) && ($modulId = $data->cModulId)) {
-            return new AbstractResult(Shop::Container()->getDB()->delete('tzahlungslog', 'cModulId', $modulId));
+            return new AbstractResult(PluginHelper::getDB()->delete('tzahlungslog', 'cModulId', $modulId));
         }
 
         return new AbstractResult(false);
@@ -105,11 +107,11 @@ WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
     {
         $id = 'kPlugin_' . Helper::getIDByPluginID('ws5_mollie') . '_%';
 
-        $result = Shop::Container()->getDB()->executeQueryPrepared('(
+        $result = PluginHelper::getDB()->executeQueryPrepared('(
 SELECT COUNT(b.cBestellNr) as transactions, ROUND(IFNULL(SUM(b.fGesamtsumme),0),2) as amount, "day" as timespan FROM tbestellung b
 WHERE kZahlungsart IN (SELECT z.kZahlungsart FROM tzahlungsart z
 WHERE z.cModulId LIKE :cModulId1)
-AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 24 HOUR)
 ) UNION (
 SELECT COUNT(b.cBestellNr) as transactions, ROUND(IFNULL(SUM(b.fGesamtsumme),0),2) as amount, "week" as timespan FROM tbestellung b
 WHERE kZahlungsart IN (SELECT z.kZahlungsart FROM tzahlungsart z

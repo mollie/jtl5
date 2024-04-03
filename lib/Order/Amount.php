@@ -10,7 +10,8 @@ namespace Plugin\ws5_mollie\lib\Order;
 use JsonSerializable;
 use JTL\Catalog\Currency;
 use JTL\Shop;
-use WS\JTL5\Traits\Jsonable;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use WS\JTL5\V1_0_16\Traits\Jsonable;
 
 class Amount implements JsonSerializable
 {
@@ -23,7 +24,7 @@ class Amount implements JsonSerializable
      * Amount constructor.
      * @param $value
      * @param null|Currency $currency
-     * @param bool          $useRounding (is it total SUM => true [5 Rappen Rounding])
+     * @param bool $useRounding (is it total SUM => true [5 Rappen Rounding])
      * @todo: prüfe mit Shop4
      */
     public function __construct($value, Currency $currency = null, bool $useRounding = false)
@@ -40,7 +41,7 @@ class Amount implements JsonSerializable
      */
     public static function fallbackCurrency(): Currency
     {
-        $curr = $_SESSION['Waehrung'] ?? Shop::Container()->getDB()->select('twaehrung', 'cStandard', 'Y');
+        $curr = $_SESSION['Waehrung'] ?? PluginHelper::getDB()->select('twaehrung', 'cStandard', 'Y');
 
         return new Currency($curr->kWaehrung);
     }

@@ -10,19 +10,20 @@ namespace Plugin\ws5_mollie\lib\Controller;
 use JTL\Customer\Customer;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\PluginHelper;
 use Plugin\ws5_mollie\lib\Shipment;
 use stdClass;
-use WS\JTL5\Backend\AbstractResult;
-use WS\JTL5\Backend\Controller\AbstractController;
-use WS\JTL5\Exception\APIException;
+use WS\JTL5\V1_0_16\Backend\AbstractResult;
+use WS\JTL5\V1_0_16\Backend\Controller\AbstractController;
+use WS\JTL5\V1_0_16\Exception\APIException;
 
 class ShipmentsController extends AbstractController
 {
     /**
      * @param stdClass $data
-     * @throws \Mollie\Api\Exceptions\ApiException
-     * @throws IncompatiblePlatform
      * @return AbstractResult
+     * @throws IncompatiblePlatform
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
     public static function sync(stdClass $data): AbstractResult
     {
@@ -37,7 +38,7 @@ class ShipmentsController extends AbstractController
 
             $oKunde = new Customer($checkout->getBestellung()->kKunde);
 
-            $mode = self::Plugin('ws5_mollie')->getConfig()->getValue('shippingMode');
+            $mode = PluginHelper::getSetting('shippingMode');
             switch ($mode) {
                 case 'A':
                     // ship directly

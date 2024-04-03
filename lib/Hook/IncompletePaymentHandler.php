@@ -9,13 +9,12 @@ namespace Plugin\ws5_mollie\lib\Hook;
 
 use Exception;
 use JTL\Alert\Alert;
-use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
-use JTL\Helpers\PaymentMethod;
 use JTL\Helpers\Request;
 use JTL\Shop;
-use WS\JTL5\Hook\AbstractHook;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use WS\JTL5\V1_0_16\Hook\AbstractHook;
 
 class IncompletePaymentHandler extends AbstractHook
 {
@@ -49,7 +48,7 @@ class IncompletePaymentHandler extends AbstractHook
             // Add error alert to frontend
             if (array_key_exists(static::MOLLIE_PAYMENT_NOT_COMPLETED_STRING, $_REQUEST) && $_REQUEST[static::MOLLIE_PAYMENT_NOT_COMPLETED_STRING] === '1') {
 
-                $translatedErrorMessage = self::Plugin('ws5_mollie')->getLocalization()->getTranslation('paymentNotCompleted');
+                $translatedErrorMessage = PluginHelper::getPlugin()->getLocalization()->getTranslation('paymentNotCompleted');
                 Shop::Container()->getAlertService()->addAlert(
                     Alert::TYPE_ERROR,
                     $translatedErrorMessage,

@@ -11,7 +11,8 @@ use Exception;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
-use WS\JTL5\Model\AbstractModel;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use WS\JTL5\V1_0_16\Model\AbstractModel;
 
 /**
  * Class QueueModel
@@ -40,7 +41,7 @@ class QueueModel extends AbstractModel
     {
         ifndef('MOLLIE_CLEANUP_DAYS', 30);
         /** @noinspection PhpUndefinedConstantInspection */
-        return Shop::Container()->getDB()->executeQuery(sprintf('DELETE FROM %s WHERE dDone IS NOT NULL AND (bLock IS NULL OR bLock = "0000-00-00 00:00:00") AND dCreated < DATE_SUB(NOW(), INTERVAL %d DAY)', self::TABLE, MOLLIE_CLEANUP_DAYS), 3);
+        return PluginHelper::getDB()->executeQueryPrepared(sprintf('DELETE FROM %s WHERE dDone IS NOT NULL AND (bLock IS NULL OR bLock = "0000-00-00 00:00:00") AND dCreated < DATE_SUB(NOW(), INTERVAL %d DAY)', self::TABLE, (int)MOLLIE_CLEANUP_DAYS), [], 3);
     }
 
     /**

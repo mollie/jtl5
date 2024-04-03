@@ -7,14 +7,14 @@
 
 namespace Plugin\ws5_mollie\lib;
 
-use WS\JTL5\Traits\Plugins;
+use WS\JTL5\V1_0_16\Traits\Plugins;
 
 class Locale
 {
     use Plugins;
 
     protected static $langs = [
-        'ger' => ['lang' => 'de', 'country' => ['AT', 'DE', 'CH']],
+        'ger' => ['lang' => 'de', 'country' => ['DE', 'AT', 'CH']],
         'fre' => ['lang' => 'fr', 'country' => ['BE', 'FR']],
         'dut' => ['lang' => 'nl', 'country' => ['BE', 'NL']],
         'spa' => ['lang' => 'es', 'country' => ['ES']],
@@ -48,6 +48,6 @@ class Locale
             return $locale;
         }
 
-        return self::Plugin('ws5_mollie')->getConfig()->getValue('fallbackLocale');
+        return PluginHelper::getSetting('fallbackLocale');
     }
 }
