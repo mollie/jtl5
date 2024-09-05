@@ -5,11 +5,10 @@
     <Author>WebStollen GmbH</Author>
     <URL>https://www.webstollen.de</URL>
     <XMLVersion>102</XMLVersion>
-    <ShopVersion>5.0.0</ShopVersion>
+    <ShopVersion>5.2.0</ShopVersion>
     <PluginID>ws5_mollie</PluginID>
     <CreateDate>2023-02-13</CreateDate>
-    <Version>1.5.0</Version>
-    <ExsID></ExsID>
+    <Version>1.9.0</Version>
     <Install>
         <Hooks>
             <Hook id="131">hooks/131.php</Hook>
@@ -486,6 +485,53 @@
                     <Name>Klarna Pay Now.</Name>
                     <ChargeName>Mollie</ChargeName>
                     <InfoText>Bezahlen Sie bequem und direkt mit Klarna Pay Now.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="selectbox" initialValue="N" sort="50" conf="Y">
+                    <Name>AGB Checkbox für Klarna anzeigen</Name>
+                    <Description>Klarna Integration konform mit Trusted Shops</Description>
+                    <ValueName>trustedShopsCheckbox</ValueName>
+                    <SelectboxOptions>
+                        <Option sort="1" value="Y">Ja</Option>
+                        <Option sort="2" value="N">Nein</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="28" sort="45" conf="Y">
+                    <Name>Fälligkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
+            <Method>
+                <Name>Klarna</Name>
+                <PictureURL>images/Payment_methods/klarnaOne@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>INVOICE</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Klarna.php</ClassFile>
+                <ClassName>Klarna</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Bezahle mit Klarna</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit Klarna.</InfoText>
+                </MethodLanguage>
+                <MethodLanguage iso="ENG">
+                    <Name>Pay with Klarna</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Pay with Klarna.</InfoText>
                 </MethodLanguage>
                 <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
                     <Name>API</Name>
@@ -1019,6 +1065,73 @@
                     <SelectboxOptions>
                         <Option value="order" sort="1">Order API</Option>
                         <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="28" sort="45" conf="Y">
+                    <Name>Fälligkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen?</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
+            <Method>
+                <Name>Trustly</Name>
+                <PictureURL>images/Payment_methods/trustly@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>DIRECT_E_BANKING</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Trustly.php</ClassFile>
+                <ClassName>Trustly</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>trustly</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit Trustly.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="payment" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
+                        <Option value="payment" sort="2">Payment API</Option>
+                    </SelectboxOptions>
+                </Setting>
+                <Setting type="zahl" initialValue="100" sort="45" conf="Y">
+                    <Name>Fälligkeit in Tagen</Name>
+                    <Description>Wie lange hat der Kunde Zeit die Bestellung zu bezahlen? (Order API)</Description>
+                    <ValueName>dueDays</ValueName>
+                </Setting>
+            </Method>
+            <Method>
+                <Name>Riverty</Name>
+                <PictureURL>images/Payment_methods/riverty@2x.png</PictureURL>
+                <Sort>1</Sort>
+                <SendMail>1</SendMail>
+                <Provider>Mollie</Provider>
+                <TSCode>INVOICE</TSCode>
+                <PreOrder>1</PreOrder>
+                <Soap>0</Soap>
+                <Curl>1</Curl>
+                <Sockets>0</Sockets>
+                <ClassFile>Riverty.php</ClassFile>
+                <ClassName>Riverty</ClassName>
+                <TemplateFile>template/index.tpl</TemplateFile>
+                <MethodLanguage iso="GER">
+                    <Name>Riverty</Name>
+                    <ChargeName>Mollie</ChargeName>
+                    <InfoText>Bezahlen Sie bequem mit Riverty.</InfoText>
+                </MethodLanguage>
+                <Setting type="selectbox" initialValue="order" sort="40" conf="Y">
+                    <Name>API</Name>
+                    <Description>Welche API soll verwendet werden?</Description>
+                    <ValueName>api</ValueName>
+                    <SelectboxOptions>
+                        <Option value="order" sort="1">Order API</Option>
                     </SelectboxOptions>
                 </Setting>
                 <Setting type="zahl" initialValue="28" sort="45" conf="Y">

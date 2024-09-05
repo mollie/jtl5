@@ -1,0 +1,89 @@
+{
+  "name": "webstollen/jtl5-core-plugin-library-v1_0_16",
+  "description": "Helper Package for JTL-Shop 5 Plugins",
+  "type": "library",
+  "license": "Proprietary",
+  "version": "1.0.14",
+  "dist": {
+    "url": "https://ws-download.de/webstollen/jtl5-plugin/jtl5-plugin-v1.0.14.zip",
+    "type": "zip"
+  },
+  "homepage": "https://www.webstollen.de",
+  "authors": [
+    {
+      "name": "Florian Klamer",
+      "email": "klamer@webstollen.de"
+    },
+    {
+      "name": "Alexander Strathmeyer",
+      "email": "strathmeyer@webstollen.de"
+    }
+  ],
+  "require": {
+    "php": ">=7.3",
+    "ext-json": "*",
+    "ext-dom": "*"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "3.*",
+    "nikic/php-parser": "^4.10.2",
+    "phpmetrics/phpmetrics": "^2.7",
+    "phpstan/phpstan": "^0.12.90",
+    "phpunit/phpunit": "^9.5.5",
+    "roave/security-advisories": "dev-latest",
+    "squizlabs/php_codesniffer": "3.*",
+    "wikimedia/composer-merge-plugin": "^2.0"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "publish:master": "export PUBLISH_TOKEN=`cat .publish-token`; curl --data branch=master \"https://__token__:$PUBLISH_TOKEN@gitlab.webstollen.de/api/v4/projects/480/packages/composer\"",
+    "phpmetrics": "phpmetrics --report-html=report ./src",
+    "phpcs": "phpcs --standard=PSR12 --encoding=utf8 --ignore=vendor/,report/,var/,core/ -p ./",
+    "phpcbf": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,report/,var/,core/ -p ./",
+    "php-cs-fixer": "php-cs-fixer fix",
+    "fix": "phpcbf --standard=PSR12 --encoding=utf8 --ignore=vendor/,report/,var/,core/ -p ./; php-cs-fixer fix",
+    "phpstan": "phpstan analyse -c phpstan.neon"
+  },
+  "autoload": {
+    "psr-4": {
+      "WS\\JTL5\\V1_0_16\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WS\\JTL5\\V1_0_16\\Tests\\": "tests/",
+      "JTL\\": "core/includes/src/"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "platform": {
+      "php": "7.3.0",
+      "ext-bcmath": "1.0",
+      "ext-gd": "1.0",
+      "ext-intl": "1.0",
+      "ext-soap": "1.0"
+    },
+    "optimize-autoloader": true
+  },
+  "archive": {
+    "name": "JTL5_Plugin",
+    "exclude": [
+      "docker",
+      "core",
+      "tests",
+      "docker-compose.yml",
+      "phpunit.xml"
+    ]
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://gitlab.com/jtl-software/jtl-shop/tools/scc.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://gitlab.com/jtl-software/jtl-shop/tools/sccbs3.git"
+    }
+  ]
+}

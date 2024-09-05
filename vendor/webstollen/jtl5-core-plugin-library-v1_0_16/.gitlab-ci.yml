@@ -1,0 +1,62 @@
+stages:
+  - test
+  - build
+  - release
+
+sast:
+  stage: test
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+
+#compile:
+#  image: registry.webstollen.de/docker/jtl-plugin-ci:test
+#  stage: build
+#  only:
+#    - tags
+#    - master
+#  script:
+#    - rm -rf tests/ docker/ core/
+#    - rm -f .php-cs-fixer.php docker-compose.yml phpstan.neon phpunit.xml
+#    - cd ..
+#    - compiler $PROJECT_DIR/ $PROJECT_DIR/
+#    - zip -r $CI_PROJECT_DIR/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip $CI_PROJECT_NAME
+#  artifacts:
+#    expire_in: 30 days
+#    paths:
+#      - "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip"
+#
+#upload:
+#  image: registry.webstollen.de/docker/jtl-plugin-ci:master
+#  stage: release
+#  needs: ["compile"]
+#  artifacts:
+#    paths:
+#      - $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip
+#  only:
+#    - tags
+#    - master
+#  script:
+#    - aws configure set region eu-central-1
+#    - aws s3 cp $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.zip s3://$S3_BUCKET/$CI_PROJECT_ROOT_NAMESPACE/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip
+#    - echo "DOWNLOAD URL https://ws-download.de/$CI_PROJECT_ROOT_NAMESPACE/$CI_PROJECT_NAME/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME$SRC_PREFIX.zip"
+
+# Publishes a tag/branch to Composer Packages of the current project
+publish:
+  image: curlimages/curl:latest
+  stage: release
+  variables:
+    URL: "$CI_SERVER_PROTOCOL://$CI_SERVER_HOST:$CI_SERVER_PORT/api/v4/projects/$CI_PROJECT_ID/packages/composer?job_token=$CI_JOB_TOKEN"
+  script:
+    - version=$([[ -z "$CI_COMMIT_TAG" ]] && echo "branch=$CI_COMMIT_REF_NAME" || echo "tag=$CI_COMMIT_TAG")
+    - insecure=$([ "$CI_SERVER_PROTOCOL" = "http" ] && echo "--insecure" || echo "")
+    - response=$(curl -s -w "\n%{http_code}" $insecure --data $version $URL)
+    - code=$(echo "$response" | tail -n 1)
+    - body=$(echo "$response" | head -n 1)
+    # Output state information
+    - if [ $code -eq 201 ]; then
+        echo "Package created - Code $code - $body";
+      else
+        echo "Could not create package - Code $code - $body";
+        exit 1;
+      fi

