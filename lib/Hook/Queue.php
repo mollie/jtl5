@@ -1,2 +1,132 @@
-<?php /* Checksum 0d8e72c6 */
-$j827232c1=file(__FILE__);eval(base64_decode('JGMxMmNjMTEwZD1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCwxODgyXTtyZXR1cm4gKCRqPT0yMTYpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09MzQ3KT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTc2MSk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($c12cc110d($j827232c1[1],347)));return eval($a3ee76a9a($c12cc110d($j827232c1[1],761), $c12cc110d($j827232c1[1], 216), $j827232c1[1]));__halt_compiler();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
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Hook;
+
+use Exception;
+use JTL\Alert\Alert;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Helpers\Text;
+use JTL\Shop;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use RuntimeException;
+use WS\JTL5\V1_0_16\Hook\AbstractHook;
+
+class Queue extends AbstractHook
+{
+    /**
+     * @param array $args_arr
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public static function bestellungInDB(array $args_arr): void
+    {
+        if (
+            array_key_exists('oBestellung', $args_arr)
+            && PluginHelper::getSetting('onlyPaid')
+            && AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kZahlungsart, true)
+        ) {
+            $args_arr['oBestellung']->cAbgeholt = 'Y';
+            Shop::Container()->getLogService()->info('Switch cAbgeholt for kBestellung: ' . print_r($args_arr['oBestellung']->kBestellung, 1));
+        }
+    }
+
+    /**
+     * @param array $args_arr
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public static function xmlBestellStatus(array $args_arr): void
+    {
+        if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
+            QueueModel::saveToQueue(HOOK_BESTELLUNGEN_XML_BESTELLSTATUS . ':' . (int)$args_arr['oBestellung']->kBestellung, [
+                'kBestellung' => $args_arr['oBestellung']->kBestellung,
+                'status'      => (int)$args_arr['status']
+            ]);
+        }
+    }
+
+    /**
+     * @param array $args_arr
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public static function xmlBearbeiteStorno(array $args_arr): void
+    {
+        if (AbstractCheckout::isMollie((int)$args_arr['oBestellung']->kBestellung)) {
+            QueueModel::saveToQueue(HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO . ':' . $args_arr['oBestellung']->kBestellung, ['kBestellung' => $args_arr['oBestellung']->kBestellung]);
+        }
+    }
+
+    /**
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public static function headPostGet(): void
+    {
+        if (array_key_exists('mollie', $_REQUEST) && (int)$_REQUEST['mollie'] === 1 && array_key_exists('id', $_REQUEST)) {
+            try {
+                if (array_key_exists('hash', $_REQUEST) && $hash = trim(Text::htmlentities(Text::filterXSS($_REQUEST['hash'])), '_')) {
+                    AbstractCheckout::finalizeOrder($hash, $_REQUEST['id'], array_key_exists('test', $_REQUEST));
+                } else {
+                    QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+                }
+            } catch (Exception $e) {
+                Shop::Container()->getLogService()->error(__NAMESPACE__ . ' could not finalize order or add to queue: ' . $e->getMessage() . "\n" . json_encode($_REQUEST));
+            }
+
+            // TODO: DOKU
+            ifndef('MOLLIE_STOP_EXEC_AFTER_WEBHOOK', true);
+            if (MOLLIE_STOP_EXEC_AFTER_WEBHOOK) {
+                exit();
+            }
+        }
+        if (array_key_exists('m_pay', $_REQUEST)) {
+            try {
+                $raw = PluginHelper::getDB()->executeQueryPrepared('SELECT kId, cOrderId FROM `xplugin_ws5_mollie_orders` WHERE dReminder IS NOT NULL AND MD5(CONCAT(kId, "-", kBestellung)) = :md5', [
+                    ':md5' => $_REQUEST['m_pay']
+                ], 1);
+
+                if (!$raw) {
+                    throw new RuntimeException(PluginHelper::getPlugin()->getLocalization()->getTranslation('errOrderNotFound'));
+                }
+
+                if (strpos($raw->cOrderId, 'tr_') === 0) {
+                    $checkout = PaymentCheckout::fromID($raw->cOrderId);
+                } else {
+                    $checkout = OrderCheckout::fromID($raw->cOrderId);
+                }
+                $checkout->getMollie(true);
+                $checkout->updateModel()->saveModel();
+
+                if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->cStatus, ['completed', 'paid', 'authorized', 'pending'])) {
+                    throw new RuntimeException(PluginHelper::getPlugin()->getLocalization()->getTranslation('errAlreadyPaid'));
+                }
+
+                $options = [];
+                if (!PluginHelper::getSetting('resetMethod')) {
+                    $options['method'] = $checkout->getModel()->cMethod;
+                }
+                $mollie = $checkout->create($options);
+                $url    = $mollie->getCheckoutUrl();
+
+                header('Location: ' . $url);
+                exit();
+            } catch (RuntimeException $e) {
+                $alertHelper = Shop::Container()->getAlertService();
+                $alertHelper->addAlert(Alert::TYPE_ERROR, $e->getMessage(), 'mollie_repay', ['dismissable' => true]);
+            } catch (Exception $e) {
+                Shop::Container()->getLogService()->error('mollie:repay:error: ' . $e->getMessage() . "\n" . print_r($_REQUEST, 1));
+            }
+        }
+    }
+}

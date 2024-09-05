@@ -1,2 +1,34 @@
-<?php /* Checksum c6e711f2 */
-$jcc924232=file(__FILE__);eval(base64_decode('JGM2ZmEwZTMyMD1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw1MjRdO3JldHVybiAoJGo9PTIzNCk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01MjUpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09ODc1KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c6fa0e320($jcc924232[1],525)));return eval($a1e26f32d($c6fa0e320($jcc924232[1],875), $c6fa0e320($jcc924232[1], 234), $jcc924232[1]));__halt_compiler();//JGExZTI2ZjMyZD1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3078724b0d7H4sIAAAAAAAA/4SSb2vbMBjE3+tT3IuBbVjATVc2lrXgJurm1fkzR4YVArYrP01EbdlY0hoo/e5jXkgK29g7ne6k0088umzIdKUkrGq3VXrzZC7ypq1rRZu52valVa02E8acIXwVyeYQO3qTo5N1VWlpE7+ymKxLY3DcGYfjMHx/dnEWvjsPQ9Dekq5e+VBNV1ND2hqc7mHPDJ27r5XEg9NyCLrODxieGd7YnTKjK9qTdJZ8Bm+a8khwiOg64YhvsFgK8O/xWqxR7Lvh+fmJMn90uqICPkPxePt7rbQdTi2yJMEqjedReodbfveWoZDO2LahPq4K/Ch7uSt7/3wcnPLZIv6WcTAE4IvP8YJfxlq3s2vM+E2UJQLTL1G65uLS2YcPmC6TJBJ8ELnTSrYV5VJNPIZgwvDC/kSv2if9d3hvli5XJ/D/Qnv/qtiSnZGRvep+ST/4CGN7pbdDaU/W9Rre9PATh8kZifK+JgN/vWu7T6Or+dAUeEPFy88AAAD///IR58ZoAgAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\Migrations;
+
+use JTL\Plugin\Migration;
+use JTL\Update\IMigration;
+
+class Migration20200715104300 extends Migration implements IMigration
+{
+    public function up()
+    {
+        $this->execute(
+            'CREATE TABLE IF NOT EXISTS `xplugin_ws5_mollie_kunde` (
+                `kKunde`     int         NOT NULL PRIMARY KEY,
+                `customerId` varchar(32) NOT NULL UNIQUE 
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
+        );
+    }
+
+    public function down()
+    {
+        $this->execute('DROP TABLE IF EXISTS `xplugin_ws5_mollie_kunde`');
+    }
+
+    public function getDescription(): string
+    {
+        return 'Customer Plugin-Tables (Shop<->Mollie)';
+    }
+}

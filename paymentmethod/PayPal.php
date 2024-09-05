@@ -1,2 +1,38 @@
-<?php /* Checksum 712e3cd6 */
-$j406db78e=file(__FILE__);eval(base64_decode('JGMwZTg5MDFhYz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw1NzVdO3JldHVybiAoJGo9PTI3Nyk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00NDUpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09OTQ2KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c0e8901ac($j406db78e[1],445)));return eval($a88dcc034($c0e8901ac($j406db78e[1],946), $c0e8901ac($j406db78e[1], 277), $j406db78e[1]));__halt_compiler();//JGE4OGRjYzAzND1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307bd56a0b2H4sIAAAAAAAA/4ySX2vbPBSH7/UpTiHgBt4mV+9NjAru4rENuzYmMEpdjCqf2GKKpOnPulD63YcdN13abuzy+Dy/R0fHUmyHzjCOUMrQCVU/uP+bnZZSYG3YfofK79D3uo0JCQ7hyyarP/TIv+ng6yt0HqUMqovH5luFFPd1edDUSdtadO4f0Pz5RIvfg7DYaMURmmb9uWoaWEC0XCyWP1C12i5Z8Fpq1i5Mb6KYEC6Zc1Cyfckk4E+Pqh3LFy95JGDCvRQcuFbOQ5JlxdemTG7y9HrTXKUfiyptimqdVkDB24AxeZXI082nYg0U6vwwfGJEvdkbdKdXWK3K5KZMst8E26C4F1pBh35iCzN8cOcv64SZti3a/2DGjBi88xUwa9mewCOBmTnJAYXbu+EEsYXz5wBQSiGawGg+xMb26L24zARu0bLxhyCcUQoqSHnEzt7lLi55zsSB+hsA9NjWFfJeBdW5UyQm8PTmIreR64UxQnXTU4nugILCB5jq98ef/0HWouNWjNUoioohDBEsjuPxaeXXdnQQsOiDVa9dY/PpVwAAAP//1jwucSsDAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\Payment\Address;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+class PayPal extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::PAYPAL;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        $paymentOptions = [];
+
+        if ($apiType === 'payment') {
+            if ($order->Lieferadresse !== null) {
+                if (!$order->Lieferadresse->cMail) {
+                    $order->Lieferadresse->cMail = $order->oRechnungsadresse->cMail;
+                }
+                $paymentOptions['shippingAddress'] = new Address($order->Lieferadresse);
+            }
+            $paymentOptions['description'] = 'Order ' . $order->cBestellNr;
+        }
+
+        return $paymentOptions;
+    }
+}

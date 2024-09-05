@@ -1,2 +1,23 @@
-<?php /* Checksum 9b01bb2f */
-$jd2d01465=file(__FILE__);eval(base64_decode('JGNjZmI1Mzk1Nz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0NTRdO3JldHVybiAoJGo9PTI1MSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00OTQpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NjgwKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($ccfb53957($jd2d01465[1],494)));return eval($a32c64fcf($ccfb53957($jd2d01465[1],680), $ccfb53957($jd2d01465[1], 251), $jd2d01465[1]));__halt_compiler();//JGEzMmM2NGZjZj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3077166154aH4sIAAAAAAAA/4SQQYvbMBCF7/oVOgQkl9hpDunBJgW3NcQlJantpoe6CFWe2iKK5EpyE1Py34u9Wfa4oIPezBv43hsc4O9l/bnab+rTmr1l63f1By7OoJs6PeYJQvI3pgtWZsUpK36QXVUd2e5QVuQn3m63mCgjuOqM8yTA/xDugDdgKUmFAOfCj0Z7a1SYKmWu4cHKVuoYvyFB8op1Ny/dw3tHCFn4M0gLzGgBmLFPecEYjjBZRdHj8eYi9UpqoYYG3JN8qKjvepIgqSVz4ClppOsVHxlYa6wjS8yt5SM7w8jgJp13lDTwa2jJEi9YkX39lpVVECQIeTtOMdNjHse5lp6Sq9uwi1FKwkyKBfeiwzS7Cei9NBov4Pk7NzR1XZed6eN4isylBkuD8H0Lfm/aEuxfKWAazGz05Xq2fAHneAt0grn/DwAA//8vuwGbvQEAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+use WS\JTL5\V1_0_16\Backend\API;
+
+if ($_SERVER['HTTP_HOST'] === 'localhost') {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: *');
+}
+
+/** @global \JTL\Backend\AdminAccount $oAccount */
+require_once __DIR__ . '/../../../admin/includes/admininclude.php';
+ini_set('display_errors', array_key_exists('debug', $_REQUEST));
+
+try {
+    API::Init('ws5_mollie');
+} catch (Exception $exception) {
+    \JTL\Shop::Container()->getLogService()->error($exception->getMessage());
+}

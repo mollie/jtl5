@@ -1,2 +1,29 @@
-<?php /* Checksum 2a7fb523 */
-$j01abd56d=file(__FILE__);eval(base64_decode('JGMyODQ5OWE4Mz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0MTRdO3JldHVybiAoJGo9PTMxNSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT02MjkpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09OTAxKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c28499a83($j01abd56d[1],629)));return eval($ac11e94cc($c28499a83($j01abd56d[1],901), $c28499a83($j01abd56d[1], 315), $j01abd56d[1]));__halt_compiler();//JGFjMTFlOTRjYz1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO30783351bfcH4sIAAAAAAAA/7SRQUvDMBTH7/kU7yC0PSjZ3EAtCFWrU+oU7U5W1ix9doE2LXmJG4x9d1mVbuBN8BSS3+P//4WnRY3UConwXLlS6WxF43ndVJXC7FGVRljVaAoZc4TwkCbZz1jPwp7M2kJYzO4PEJOVIIL+ZciHA37GzwdjzjkHXFvUxQEHVbcV1qgtwT6HbRi0blEpCR9Oy27QtX7AYMPgyC4VHV/iGqWz6HtRksYvkEZXSQz5uu1s5/tPzRtToKEcrifR9C6GXE4ELfP+/BRGLoXxRzyA6VMK01mSQHS7y8zlqxXWUR56Qchgy35bFc1K/6/X6fAvXiXaGyRpVLu7+sEFkDVKl52pQeuMBi/utgGpWFQI3zpvXfs72AZGHHYCdOJ1HduvAAAA//8jtX8qOQIAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\Migrations;
+
+use JTL\Plugin\Migration;
+use JTL\Update\IMigration;
+
+class Migration20210809150000 extends Migration implements IMigration
+{
+    public function up()
+    {
+        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` CHANGE `cHash` `cHash` varchar(40) NOT NULL AFTER `cStatus`;');
+    }
+
+    public function down()
+    {
+        $this->execute('ALTER TABLE `xplugin_ws5_mollie_orders` CHANGE `cHash` `cHash` varchar(32) NOT NULL AFTER `cStatus`;');
+    }
+
+    public function getDescription(): string
+    {
+        return 'Extend Table orders[cHash] to 40 chars.';
+    }
+}

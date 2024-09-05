@@ -1,0 +1,20 @@
+@import 'tailwindcss/base';
+
+@import 'tailwindcss/components';
+
+@import 'tailwindcss/utilities';
+
+/* ---------------- Global CSS ------------------- */
+.backend-wrapper > .backend-main > .backend-navbar#topbar {
+    box-shadow: none !important;
+}
+
+form .form-group .text-sm-right {
+    text-align: left !important;
+}
+
+
+/* TODO: remove after React Backend Library update to v2.0.0*/
+#root {
+    color: #435a6b;
+}

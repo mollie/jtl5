@@ -1,2 +1,25 @@
-<?php /* Checksum 6255f1d2 */
-$jb8e16e3d=file(__FILE__);eval(base64_decode('JGNlYTQ5OThkZT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0MThdO3JldHVybiAoJGo9PTIxMCk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00MTIpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09Njg0KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($cea4998de($jb8e16e3d[1],412)));return eval($a7f31a43f($cea4998de($jb8e16e3d[1],684), $cea4998de($jb8e16e3d[1], 210), $jb8e16e3d[1]));__halt_compiler();//JGE3ZjMxYTQzZj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3072f359639H4sIAAAAAAAA/2TQz27iMBAG8LufYg5I7EqrcNoLEYcAWW1KQlCIVFV1ZRlnClYd2/Wftgjx7hWlVUt7ndH3G32jeY/ecoGwUnErNX32f1lvlJJILd/3qEOPYWe6lJDoEa7aks52KB5MDHSKPqBSUW/Tt+VPQskNXZ2Z6oNx+BilQ2a0QGBsXjSMQQLDUZKMnlB3xo14DEYZ3iV2Z4cpIUJx72GhuNN8raTAIgC+BNSdhwueHAjYuFFSgDDaB8jKsr5mq+ymypctm+b/6iZndTPPG5hAcBFT8i1R5e3/eg4ToNW5Q2YlbfcW/WWT8XhRZs0yY+uymOWsaL9I91GLII2GLYb3UG1PA//r82cwMK5D9wcG3MrTgd9j4M7xPYEDAYchOg23dymBIzm+BgAA///S8VViqAEAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+class KlarnaSliceIt extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::KLARNA_SLICE_IT;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return [];
+    }
+}

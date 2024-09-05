@@ -1,2 +1,107 @@
-<?php /* Checksum 92281489 */
-$ja3d43960=file(__FILE__);eval(base64_decode('JGNhMjM2Y2QzNT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCwxMzQ4XTtyZXR1cm4gKCRqPT0zMjYpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09NTc4KT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTkyMSk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($ca236cd35($ja3d43960[1],578)));return eval($a8da67da2($ca236cd35($ja3d43960[1],921), $ca236cd35($ja3d43960[1], 326), $ja3d43960[1]));__halt_compiler();//JGE4ZGE2N2RhMj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307761ddf7dH4sIAAAAAAAA/+xVb28auRN+v59iWqF4Vwpt+Un9SQFtJCA0odmUKktz1wsIGTMsPoyNbG/K9c93P3n/kQCJ7qqe7nS6d7ueZ2aeGc88lnSFZk0ZwnuRJlyOPpnXk5USguNI8OnoQqlly/NSg9DbMFxbrmQr+307jEYRlUlKE6w+LlCsUW8BMRrDlRy90UpalLPccjjVlZqhGHVTY9UKdfb3FDw/vZ/wp3j0dhi9Ht00Jq8mjf9n3EftqbGaMlsUwgQ1BroLZMup2gBuHCsD91HeFw88WKdTwRkYSy1nME8lc6UDbpClFv2jGtWJmVCtgybcKT7z4IsHfA7+s7LWZjNB65Nf6EKkMjFUWxLA169grF4r4z8Fq5+yKzVLRX92DGSZVzoh8ALuF5055gd+UD9N0PbP/ABeAJmQAMIwhDkVBgNHTKNNtWx58M3LWVb0b4lsy8/IExxoS8aZX/ei173sDH6eDK6Hk04vHvaiqN2JuxfRhziGoyPwa0tBtaS9/hmEYDVf+XvMYrSWy8QnFZQEQQDPwhAIyUjVVlmNLsQfa0bLg5cvYTg4GzThGueUWaXBLrgBq8BNwPP9/tDfVihLMs9BSYZA7ygXdCrQg5rVqbE4ixdqbaqxCMGgmDebRXfJdvRI3umuknOeFG2/oSJFv6rGXcChqCRoFb0/nNM15mPRGbZlIvETuLkeZciO2vguToWony4jLpcQwqud4xL/hOlNKpfZWO9B2Du6QgiBXA2iqN+Dy6h9/a4N7fMO2QFepnKGMtHpep05tBqtXch2wDLA/3YBsr20/A5CaOycv58Lzhb2gCVSScJlsk9cxipLc3Jy8tAw62ljUQhnnFGLPvlYX9VncNHkTUN2eqrKDsVrTdkC3aZACLfjludBTVCZGAjhoepl89YWojw1fsNFnSuNlC3AL9yogdqyCAvhaR7t4a0fzn9buY0hBF9Nf0Vmg1sPCBvixhIX7Gl9iBSjgn+m7sqLo6Gm0oj8pNjU9nkni3ecU8uVxSg/CI5drg4attDIp6lMspxmrbm0830F+L7cZ2jYodyw1ZyMSNmMjEPVmsxSbZwz1RsejAvlu78D9+e2vN4HMlS+RAXbc63StVPY8c4ybae7DPOkfu64s0z/SK4uk7zECU2muztULDkh2QRu1buaFPdLxrduNiq/rGxXeS48j5YnrzHhxmqO2jp9//7XoRD2MjiE8OBBbzbnWq36Z49TKZ4x9+5lN+Q2s5DNKmr9lBVf/dn+8/bPE8+4fdOD7od4OLjqXf89+rmrkv/p51+gn2X+PyWfPyalU039SM5/pVIyjdTipBSCHyqX334PAAD//4kUKJIWDQAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Hook;
+
+use Exception;
+use JTL\Language\LanguageHelper;
+use JTL\Session\Frontend;
+use Plugin\ws5_mollie\lib\Model\CustomerModel;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use WS\JTL5\V1_0_16\Hook\AbstractHook;
+
+class Checkbox extends AbstractHook
+{
+    /**
+     * @param $args_arr
+     * @throws Exception
+     */
+    public static function execute(&$args_arr): void
+    {
+        if (!Frontend::get('Zahlungsart') || strpos(Frontend::get('Zahlungsart')->cModulId, 'kPlugin_' . PluginHelper::getPlugin()->getID() . '_') === false) {
+            return;
+        }
+
+        if ($args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS && ($klarnaEID = trim(PluginHelper::getSetting('klarnaEID'))) !== '') {
+            $modulID = Frontend::get('Zahlungsart')->cModulId;
+            // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
+            $trustedShopsCheckbox = self::Plugin('ws5_mollie')->getConfig()->getValue($modulID . '_trustedShopsCheckbox');
+            if ($trustedShopsCheckbox === 'Y') {
+                $checkbox = new \JTL\CheckBox();
+                $checkbox->kLink = 0;
+                $checkbox->kCheckBox = 0;
+                $checkbox->kCheckBoxFunktion = 0;
+                $checkbox->cName = 'MOLLIE KLARNA AGB';
+                $checkbox->cKundengruppe = ';1;';
+                $checkbox->cAnzeigeOrt = ';2;';
+                $checkbox->nAktiv = 1;
+                $checkbox->nPflicht = 1;
+                $checkbox->nLogging = 0;
+                $checkbox->nSort = 999;
+                $checkbox->dErstellt = date('Y-m-d H:i:s');
+                $checkbox->oCheckBoxSprache_arr = [];
+
+                $langs = LanguageHelper::getAllLanguages(1);
+                foreach ($langs as $kSprache => $lang) {
+                    $checkbox->oCheckBoxSprache_arr[$kSprache] = (object)[
+                        'cText' => PluginHelper::getPlugin()->getLocalization()->getTranslation('klarnaAGBText', $lang->getIso()),
+                        'cBeschreibung' => sprintf(PluginHelper::getPlugin()->getLocalization()->getTranslation('klarnaAGBDesc', $lang->getIso()), $klarnaEID),
+                        'kSprache' => $kSprache,
+                        'kCheckbox' => -1
+                    ];
+                }
+
+                $checkbox->kKundengruppe_arr = [Frontend::getCustomer()->getGroupID()];
+                $checkbox->kAnzeigeOrt_arr   = [CHECKBOX_ORT_BESTELLABSCHLUSS];
+                $checkbox->cID               = 'mollie_klarna_agb';
+                $checkbox->cLink             = '';
+
+                $args_arr['oCheckBox_arr'][] = $checkbox;
+            }
+        }
+
+
+        if (Frontend::getCustomer()->nRegistriert && $args_arr['nAnzeigeOrt'] === CHECKBOX_ORT_BESTELLABSCHLUSS) {
+            $mCustomer = CustomerModel::fromID(Frontend::getCustomer()->getID(), 'kKunde');
+
+            if ($mCustomer->customerId) {
+                return;
+            }
+
+            $checkbox                       = new \JTL\CheckBox();
+            $checkbox->kLink                = 0;
+            $checkbox->kCheckBox            = 0;
+            $checkbox->kCheckBoxFunktion    = 0;
+            $checkbox->cName                = 'MOLLIE SAVE CUSTOMER';
+            $checkbox->cKundengruppe        = ';1;';
+            $checkbox->cAnzeigeOrt          = ';2;';
+            $checkbox->nAktiv               = 1;
+            $checkbox->nPflicht             = 0;
+            $checkbox->nLogging             = 0;
+            $checkbox->nSort                = 999;
+            $checkbox->dErstellt            = date('Y-m-d H:i:s');
+            $checkbox->oCheckBoxSprache_arr = [];
+
+            $langs = LanguageHelper::getAllLanguages(1);
+            foreach ($langs as $kSprache => $lang) {
+                $checkbox->oCheckBoxSprache_arr[$kSprache] = (object)[
+                    'cText' => PluginHelper::getPlugin()->getLocalization()->getTranslation('checkboxText', $lang->getIso()),
+                    'cBeschreibung' => PluginHelper::getPlugin()->getLocalization()->getTranslation('checkboxDescr', $lang->getIso()),
+                    'kSprache' => $kSprache,
+                    'kCheckbox' => -1
+                ];
+            }
+
+            $checkbox->kKundengruppe_arr = [Frontend::getCustomer()->getGroupID()];
+            $checkbox->kAnzeigeOrt_arr   = [CHECKBOX_ORT_BESTELLABSCHLUSS];
+            $checkbox->cID               = 'mollie_create_customer';
+            $checkbox->cLink             = '';
+
+            $args_arr['oCheckBox_arr'][] = $checkbox;
+        }
+    }
+}

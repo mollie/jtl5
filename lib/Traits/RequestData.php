@@ -1,2 +1,88 @@
-<?php /* Checksum edfa4dee */
-$j8ae98d69=file(__FILE__);eval(base64_decode('JGNiYTUzY2NhNT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw1MDZdO3JldHVybiAoJGo9PTIxMik/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01MjQpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09ODYzKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($cba53cca5($j8ae98d69[1],524)));return eval($a661d598d($cba53cca5($j8ae98d69[1],863), $cba53cca5($j8ae98d69[1], 212), $j8ae98d69[1]));__halt_compiler();//JGE2NjFkNTk4ZD1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO30764e10066H4sIAAAAAAAA/6RSwa7TMBC8+yv2SREvlvKOSKhR6AU4IyintrIcd1sMrl28dmmp+u8obiChSatKXD2e2ZnZtXKLtJMK4aOJG20XP+m12DpjNC6MrhczL3WgkrFICO8PCndBO1syFhoAPuGPiBTeySDZiQGDnXcBVcAVZL7DSpawWButYB2takTgGzn7Gb2WRv/CnE9Aei+PDE4M9Brypyx81fTytqfDG6x9Nk6u2vE5LxmcGQOPIXoLQ2KLM5A1BS9VGJjpyyUf8CpzKSxBBfMlH88gxAZDTsFru4GsaZP/T4BES+PFdzwKPGgKlCfdYiQWT3ptahuN+bcHTeLiLB9S50l0yWEK21ooZ/fog0Cr3OouoYDnL7MPL2+ei4ZnNHUkyjmHyYjNlvp3CcMS6arEArK9NPHxMnvPaV3trJteoOq3c5l1q4qEPpA7/SuvzvBu6NHbv3nEMJ10ycYENV33yO8r/injqaq68zn/DgAA///uTfrtFAQAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Traits;
+
+use Exception;
+
+trait RequestData
+{
+    /**
+     * @var array
+     */
+    protected $requestData;
+
+    /**
+     * @throws Exception
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        if (!$this->requestData) {
+            $this->loadRequest();
+        }
+
+        return $this->requestData;
+    }
+
+    /**
+     * @param array $options
+     * @return $this
+     */
+    abstract public function loadRequest(array &$options = []);
+
+    /**
+     * @param string $name
+     * @throws Exception
+     * @return false|mixed|string
+     */
+    public function __get(string $name)
+    {
+        if (!$this->requestData) {
+            $this->loadRequest();
+        }
+
+        if (!array_key_exists($name, $this->requestData)) {
+            return null;
+        }
+
+        return is_string($this->requestData[$name]) ? mb_convert_encoding($this->requestData[$name], 'UTF-8', mb_list_encodings()) : $this->requestData[$name];
+    }
+
+    /**
+     * @param string $name
+     * @param mixed  $value
+     * @return $this
+     */
+    public function __set(string $name, $value)
+    {
+        if (!$this->requestData) {
+            $this->requestData = [];
+        }
+
+        $this->requestData[$name] = is_string($value) ? mb_convert_encoding($value, 'UTF-8', mb_list_encodings()) : $value;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        return $this->requestData ?: [];
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function __isset(string $name)
+    {
+        return $this->requestData[$name] !== null;
+    }
+}

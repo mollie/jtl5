@@ -1,2 +1,828 @@
-<?php /* Checksum 91653b9a */
-$j547c87b1=file(__FILE__);eval(base64_decode('JGMzMzdlYzUwYT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCw3NjY3XTtyZXR1cm4gKCRqPT0xNDEpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09NjQyKT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTkxNyk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($c337ec50a($j547c87b1[1],642)));return eval($a32569605($c337ec50a($j547c87b1[1],917), $c337ec50a($j547c87b1[1], 141), $j547c87b1[1]));__halt_compiler();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
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Checkout;
+
+use Exception;
+use JTL\Catalog\Currency;
+use JTL\Catalog\Product\Artikel;
+use JTL\Catalog\Product\EigenschaftWert;
+use JTL\Catalog\Product\Preise;
+use JTL\Checkout\Bestellung;
+use JTL\Checkout\ZahlungsLog;
+use JTL\Customer\Customer;
+use JTL\DB\ReturnType;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Helpers\Product;
+use JTL\Mail\Mail\Mail;
+use JTL\Mail\Mailer;
+use JTL\Plugin\Payment\FallbackMethod;
+use JTL\Plugin\Payment\LegacyMethod;
+use JTL\Plugin\Payment\MethodInterface;
+use JTL\Session\Frontend;
+use JTL\Shop;
+use JTL\Shopsetting;
+use Mollie\Api\Resources\Order;
+use Mollie\Api\Resources\Payment;
+use Mollie\Api\Types\OrderStatus;
+use Mollie\Api\Types\PaymentStatus;
+use PaymentMethod;
+use Plugin\ws5_mollie\lib\Locale;
+use Plugin\ws5_mollie\lib\Model\OrderModel;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\MollieAPI;
+use Plugin\ws5_mollie\lib\Order\Amount;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use Plugin\ws5_mollie\lib\Traits\RequestData;
+use RuntimeException;
+use stdClass;
+use WS\JTL5\V1_0_16\Model\ModelInterface;
+use WS\JTL5\V1_0_16\Traits\Plugins;
+
+/**
+ * Class AbstractCheckout
+ * @package Plugin\ws5_mollie\lib\Checkout
+ *
+ * @property string $locale
+ * @property Amount $amount
+ * @property string $redirectUrl
+ * @property null|array $metadata
+ * @property string $webhookUrl
+ * @property null|string $method
+ *
+ */
+abstract class AbstractCheckout
+{
+    use Plugins;
+    use RequestData;
+
+    /**
+     * @var OrderModel
+     */
+    protected $model;
+
+    /**
+     * @var string
+     */
+    protected $hash;
+
+    /**
+     * @var null|MollieAPI
+     */
+    protected $api;
+    /**
+     * @var PaymentMethod
+     */
+    protected $paymentMethod;
+    /**
+     * @var Bestellung
+     */
+    protected $oBestellung;
+
+    /**
+     * AbstractCheckout constructor.
+     * @param Bestellung     $oBestellung
+     * @param null|MollieAPI $api
+     */
+    public function __construct(Bestellung $oBestellung, MollieAPI $api = null)
+    {
+        $this->oBestellung = $oBestellung;
+        $this->api         = $api;
+    }
+
+    /**
+     * @param string $sessionHash
+     * @param string $id
+     * @param bool   $test
+     *
+     * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @return void
+     *
+     */
+    public static function finalizeOrder(string $sessionHash, string $id, bool $test): void
+    {
+        $logger = Shop::Container()->getLogService();
+
+        try {
+            if ($paymentSession = PluginHelper::getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash)) {
+                if (session_id() !== $paymentSession->cSID) {
+                    session_destroy();
+                    session_id($paymentSession->cSID);
+                    $session = Frontend::getInstance(true, true);
+                } else {
+                    $session = Frontend::getInstance(false, false);
+                }
+
+                if (
+                    (!isset($_SESSION['Warenkorb']->PositionenArr, $paymentSession->nBezahlt, $paymentSession->kBestellung)
+                        || !($paymentSession->nBezahlt && $paymentSession->kBestellung))
+                    && count($_SESSION['Warenkorb']->PositionenArr)
+                ) {
+                    $paymentSession->cNotifyID = $id;
+                    $paymentSession->dNotify   = 'NOW()';
+
+                    $api    = new MollieAPI($test);
+                    $mollie = strpos($id, 'tr_') === 0 ?
+                        $api->getClient()->payments->get($id) :
+                        $api->getClient()->orders->get($id, ['embed' => 'payments']);
+
+                    if (in_array($mollie->status, [OrderStatus::STATUS_PENDING, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PAID], true)) {
+                        require_once PFAD_ROOT . PFAD_INCLUDES . 'bestellabschluss_inc.php';
+                        require_once PFAD_ROOT . PFAD_INCLUDES . 'mailTools.php';
+
+                        $order = getOrderHandler()->finalizeOrder();
+                        $session->cleanUp();
+                        $paymentSession->nBezahlt     = 1;
+                        $paymentSession->dZeitBezahlt = 'now()';
+                    } else {
+                        throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
+                    }
+
+                    if ($order->kBestellung) {
+                        $paymentSession->kBestellung = $order->kBestellung;
+                        PluginHelper::getDB()->update('tzahlungsession', 'cZahlungsID', $sessionHash, $paymentSession);
+
+                        try {
+                            $checkout = self::fromID($id, false, $order);
+                        } catch (Exception $e) {
+                            if (strpos($id, 'tr_') === 0) {
+                                $checkoutClass = PaymentCheckout::class;
+                            } else {
+                                $checkoutClass = OrderCheckout::class;
+                            }
+                            $checkout = new $checkoutClass($order, $api);
+                        }
+
+                        if (strpos($mollie->id, 'ord_') === 0) {
+                            /** @var Payment $payment */
+                            foreach ($mollie->payments() as $payment) {
+                                if (in_array($payment->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID, PaymentStatus::STATUS_PENDING])) {
+                                    $checkout->getModel()->cTransactionId = $payment->id;
+                                    $checkout->getModel()->save();
+                                }
+                            }
+                        }
+
+                        $checkout->updateOrderNumber()
+                            ->setExpirationDate()
+                            ->handleNotification($sessionHash);
+                    } else {
+                        throw new Exception(sprintf('Bestellung nicht finalisiert: %s', print_r($order, 1)));
+                    }
+                } else {
+                    QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+
+                    throw new Exception(sprintf('PaymentSession bereits bezahlt: %s - ID: %s => Queue', $sessionHash, $id));
+                }
+            } else {
+                QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
+
+                throw new Exception(sprintf('PaymentSession nicht gefunden: %s - ID: %s => Queue', $sessionHash, $id));
+            }
+        } catch (Exception $e) {
+            $logger->notice(__NAMESPACE__ . ' finalize order:' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @param string          $id
+     * @param bool            $bFill
+     * @param null|Bestellung $order
+     * @throws RuntimeException
+     * @return static
+     */
+    public static function fromID(string $id, bool $bFill = true, Bestellung $order = null): self
+    {
+        /** @var OrderModel $model */
+        $model = OrderModel::fromID($id, 'cOrderId', true);
+
+        $oBestellung = $order;
+        if (!$oBestellung) {
+            if (!$model->kBestellung) {
+                throw new RuntimeException('Keine Bestell-ID hinterlegt.');
+            }
+            $oBestellung = new Bestellung($model->kBestellung, $bFill);
+        }
+
+        if (static::class !== __CLASS__) {
+            $self = new static($oBestellung, new MollieAPI($model->bTest));
+        } elseif (strpos($model->cOrderId, 'tr_') !== false) {
+            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
+        } else {
+            $self = new OrderCheckout($oBestellung, new MollieAPI($model->bTest));
+        }
+        $self->setModel($model);
+
+        return $self;
+    }
+
+    /**
+     * Lädt das Model falls vorhanden, oder gibt eun neues leeres zurück
+     *
+     * @throws Exception
+     * @return OrderModel
+     */
+    public function getModel(): OrderModel
+    {
+        if (!$this->model) {
+            $this->model        = OrderModel::fromID($this->getBestellung()->kBestellung, 'kBestellung');
+            $this->model->bTest = $this->getAPI()->isTest();
+        }
+
+        return $this->model;
+    }
+
+    /**
+     * @return static
+     */
+    protected function setModel(OrderModel $model): self
+    {
+        $this->model = $model;
+
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     * @return Bestellung
+     */
+    public function getBestellung(): Bestellung
+    {
+        if (!$this->oBestellung && $this->getModel()->kBestellung) {
+            $this->oBestellung = new Bestellung($this->getModel()->kBestellung, true);
+        }
+
+        return $this->oBestellung;
+    }
+
+    /**
+     * @throws Exception
+     * @return MollieAPI
+     */
+    public function getAPI(): MollieAPI
+    {
+        if (!$this->api) {
+            if ($this->getModel()->cOrderId) {
+                $this->api = new MollieAPI($this->getModel()->bTest);
+            } else {
+                $this->api = new MollieAPI(MollieAPI::getMode());
+            }
+        }
+
+        return $this->api;
+    }
+
+    /**
+     * @param null|mixed $hash
+     *
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws Exception
+     * @return void
+     *
+     */
+    public function handleNotification($hash = null): void
+    {
+        if (!$hash) {
+            $hash = $this->getModel()->cHash;
+        }
+
+//        try{
+//            $pm = $this->getPaymentMethod();
+//            if(method_exists($pm, 'generatePUI') && ($pui = $pm->generatePUI($this))){
+//                $this->getBestellung()->cPUIZahlungsdaten = $pui;
+//                $this->getBestellung()->updateInDB();
+//            }
+//        }catch (\Exception $e){
+//
+
+        $this->updateModel()->saveModel();
+        if (null === $this->getBestellung()->dBezahltDatum) {
+            if ($incoming = $this->getIncomingPayment()) {
+                $this->getPaymentMethod()->addIncomingPayment($this->getBestellung(), $incoming);
+                if ($this->completlyPaid()) {
+                    $this->getPaymentMethod()->setOrderStatusToPaid($this->getBestellung());
+                    $this::makeFetchable($this->getBestellung(), $this->getModel());
+                    $this->getPaymentMethod()->deletePaymentHash($hash);
+
+                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s' als bezahlt markiert: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO));
+
+                    $oZahlungsart = PluginHelper::getDB()->selectSingleRow('tzahlungsart', 'cModulId', $this->getPaymentMethod()->moduleID);
+                    if ($oZahlungsart && (int)$oZahlungsart->nMailSenden & ZAHLUNGSART_MAIL_EINGANG) {
+                        $this->getPaymentMethod()->sendConfirmationMail($this->getBestellung());
+                    }
+                } else {
+                    $this->Log(sprintf("Checkout::handleNotification: Bestellung '%s': nicht komplett bezahlt: %.2f %s", $this->getBestellung()->cBestellNr, (float)$incoming->fBetrag, $incoming->cISO), LOGLEVEL_ERROR);
+                }
+            }
+        }
+
+    }
+
+    public function setExpirationDate()
+    {
+        // set expireDate as Bestellattribut
+        try {
+            if (PluginHelper::getSetting('syncExpirationDate')) {
+                if ($order = $this->getMollie()) {
+                    if ($this->getBestellung()->kBestellung && isset($order->expiresAt)) {
+                        $bestellattribut = new stdClass();
+                        $bestellattribut->kBestellung = $this->getBestellung()->kBestellung;
+                        $bestellattribut->cName = 'mollieOrderExpirationDate';
+                        $bestellattribut->cValue = date("d.m.Y H:i:s", strtotime($order->expiresAt));
+                        PluginHelper::getDB()->insertRow('tbestellattribut', $bestellattribut);
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            $this->Log('Set Expiration Date nOrderCheckout::setExpirationDate:' . $e->getMessage(), LOGLEVEL_ERROR);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Speichert das Model
+     *
+     * @throws Exception
+     * @return true
+     *
+     */
+    public function saveModel(): bool
+    {
+        return $this->getModel()->save();
+    }
+
+    /**
+     * @throws Exception
+     * @return static
+     */
+    public function updateModel(): self
+    {
+        if ($this->getMollie()) {
+            $this->getModel()->cOrderId  = $this->getMollie()->id;
+            $this->getModel()->cLocale   = $this->getMollie()->locale;
+            $this->getModel()->fAmount   = $this->getMollie()->amount->value;
+            $this->getModel()->cMethod   = $this->getMollie()->method;
+            $this->getModel()->cCurrency = $this->getMollie()->amount->currency;
+            $this->getModel()->cStatus   = $this->getMollie()->status;
+        }
+
+        // TODO: DOKU, Reminder Email, name der paymentmethod in array
+        if (!defined('MOLLIE_DISABLE_REMINDER')) {
+            define('MOLLIE_DISABLE_REMINDER', []);
+        }
+        if (is_array(MOLLIE_DISABLE_REMINDER) && $this->getModel()->cMethod && in_array($this->getModel()->cMethod, MOLLIE_DISABLE_REMINDER)) {
+            $this->getModel()->dReminder = date('Y-m-d H:i:s');
+        }
+
+        $this->getModel()->kBestellung = $this->getBestellung()->kBestellung ?: ModelInterface::NULL;
+        $this->getModel()->cBestellNr = $this->getBestellung()->cBestellNr;
+        $this->getModel()->bSynced = $this->getModel()->bSynced ?? !PluginHelper::getSetting('onlyPaid');
+
+        return $this;
+    }
+
+    abstract public function getMollie(bool $force = false);
+
+    /**
+     * @return stdClass
+     */
+    abstract public function getIncomingPayment(): ?stdClass;
+
+    /**
+     * @throws Exception
+     * @return FallbackMethod|MethodInterface|PaymentMethod|\Plugin\ws5_mollie\lib\PaymentMethod
+     */
+    public function getPaymentMethod()
+    {
+        if (!$this->paymentMethod) {
+            if ($this->getBestellung()->Zahlungsart && strpos($this->getBestellung()->Zahlungsart->cModulId, "kPlugin_{$this::Plugin('ws5_mollie')->getID()}_") !== false) {
+                $this->paymentMethod = LegacyMethod::create($this->getBestellung()->Zahlungsart->cModulId);
+            } else {
+                $this->paymentMethod = LegacyMethod::create("kPlugin_{$this::Plugin('ws5_mollie')->getID()}_mollie");
+            }
+        }
+
+        return $this->paymentMethod;
+    }
+
+    /**
+     * @throws Exception
+     * @return bool
+     */
+    public function completlyPaid(): bool
+    {
+        if (
+            $row = PluginHelper::getDB()->executeQueryPrepared('SELECT SUM(fBetrag) as fBetragSumme FROM tzahlungseingang WHERE kBestellung = :kBestellung', [
+                ':kBestellung' => $this->oBestellung->kBestellung
+            ], 1)
+        ) {
+            return (float)$row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor);
+        }
+
+        return false;
+    }
+
+    /**
+     * @param Bestellung $oBestellung
+     * @param OrderModel $model
+     * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @return bool
+     */
+    public static function makeFetchable(Bestellung $oBestellung, OrderModel $model): bool
+    {
+        if ($oBestellung->cAbgeholt === 'Y' && !$model->bSynced) {
+            PluginHelper::getDB()->update('tbestellung', 'kBestellung', $oBestellung->kBestellung, (object)['cAbgeholt' => 'N']);
+            $model->bSynced = true;
+
+            try {
+                return $model->save();
+            } catch (Exception $e) {
+                Shop::Container()->getLogService()->error(sprintf('Fehler beim speichern des Models: %s / Bestellung: %s', $model->kId, $oBestellung->cBestellNr));
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $msg
+     * @param int $level
+     * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @return $this
+     */
+    public function Log(string $msg, $level = LOGLEVEL_NOTICE)
+    {
+        try {
+            $data = '';
+            if ($this->getBestellung()) {
+                $data .= '#' . $this->getBestellung()->kBestellung;
+            }
+            if ($this->getMollie()) {
+                $data .= '$' . $this->getMollie()->id;
+            }
+            ZahlungsLog::add($this->getPaymentMethod()->moduleID, '[' . microtime(true) . ' - ' . $_SERVER['PHP_SELF'] . '] ' . $msg, $data, $level);
+        } catch (Exception $e) {
+            Shop::Container()->getLogService()->error(sprintf("Error while Logging: %s\nPrevious Error: %s", $e->getMessage(), $msg));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    abstract protected function updateOrderNumber();
+
+    /**
+     * @param int  $kBestellung
+     * @param bool $checkZA
+     * @return bool
+     */
+    public static function isMollie(int $kBestellung, bool $checkZA = false): bool
+    {
+        if ($checkZA) {
+            $res = PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM tzahlungsart WHERE cModulId LIKE :cModulId AND kZahlungsart = :kZahlungsart', [
+                ':kZahlungsart' => $kBestellung,
+                ':cModulId' => 'kPlugin_' . PluginHelper::getPlugin()->getID() . '%'
+            ], 1);
+
+            return (bool)$res;
+        }
+
+        return ($res = PluginHelper::getDB()->executeQueryPrepared('SELECT kId FROM xplugin_ws5_mollie_orders WHERE kBestellung = :kBestellung;', [
+                ':kBestellung' => $kBestellung,
+            ], 1)) && $res->kId;
+    }
+
+    /**
+     * @param Bestellung     $oBestellung
+     * @param null|MollieAPI $api
+     * @return static
+     */
+    public static function factory(Bestellung $oBestellung, MollieAPI $api = null): self
+    {
+        return new static($oBestellung, $api);
+    }
+
+    /**
+     * @param int   $kBestellung
+     * @param mixed $fill
+     * @return OrderCheckout|PaymentCheckout
+     */
+    public static function fromBestellung(int $kBestellung, $fill = true)
+    {
+        $model = OrderModel::fromID($kBestellung, 'kBestellung', true);
+
+        if (!$model->kBestellung) {
+            throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
+        }
+        $oBestellung = new Bestellung($model->kBestellung, $fill);
+        if (!$oBestellung->kBestellung) {
+            throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
+        }
+        if (strpos($model->cOrderId, 'tr_') !== false) {
+            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
+        } else {
+            $self = new OrderCheckout($oBestellung, new MollieAPI($model->bTest));
+        }
+        $self->setModel($model);
+
+        return $self;
+    }
+
+    /**
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public static function sendReminders(): void
+    {
+        $reminder = (int)PluginHelper::getSetting('reminder');
+
+        if (!$reminder) {
+            PluginHelper::getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET dReminder = :dReminder WHERE dReminder IS NULL', [
+                ':dReminder' => date('Y-m-d H:i:s')
+            ], 3);
+
+            return;
+        }
+        // TODO: DOKU
+        ifndef('MOLLIE_REMINDER_LIMIT_DAYS', 7);
+        $remindables = PluginHelper::getDB()->executeQueryPrepared("SELECT kId FROM xplugin_ws5_mollie_orders WHERE (dReminder IS NULL OR dReminder = '0000-00-00 00:00:00') AND dCreated > NOW() - INTERVAL " . MOLLIE_REMINDER_LIMIT_DAYS . " DAY AND dCreated < NOW() - INTERVAL :d MINUTE AND cStatus IN ('created','open', 'expired', 'failed', 'canceled')", [
+            ':d' => $reminder
+        ], 2);
+        foreach ($remindables as $remindable) {
+            try {
+                self::sendReminder($remindable->kId);
+            } catch (Exception $e) {
+                Shop::Container()->getBackendLogService()->error('AbstractCheckout::sendReminders: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * @param $kID
+     * @param mixed $kId
+     *
+     * @throws Exception
+     * @return true
+     *
+     */
+    public static function sendReminder($kId): bool
+    {
+        $order = OrderModel::fromID($kId, 'kId', true);
+
+        // filter paid and storno
+        if (!$order->kBestellung || (int)$order->cStatus > BESTELLUNG_STATUS_IN_BEARBEITUNG || (int)$order->cStatus < 0) {
+            $order->dReminder = date('Y-m-d H:i:s');
+            $order->save();
+
+            return true;
+        }
+        $oBestellung = new Bestellung($order->kBestellung);
+        $repayURL    = Shop::getURL() . '/?m_pay=' . md5($order->kId . '-' . $order->kBestellung);
+
+        $data = new stdClass();
+        $data->tkunde = new Customer($oBestellung->kKunde);
+        if (!$data->tkunde->kKunde) {
+            $order->dReminder = date('Y-m-d H:i:s');
+            $order->save();
+
+            throw new Exception("Kunde '$oBestellung->kKunde' nicht gefunden.");
+        }
+        $data->Bestellung = $oBestellung;
+        $data->PayURL = $repayURL;
+        $data->Amount = Preise::getLocalizedPriceString($order->fAmount, Currency::fromISO($order->cCurrency), false);
+
+        $mailer = Shop::Container()->get(Mailer::class);
+        $mail = new Mail();
+        $mail->createFromTemplateID('kPlugin_' . PluginHelper::getPlugin()->getID() . '_zahlungserinnerung', $data);
+
+        $order->dReminder = date('Y-m-d H:i:s');
+        $order->save();
+
+        if (!$mailer->send($mail)) {
+            throw new Exception($mail->getError() . "\n" . print_r([$data, $order->jsonSerialize()], 1));
+        }
+
+        return true;
+    }
+
+    /**
+     * cancels oder refunds eine stornierte Bestellung
+     *
+     * @return string
+     */
+    abstract public function cancelOrRefund(): string;
+
+    /**
+     * @param array $options
+     * @throws Exception
+     * @return self
+     */
+    public function loadRequest(array &$options = [])
+    {
+        if ($this->getBestellung()) {
+            $oKunde = !$this->getBestellung()->oKunde && $this->getPaymentMethod()->duringCheckout
+                ? $_SESSION['Kunde']
+                : $this->getBestellung()->oKunde;
+
+            $this->amount = new Amount($this->getBestellung()
+                    ->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor, $this->getBestellung()->Waehrung, true);
+            $this->metadata = [
+                'kBestellung'   => $this->getBestellung()->kBestellung,
+                'kKunde'        => $oKunde->kKunde,
+                'kKundengruppe' => $oKunde->kKundengruppe,
+                'cHash'         => $this->getHash(),
+            ];
+
+            if (
+                defined(get_class($this->getPaymentMethod()) . '::METHOD') && $this->getPaymentMethod()::METHOD !== ''
+                && (!PluginHelper::getSetting('resetMethod') || !$this->getMollie())
+            ) {
+                $this->method = $this->getPaymentMethod()::METHOD;
+            }
+
+
+            $this->redirectUrl = $this->getPaymentMethod()->duringCheckout ?
+            Shop::Container()->getLinkService()->getStaticRoute('bestellabschluss.php') . "?" . http_build_query(['hash' => $this->getHash()]) :
+                $this->getPaymentMethod()->getReturnURL($this->getBestellung());
+
+            $this->webhookUrl = $this->getWebhookUrl();
+        }
+
+        $this->locale = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), Frontend::getCustomer()->cLand);
+
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    public function getHash(): string
+    {
+        if ($this->getModel()->cHash) {
+            return $this->getModel()->cHash;
+        }
+        if (!$this->hash) {
+            $this->hash = $this->getPaymentMethod()->generateHash($this->getBestellung());
+        }
+
+        return $this->hash;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    protected function getWebhookUrl(): string
+    {
+        $query = [
+            'mollie' => 1,
+        ];
+        if ($this->getPaymentMethod()->duringCheckout) {
+            $query['hash'] = $this->getHash();
+            $query['test'] = $this->getAPI()->isTest() ?: null;
+        }
+
+        return Shop::getURL(true) . '/?' . http_build_query($query);
+    }
+
+    /**
+     * @param array $paymentOptions
+     * @return Order|Payment
+     */
+    abstract public function create(array $paymentOptions = []);
+
+    /**
+     * @throws Exception
+     */
+    public function storno(): void
+    {
+        if (in_array((int)$this->getBestellung()->cStatus, [BESTELLUNG_STATUS_OFFEN, BESTELLUNG_STATUS_IN_BEARBEITUNG], true)) {
+            require_once PFAD_ROOT . PFAD_INCLUDES . 'bestellabschluss_inc.php';
+
+            $log                   = [];
+            $conf                  = Shop::getSettings([CONF_GLOBAL]);
+            $nArtikelAnzeigefilter = (int)$conf['global']['artikel_artikelanzeigefilter'];
+            foreach ($this->getBestellung()->Positionen as $pos) {
+                if ($pos->kArtikel && $pos->Artikel && $pos->Artikel->cLagerBeachten === 'Y') {
+                    $log[] = sprintf('Reset stock of "%s" by %d', $pos->Artikel->cArtNr, -1 * $pos->nAnzahl);
+                    self::aktualisiereLagerbestand($pos->Artikel, -1 * $pos->nAnzahl, $pos->WarenkorbPosEigenschaftArr, $nArtikelAnzeigefilter);
+                }
+            }
+            $log[] = sprintf("Cancel order '%s'.", $this->getBestellung()->cBestellNr);
+
+            if (PluginHelper::getDB()->executeQueryPrepared('UPDATE tbestellung SET cAbgeholt = "N", cStatus = :cStatus WHERE kBestellung = :kBestellung', [':cStatus' => '-1', ':kBestellung' => $this->getBestellung()->kBestellung], 3)) {
+                $this->Log(implode('\n', $log));
+            }
+        }
+    }
+
+    protected static function aktualisiereLagerbestand(Artikel $product, int $amount, array $attributeValues, int $productFilter = 1)
+    {
+        $inventory = $product->fLagerbestand;
+        $db = PluginHelper::getDB();
+        if ($product->cLagerBeachten !== 'Y') {
+            return $inventory;
+        }
+        if (
+            $product->cLagerVariation === 'Y'
+            && count($attributeValues) > 0
+        ) {
+            foreach ($attributeValues as $value) {
+                $EigenschaftWert = new EigenschaftWert($value->kEigenschaftWert);
+                if ($EigenschaftWert->fPackeinheit == 0) {
+                    $EigenschaftWert->fPackeinheit = 1;
+                }
+                $db->queryPrepared(
+                    'UPDATE teigenschaftwert
+                    SET fLagerbestand = fLagerbestand - :inv
+                    WHERE kEigenschaftWert = :aid',
+                    [
+                        'aid' => (int)$value->kEigenschaftWert,
+                        'inv' => $amount * $EigenschaftWert->fPackeinheit
+                    ],
+                    ReturnType::DEFAULT
+                );
+            }
+            getStockUpdater()->updateProductStockLevel($product->kArtikel, $amount, $product->fPackeinheit);
+        } elseif ($product->fPackeinheit > 0) {
+            if ($product->kStueckliste > 0) {
+                $inventory = getStockUpdater()->updateBOMStockLevel($product, $amount);
+            } else {
+                getStockUpdater()->updateProductStockLevel($product->kArtikel, $amount, $product->fPackeinheit);
+                $tmpProduct = $db->select(
+                    'tartikel',
+                    'kArtikel',
+                    $product->kArtikel,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    'fLagerbestand'
+                );
+                if ($tmpProduct !== null) {
+                    $inventory = (float)$tmpProduct->fLagerbestand;
+                }
+                // Stücklisten Komponente
+                if (Product::isStuecklisteKomponente($product->kArtikel)) {
+                    getStockUpdater()->updateBOMStock(
+                        $product->kArtikel,
+                        $inventory,
+                        $product->cLagerKleinerNull === 'Y'
+                    );
+                }
+            }
+            // Aktualisiere Merkmale in tartikelmerkmal vom Vaterartikel
+            if ($product->kVaterArtikel > 0) {
+                Artikel::beachteVarikombiMerkmalLagerbestand($product->kVaterArtikel, $productFilter);
+                getStockUpdater()->updateProductStockLevel($product->kVaterArtikel, $amount, $product->fPackeinheit);
+            }
+        }
+
+        return $inventory;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     *
+     */
+    public function getDescription(): string
+    {
+        $descTemplate = trim(PluginHelper::getSetting('paymentDescTpl')) ?: 'Order {orderNumber}';
+        $oKunde = $this->getBestellung()->oKunde ?: $_SESSION['Kunde'];
+
+        return str_replace([
+            '{orderNumber}',
+            '{storeName}',
+            '{customer.firstname}',
+            '{customer.lastname}',
+            '{customer.company}',
+        ], [
+            $this->getBestellung()->cBestellNr,
+            Shopsetting::getInstance()->getValue(CONF_GLOBAL, 'global_shopname'),  //Shop::getSettings([CONF_GLOBAL])['global']['global_shopname'],
+            $oKunde->cVorname,
+            $oKunde->cNachname,
+            $oKunde->cFirma
+        ], $descTemplate);
+    }
+
+    /**
+     * @param Order|Payment $model
+     * @return $this;
+     */
+    abstract protected function setMollie($model);
+}

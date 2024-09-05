@@ -1,2 +1,23 @@
-<?php /* Checksum 000c8bf2 */
-$j1b179e9f=file(__FILE__);eval(base64_decode('JGM4YzU3NGI3Nz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0MDZdO3JldHVybiAoJGo9PTE1MSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00OTEpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NzkyKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c8c574b77($j1b179e9f[1],491)));return eval($abf26b333($c8c574b77($j1b179e9f[1],792), $c8c574b77($j1b179e9f[1], 151), $j1b179e9f[1]));__halt_compiler();//JGFiZjI2YjMzMz1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO30721b618d0H4sIAAAAAAAA/2SQW2vqQBSF3+dXrAchCh44h0NfEmIxmlKqMSKBUoyEONnVoZNJmAutiP+9eOnF9nWvtb699lZlTaYtOWEu3Uao/NXcFHUjpaC8LXc1KVuT3TZVwJgzhIdsmo+2xF8aZ/OIjCUpndoEJ/E3Qop1Pj9jkg8Ml6UxmEQj0JslVRlcOdieoXVrKTh4o4zFcDpNH4v58CmJZ1kRxXfpIi7SxTheIITVjgL2I5HE2X06Rog8OdcYtiLPdi2Z6zK+P4lG39LPTnErGoUN2YsxbY8D0/06FZ1GV6T76JStOEJ7Pkqtyx3DnkGTdVp9agjDEN7lkR5usfQqMlyLE9ZDOIBxa2N190z9M+CXTTPdx98+/v3vreBjuQoYDuzwHgAA///yiwwArwEAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+class KBC extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::KBC;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return $apiType === 'payment' ? ['description' => substr($order->cBestellNr, 0, 13)] : [];
+    }
+}

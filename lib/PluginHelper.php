@@ -1,2 +1,14 @@
-<?php /* Checksum f6db417f */
-$jf5277496=file(__FILE__);eval(base64_decode('JGNlZWY5OTU0Mz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwyMDhdO3JldHVybiAoJGo9PTIxMyk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01NDEpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09OTU5KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($ceef99543($jf5277496[1],541)));return eval($a7eab36de($ceef99543($jf5277496[1],959), $ceef99543($jf5277496[1], 213), $jf5277496[1]));__halt_compiler();//JGE3ZWFiMzZkZT1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307a5dc4792H4sIAAAAAAAA/2zOsQrCMBDG8f2e4gahqx3qUhzcVBwERZeDkiaHBK5pyF1REN9dsIMOrn++H3zJDazZecajTLeY6K5NN4wikUli3wJMyng90f58aOhSd8uuXtGWJXOhTa9WnLeZzrEFAC9OFX8r8sM4BcV/BJ6AuYzG3jigmrPocZE/i13ANVbfU1ULr3cAAAD//39B2/a0AAAA
+<?php
+
+namespace Plugin\ws5_mollie\lib;
+
+use WS\JTL5\V1_0_16\Helper\AbstractPluginHelper;
+
+/**
+ * Provides functionality like get and set settings.
+ * Add your own plugin helper functions here if they are not available via AbstractPluginHelper
+ */
+class PluginHelper extends AbstractPluginHelper
+{
+    protected static $pluginId = 'ws5_mollie';
+}

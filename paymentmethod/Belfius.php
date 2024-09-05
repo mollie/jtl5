@@ -1,2 +1,23 @@
-<?php /* Checksum 132e410c */
-$j35389dae=file(__FILE__);eval(base64_decode('JGMxYTAxZjdhZT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwzNTBdO3JldHVybiAoJGo9PTMwMyk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01MDQpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09ODkyKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c1a01f7ae($j35389dae[1],504)));return eval($a84310c3f($c1a01f7ae($j35389dae[1],892), $c1a01f7ae($j35389dae[1], 303), $j35389dae[1]));__halt_compiler();//JGE4NDMxMGMzZj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO30765280860H4sIAAAAAAAA/2TPQUvDMBQH8Hs+xTvsoODVy8oOq8tQae2oFREjJUvfumCahLwELWPfXeYUnV7f+78f/2flgOSlQliZ1Gsr3uiyHZwxGoWX44A2Dhi3rssYS4Rw2xTiaovq1aUocqSIxiTbZ5/L/4TRa7E6MuU3o4wkghzNRicCfI9oO4KTFNsx8GlttALlLEWYF0X12K7mTyW/a9qcL6uat1W94DXMIIaEGftzUfLmulrADER5rDL3WjSjRzotNJ3mvFjePNz/EjbJqqidhR7jV7jyhwGd/bwMExc6DBcwkV4f4PMpyBDkyGDHIGBMwcLzS8Zgz/YfAQAA//8MQS4TZwEAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+class Belfius extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::BELFIUS;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return [];
+    }
+}
