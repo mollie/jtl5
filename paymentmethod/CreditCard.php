@@ -1,2 +1,131 @@
-<?php /* Checksum 8573404d */
-$j71609c2e=file(__FILE__);eval(base64_decode('JGMzMWEzODNmYz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCwxOTU0XTtyZXR1cm4gKCRqPT0xNTMpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09NDk0KT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTkwOSk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($c31a383fc($j71609c2e[1],494)));return eval($abfc7cb22($c31a383fc($j71609c2e[1],909), $c31a383fc($j71609c2e[1], 153), $j71609c2e[1]));__halt_compiler();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
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use Exception;
+use JTL\Checkout\Bestellung;
+use JTL\Session\Frontend;
+use JTL\Shop;
+use Plugin\ws5_mollie\lib\MollieAPI;
+use Plugin\ws5_mollie\lib\Payment\Address;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+use Plugin\ws5_mollie\lib\PluginHelper;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+class CreditCard extends PaymentMethod
+{
+    public const CACHE_PREFIX          = 'creditcard';
+    public const CACHE_TOKEN           = self::CACHE_PREFIX . ':token';
+    public const CACHE_TOKEN_TIMESTAMP = self::CACHE_TOKEN . ':timestamp';
+
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::CREDITCARD;
+
+    public function handleNotification(Bestellung $order, string $hash, array $args): void
+    {
+        parent::handleNotification($order, $hash, $args);
+        $this->clearToken();
+    }
+
+    protected function clearToken(): bool
+    {
+        $this->unsetCache(self::CACHE_TOKEN)
+            ->unsetCache(self::CACHE_TOKEN_TIMESTAMP);
+
+        return true;
+    }
+
+    public function handleAdditional(array $post): bool
+    {
+        // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
+        $components = self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_components');
+        $profileId = PluginHelper::getSetting('profileId');
+
+        if ($components === 'N' || !$profileId || trim($profileId) === '' || (array_key_exists('pruefekupon', $post) && $post['pruefekupon'] === '1')) {
+            return parent::handleAdditional($post);
+        }
+
+        $cleared = false;
+        if (array_key_exists('clear', $post) && (int)$post['clear']) {
+            $cleared = $this->clearToken();
+        }
+
+        if ($components === 'S' && array_key_exists('skip', $post) && (int)$post['skip']) {
+            return parent::handleAdditional($post);
+        }
+
+        // Skip handleAdditional if "Guthaben nutzen"-Request is being processed
+        if (array_key_exists('guthabenVerrechnen', $post) && (int)$post['guthabenVerrechnen'] === 1) {
+            return true;
+        }
+
+        try {
+            // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
+            $trustBadge = self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_trustBadge') === 'Y'
+                ? PluginHelper::getPlugin()->getPaths()->getFrontendURL() . 'img/trust_' . Frontend::getInstance()->getLanguage()->getIso() . '.png'
+                : false;
+            $locale = self::getLocale(Frontend::getInstance()->getLanguage()->getIso(), Frontend::getCustomer()->cLand ?? null);
+            $mode = MollieAPI::getMode();
+            $errorMessage = json_encode(PluginHelper::getPlugin()->getLocalization()->getTranslation('mcErrorMessage'), JSON_THROW_ON_ERROR);
+        } catch (Exception $e) {
+            Shop::Container()->getLogService()->error($e->getMessage(), ['e' => $e]);
+
+            return parent::handleAdditional($post);
+        }
+
+        if (!$cleared && array_key_exists('cardToken', $post) && ($token = trim($post['cardToken']))) {
+            return $this->setToken($token) && parent::handleAdditional($post);
+        }
+
+        if (($ctTS = (int)$this->getCache(self::CACHE_TOKEN_TIMESTAMP)) && $ctTS > time()) {
+            $token = $this->getCache(self::CACHE_TOKEN);
+        }
+
+        Shop::Smarty()->assign('profileId', $profileId)
+            ->assign('trustBadge', $trustBadge ?? false)
+            ->assign('components', $components)
+            ->assign('locale', $locale ?? 'de_DE')
+            ->assign('token', $token ?? false)
+            ->assign('testMode', $mode ?? false)
+            ->assign('errorMessage', $errorMessage ?? 'Unexpected Error.')
+            ->assign('mollieLang', PluginHelper::getPlugin()->getLocalization()->getTranslations());
+
+        return false;
+    }
+
+    protected function setToken(string $token): bool
+    {
+        $this->addCache(self::CACHE_TOKEN, $token)
+            ->addCache(self::CACHE_TOKEN_TIMESTAMP, time() + 3600);
+
+        return true;
+    }
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        $paymentOptions = [];
+
+        if ($apiType === 'payment') {
+            if ($order->Lieferadresse !== null) {
+                if (!$order->Lieferadresse->cMail) {
+                    $order->Lieferadresse->cMail = $order->oRechnungsadresse->cMail;
+                }
+                $paymentOptions['shippingAddress'] = new Address($order->Lieferadresse);
+            }
+
+            $paymentOptions['billingAddress'] = new Address($order->oRechnungsadresse);
+        }
+        if ((int)$this->getCache(self::CACHE_TOKEN_TIMESTAMP) > time() && ($token = trim($this->getCache(self::CACHE_TOKEN)))) {
+            $paymentOptions['cardToken'] = $token;
+        }
+
+        return $paymentOptions;
+    }
+}

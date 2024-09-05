@@ -1,2 +1,332 @@
-<?php /* Checksum 6deee7c0 */
-$j565e43ae=file(__FILE__);eval(base64_decode('JGM5ZTY4YTY4Nz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCwyODI0XTtyZXR1cm4gKCRqPT0xMjMpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09NjU0KT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTcwNCk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($c9e68a687($j565e43ae[1],654)));return eval($ae86c1453($c9e68a687($j565e43ae[1],704), $c9e68a687($j565e43ae[1], 123), $j565e43ae[1]));__halt_compiler();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
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib;
+
+use Exception;
+use JTL\Checkout\Lieferschein;
+use JTL\Checkout\Lieferscheinpos;
+use JTL\Checkout\Versand;
+use JTL\Shop;
+use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Resources\OrderLine;
+use Mollie\Api\Types\OrderStatus;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
+use Plugin\ws5_mollie\lib\Traits\RequestData;
+use RuntimeException;
+use WS\JTL5\V1_0_16\Exception\APIException;
+use WS\JTL5\V1_0_16\Traits\Plugins;
+
+/**
+ * Class Shipment
+ * @package Plugin\ws5_mollie\lib
+ *
+ * @property null|array $lines
+ * @property null|string $tracking
+ *
+ */
+class Shipment
+{
+    use Plugins;
+    use RequestData;
+
+    /**
+     * @var null|int
+     */
+    protected $kLieferschein;
+
+    /**
+     * @var ShipmentsModel
+     */
+    protected $model;
+    /**
+     * @var OrderCheckout
+     */
+    protected $checkout;
+    /**
+     * @var \Mollie\Api\Resources\Shipment
+     */
+    protected $shipment;
+    /**
+     * @var Lieferschein
+     */
+    protected $oLieferschein;
+
+    /**
+     * Shipment constructor.
+     * @param int                $kLieferschein
+     * @param null|OrderCheckout $checkout
+     */
+    public function __construct(int $kLieferschein, OrderCheckout $checkout = null)
+    {
+        $this->kLieferschein = $kLieferschein;
+        if ($checkout) {
+            $this->checkout = $checkout;
+        }
+
+        if (!$this->getLieferschein() || !$this->getLieferschein()->getLieferschein()) {
+            throw new APIException('Lieferschein konnte nicht geladen werden');
+        }
+
+        if (!count($this->getLieferschein()->oVersand_arr)) {
+            throw new APIException('Kein Versand gefunden!');
+        }
+    }
+
+    /**
+     * @return Lieferschein
+     */
+    public function getLieferschein(): Lieferschein
+    {
+        if (!$this->oLieferschein && $this->kLieferschein) {
+            $this->oLieferschein = new Lieferschein($this->kLieferschein);
+        }
+
+        return $this->oLieferschein;
+    }
+
+    /**
+     * @param OrderCheckout $checkout
+     * @throws Exception
+     * @return array (\Mollie\Api\Resources\Shipment|null|string)[]
+     */
+    public static function syncBestellung(OrderCheckout $checkout): array
+    {
+        $shipments = [];
+        if ($checkout->getBestellung()->kBestellung) {
+            $oKunde = $checkout->getBestellung()->oKunde ?? new \JTL\Customer\Customer($checkout->getBestellung()->kKunde);
+
+            $shippingActive = PluginHelper::getSetting('shippingActive');
+            if ($shippingActive === 'N') {
+                throw new RuntimeException('Shipping deaktiviert');
+            }
+
+            if ($shippingActive === 'K' && !$oKunde->nRegistriert && (int)$checkout->getBestellung()->cStatus !== BESTELLUNG_STATUS_VERSANDT) {
+                throw new RuntimeException('Shipping für Gast-Bestellungen und Teilversand deaktiviert');
+            }
+
+            /** @var Lieferschein $oLieferschein */
+            foreach ($checkout->getBestellung()->oLieferschein_arr as $oLieferschein) {
+                try {
+                    $shipment = new self($oLieferschein->getLieferschein(), $checkout);
+
+                    $mode = PluginHelper::getSetting('shippingMode');
+                    switch ($mode) {
+                        case 'A':
+                            // ship directly
+                            if (!$shipment->send() && !$shipment->getShipment()) {
+                                throw new APIException('Shipment konnte nicht gespeichert werden.');
+                            }
+                            $shipments[] = $shipment->getShipment();
+
+                            break;
+                        case 'B':
+                            // only ship if complete shipping
+                            if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
+                                if (!$shipment->send() && !$shipment->getShipment()) {
+                                    throw new APIException('Shipment konnte nicht gespeichert werden.');
+                                }
+                                $shipments[] = $shipment->getShipment();
+
+                                break;
+                            }
+
+                            throw new APIException('Gastbestellung noch nicht komplett versendet!');
+                    }
+                } catch (APIException $e) {
+                    //TODO: handle url entity error
+                    $shipments[] = $e->getMessage();
+                } catch (Exception $e) {
+                    $shipments[] = $e->getMessage();
+                    Shop::Container()->getLogService()->error("mollie: Shipment::syncBestellung (BestellNr. {$checkout->getBestellung()->cBestellNr}, Lieferschein: {$shipment->getLieferschein()->getLieferscheinNr()}) - " . $e->getMessage());
+                }
+            }
+        }
+
+        return $shipments;
+    }
+
+    /**
+     * @throws IncompatiblePlatform
+     * @throws Exception
+     * @throws ApiException
+     * @return bool
+     */
+    public function send(): bool
+    {
+        if ($this->getShipment()) {
+            throw new APIException('Lieferschien bereits an Mollie übertragen: ' . $this->getShipment()->id);
+        }
+
+        if ($this->getCheckout()->getMollie(true)->status === OrderStatus::STATUS_COMPLETED) {
+            throw new APIException('Bestellung bei Mollie bereits abgeschlossen!');
+        }
+
+        $api = $this->getCheckout()->getAPI()->getClient();
+
+        $this->shipment = $api->shipments->createForId($this->checkout->getModel()->cOrderId, $this->loadRequest()->jsonSerialize());
+
+        return $this->updateModel()->saveModel();
+    }
+
+    /**
+     * @param false $force
+     * @throws IncompatiblePlatform
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @return null|\Mollie\Api\Resources\Shipment
+     */
+    public function getShipment(bool $force = false): ?\Mollie\Api\Resources\Shipment
+    {
+        if (($force || !$this->shipment) && $this->getModel() && $this->getModel()->cShipmentId) {
+            $this->shipment = $this->getCheckout()->getAPI()->getClient()->shipments->getForId($this->getModel()->cOrderId, $this->getModel()->cShipmentId);
+        }
+
+        return $this->shipment;
+    }
+
+    /**
+     * @throws Exception
+     * @return ShipmentsModel
+     */
+    public function getModel(): ShipmentsModel
+    {
+        if (!$this->model && $this->kLieferschein) {
+            $this->model = ShipmentsModel::fromID($this->kLieferschein, 'kLieferschein');
+            if (!$this->model->dCreated) {
+                $this->getModel()->dCreated = date('Y-m-d H:i:s');
+            }
+            $this->updateModel();
+        }
+
+        return $this->model;
+    }
+
+    /**
+     * @throws Exception
+     *
+     * @return static
+     */
+    public function updateModel(): self
+    {
+        $this->getModel()->kLieferschein = $this->kLieferschein;
+        if ($this->getCheckout()) {
+            $this->getModel()->cOrderId    = $this->getCheckout()->getModel()->cOrderId;
+            $this->getModel()->kBestellung = $this->getCheckout()->getModel()->kBestellung;
+        }
+        if ($this->getShipment()) {
+            $this->getModel()->cShipmentId = $this->getShipment()->id;
+            $this->getModel()->cUrl        = $this->getShipment()->getTrackingUrl() ?? '';
+        }
+        if ($this->tracking) {
+            $this->getModel()->cCarrier = $this->tracking['carrier'] ?? '';
+            $this->getModel()->cCode    = $this->tracking['code']    ?? '';
+        }
+
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     * @return OrderCheckout
+     */
+    public function getCheckout(): OrderCheckout
+    {
+        if (!$this->checkout) {
+            //TODO evtl. load by lieferschien
+            throw new RuntimeException('Should not happen, but it did!');
+        }
+
+        return $this->checkout;
+    }
+
+    /**
+     * @throws Exception
+     * @return $this
+     */
+    public function loadRequest(array &$options = [])
+    {
+        /** @var Versand $oVersand */
+        $oVersand = $this->getLieferschein()->oVersand_arr[0];
+        //TODO: add setting for url
+        if ($oVersand->getIdentCode() && $oVersand->getLogistik()) {
+            $tracking = [
+                'carrier' => $oVersand->getLogistik(),
+                'code'    => $oVersand->getIdentCode(),
+            ];
+            if ($oVersand->getLogistikVarUrl() && PluginHelper::getSetting('trackingActive')) {
+                $tracking['url'] = $oVersand->getLogistikURL();
+            }
+            $this->tracking = $tracking;
+        }
+
+        $this->tracking = $tracking;
+
+
+        // TODO: Wenn alle Lieferschiene in der WAWI erstellt wurden, aber nicht im Shop, kommt status 4.
+        if ((int)$this->getCheckout()->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
+            $this->lines = [];
+        } else if ((int)$this->getCheckout()->getBestellung()->cStatus === BESTELLUNG_STATUS_TEILVERSANDT && PluginHelper::getSetting('shippingMode') === 'A') {
+            $this->lines = [];
+        } else {
+            $this->lines = $this->getOrderLines();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     * @return array (float|int|string)[][]
+     *
+     */
+    protected function getOrderLines(): array
+    {
+        $lines = [];
+
+        if (!count($this->getLieferschein()->oLieferscheinPos_arr)) {
+            return $lines;
+        }
+
+        // Bei Stücklisten, sonst gibt es mehrere OrderLines für die selbe ID
+        $shippedOrderLines = [];
+
+        /** @var Lieferscheinpos $oLieferschienPos */
+        foreach ($this->getLieferschein()->oLieferscheinPos_arr as $oLieferschienPos) {
+            $wkpos = PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM twarenkorbpos WHERE kBestellpos = :kBestellpos', [
+                ':kBestellpos' => $oLieferschienPos->getBestellPos()
+            ], 1);
+
+            /** @var OrderLine $orderLine */
+            foreach ($this->getCheckout()->getMollie()->lines as $orderLine) {
+                if ($orderLine->sku === $wkpos->cArtNr && !in_array($orderLine->id, $shippedOrderLines, true)) {
+                    if ($quantity = min($oLieferschienPos->getAnzahl(), $orderLine->shippableQuantity)) {
+                        $lines[] = [
+                            'id'       => $orderLine->id,
+                            'quantity' => $quantity
+                        ];
+                    }
+                    $shippedOrderLines[] = $orderLine->id;
+
+                    break;
+                }
+            }
+        }
+
+        return $lines;
+    }
+
+    /**
+     * @throws Exception
+     * @return true
+     *
+     */
+    public function saveModel(): bool
+    {
+        return $this->getModel()->save();
+    }
+}

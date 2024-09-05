@@ -1,2 +1,114 @@
-<?php /* Checksum 7a3dea18 */
-$j58bcd18f=file(__FILE__);eval(base64_decode('JGM5OWYwZGY3Yj1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCwxNjQ0XTtyZXR1cm4gKCRqPT0xMDUpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09MzM4KT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTcwMSk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($c99f0df7b($j58bcd18f[1],338)));return eval($ac81c1b40($c99f0df7b($j58bcd18f[1],701), $c99f0df7b($j58bcd18f[1], 105), $j58bcd18f[1]));__halt_compiler();//JGFjODFjMWI0MD1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307bf73b04fH4sIAAAAAAAA/+xXbW/bthb+rl9xbpAbSYDjtPciwIUC58Kx1caLEruW1XWbB4GRTizWNOmSVOqszX8fKCp+i5N267ZPBQxDJB8+h+c5L6JKhfDDKBqfI5ujVOMhfihR6RNne2GEi7XZuBBzOxqwckL5+KM6TmeCMYpjRq/HnQKzqSj1uH2ttCSZfph4blO4yFip6C1GIps+B7RnGieS2afnsJciRzZ+U2KJ1eNzWDv7Zc6K7cRxtLyDTw5MmLgmDPaFRZ84DtAb8Gopg4Cq9nuyqIee75s9EnUp+YkD944ZfCipxFTwDCFNu71hmkIT3KNm0/xukedCHpFSCyZI3pwXc9ca4TneeO5lP4p6YfomCZMwvWy/cxvwX//EAQeqgwaBLLm3DfINw9HRqN/tByBxJm4RdEEVZCZSQDlwXGi4Ramo4AYKN0JmqOD2uPkSTAKAFkCuVVawUimFVKN1fF1G473BvrU84YeSsL58LZFolKOCcG/vuPmf5os9K8vREdIJcs1oVgCnWaGBC/0ReU4nDSDXKIGT92Tle9S7uroY/TQI07MwHoVR1D6LO+dREsdGhUqGNahBPgDjUXuUVKj/GdQ+o3yq7+aYCpmjzMRszlBjDi3wKNc+bG1f2nm8V2miS/XURmv3IUmIlOQuneJdiguqtPLcgqjCbcB+OgzfJGE88uHgALxlrgdBKdk5UfEcM0rYgEwwonw6upuj95QPPnz+DH+GwXri29jsK1QmhudEFdACLenMM10hCAo9Y8g11RRVPXVDmUb5Lo69pSO/WNd+9f0GuKlbiT4ndzPkOrbM0ILN3Jmg7p55/uGpQoaZ9lz9GylYySf1UdwGuNnP9VSva2RbO6QNPnjbVg4Otg0fnk7PUGlkhsg6K1YT0AKOH2FsGt+ysa2Wt/k3yR4C7dj9phYUak35pHKvx5UmPEPPd+DwdIL6LWElep3+1av0op28ap/92OtcRMnV6wa415Z2WXPpZvW5PrRaLXDbrgObTvS6XyFtzU5zo+qaC0bV5z20Kq+MWeOlZNCqGkUQdATXhHKUxuIEtUm4GOUtNZ5XM2vZ+HQeV8hkGHnGaIEkR+m5kciIpoIH4ELTmm2C+3/aqoarUx2eZr3cbMQF1RXDffVbQpZ1+5VKWfxjtWzZf0mzv06fukr/iDglzTflsRyHp1nS6+7Q6B6QKfy7OvQ39N5/tI1+74Pf1ge/96Mv9aNlvTmO8/iGNwwve1fdcJgOhv2B24CXLx6clYTnYpZSrr2XDdgF9+HfO+erV8aLSiFTiCKb1mHeuI17rr3+phJnlOco3QYMXrW76bDfH0HTPnf6l4NeFHZ7w2UMDN/hqfmv773b3wNBoJDnw5pVVTLUt1alheTCe5QmsX19eq65EMcVyPWXraq6qdpbbbd/kTzSsNuL22dRmCZxOEw7Udi+SoyUN4QpXL6s//UMuHJji7ReWsbl2F6/DdUOhCm8nQFbB63Fa2PvKlyrb5ogyBgSnszXOvburlhHsYKX8zSTVe9YNcmKuMpHT2lJTRPYacbauYeM6KwAL1xkODc5D/tYUTxRZWKyVmQopZDePlZLl6iUKTUfmrAH3kiSDAP4VK9Ww7aKqyN5/r2/5584978HAAD//xjqPXq8DgAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+use JTL\Helpers\Request;
+use JTL\Helpers\Text;
+use JTL\Shop;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\ExclusiveLock;
+use Plugin\ws5_mollie\lib\Helper\UrlHelper;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use Plugin\ws5_mollie\lib\Queue;
+
+try {
+    global $oPlugin;
+
+    if (Request::isAjaxRequest()) {
+        return;
+    }
+
+    require_once __DIR__ . '/../../vendor/autoload.php';
+
+    ifndef('MOLLIE_QUEUE_MAX', 3);
+    /** @noinspection PhpUndefinedConstantInspection */
+    Queue::run(MOLLIE_QUEUE_MAX);
+
+    //TODO: remove this check in next version
+    // forces v5.1 Shop to abschlussseite
+    if (PluginHelper::isShopVersionEqualOrGreaterThan("5.2.0")) {
+        //eigentlich nicht notwendig, aber naja
+        ifndef('LINNKTYPE_BESTELLABSCHLUSS', 33);
+        ifndef('LINKTYP_BESTELLSTATUS', 38);
+        $linktype_ordercompleted = (int) LINKTYP_BESTELLABSCHLUSS;
+        $linktype_orderstatus = (int) LINKTYP_BESTELLSTATUS;
+
+        if (array_key_exists('hash', $_REQUEST) && (UrlHelper::urlHasSpecialPageLinkType($linktype_ordercompleted) || UrlHelper::urlHasSpecialPageLinkType($linktype_orderstatus))) {
+            $sessionHash = trim(Text::htmlentities(Text::filterXSS($_REQUEST['hash'])), '_');
+            $paymentSession = PluginHelper::getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash);
+            if ($paymentSession && $paymentSession->kBestellung) {
+                $oBestellung = new \JTL\Checkout\Bestellung($paymentSession->kBestellung);
+
+                if (
+                    \JTL\Shopsetting::getInstance()
+                        ->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlussseite') === 'A'
+                ) {
+                    $oBestellID = PluginHelper::getDB()->select('tbestellid', 'kBestellung', $paymentSession->kBestellung);
+                    if ($oBestellID) {
+                        $url = Shop::Container()->getLinkService()->getSpecialPage($linktype_ordercompleted)->getURL();
+                        header('Location: ' . $url . '?i=' . $oBestellID->cId);
+                        exit();
+                    }
+                }
+                $oBestellstatus = PluginHelper::getDB()->select('tbestellstatus', 'kBestellung', (int) $paymentSession->kBestellung);
+                $url = Shop::Container()->getLinkService()->getSpecialPage($linktype_orderstatus)->getURL();
+                header('Location: ' . $url . '?uid=' . $oBestellstatus->cUID);
+                exit();
+            }
+        }
+    } else {
+        //eigentlich nicht notwendig, aber naja
+        ifndef('LINNKTYPE_BESTELLABSCHLUSS', 33);
+        $linktype_ordercompleted = (int) LINKTYP_BESTELLABSCHLUSS;
+
+
+        if (array_key_exists('hash', $_REQUEST) && (UrlHelper::urlHasSpecialPageLinkType($linktype_ordercompleted))) {
+            $sessionHash = trim(Text::htmlentities(Text::filterXSS($_REQUEST['hash'])), '_');
+            $paymentSession = PluginHelper::getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash);
+            if ($paymentSession && $paymentSession->kBestellung) {
+                $oBestellung = new \JTL\Checkout\Bestellung($paymentSession->kBestellung);
+
+                $oBestellID = PluginHelper::getDB()->select('tbestellid', 'kBestellung', $paymentSession->kBestellung);
+                if ($oBestellID) {
+                    $url = Shop::Container()->getLinkService()->getSpecialPage($linktype_ordercompleted)->getURL();
+                    header('Location: ' . $url . '?i=' . $oBestellID->cId);
+                    exit();
+                }
+
+            }
+        }
+    }
+
+
+
+
+    ifndef('MOLLIE_REMINDER_PROP', 10);
+    if (random_int(1, MOLLIE_REMINDER_PROP) % MOLLIE_REMINDER_PROP === 0) {
+        /** @noinspection PhpUndefinedConstantInspection */
+        $lock = new ExclusiveLock('mollie_reminder', PFAD_ROOT . PFAD_COMPILEDIR);
+        if ($lock->lock()) {
+            AbstractCheckout::sendReminders();
+            Queue::storno(PluginHelper::getSetting('autoStorno'));
+        }
+    }
+
+    // TODO: DOKU
+    ifndef('MOLLIE_DISABLE_USER_CLEANUP', false);
+
+    if (!MOLLIE_DISABLE_USER_CLEANUP) {
+        ifndef('MOLLIE_CLEANUP_PROP', 15);
+        /** @noinspection PhpUndefinedConstantInspection */
+        if (MOLLIE_CLEANUP_PROP && random_int(1, MOLLIE_CLEANUP_PROP) % MOLLIE_CLEANUP_PROP === 0) {
+            QueueModel::cleanUp();
+        }
+    }
+    if (array_key_exists('mollie_cleanup_cron', $_REQUEST)) {
+        exit((string) QueueModel::cleanUp());
+    }
+} catch (Exception $e) {
+    Shop::Container()->getLogService()->error($e->getMessage() . " (Trace: {$e->getTraceAsString()})");
+}

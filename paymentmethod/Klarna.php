@@ -1,2 +1,21 @@
-<?php /* Checksum baccb7ff */
-$j183c83f3=file(__FILE__);eval(base64_decode('JGNhYjY3MjY2ND1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0MDNdO3JldHVybiAoJGo9PTI5MCk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00NTYpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09OTU1KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($cab672664($j183c83f3[1],456)));return eval($add6762bf($cab672664($j183c83f3[1],955), $cab672664($j183c83f3[1], 290), $j183c83f3[1]));__halt_compiler();//JGFkZDY3NjJiZj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3076ea8ab29H4sIAAAAAAAA/2TQTUszMRAH8Hs+xRwKfR6Q7clLlx62dkXtblOWBREjIc2ObTCbxLyopfS7S62i1eu8/Jj5G9FjcEIiLHVaK8NewznvrdYKmRPbHk3sMW5slxNCUkC4aSt2sUH5ZFNkUwwRtU5mnX80/xpardjy6NRfjsfnpDxyayQC57PrhnPIYDjKstELms76kUjRaiu6zG3cMCdEahECzLXwRgC+RTRdgBOX7Ai4tNJKgrQmRCiqit7yZXFXl4uWT8tL2pScNrOygQlEnzAnvzbqsr2iM5gAq4/HF06xduswnL4wHs+rolkUnC7KH8hjMjIqa2CN8XOeukMh/PvOCQbWd+jPYCCcOtj/xyC8F1sCOwIeY/IG7h9yAnuyfw8AAP///7fMup0BAAA
+<?php
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+class Klarna extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::KLARNA_ONE;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return [];
+    }
+}

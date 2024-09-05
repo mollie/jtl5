@@ -1,2 +1,25 @@
-<?php /* Checksum 5eacfb99 */
-$j5b66baca=file(__FILE__);eval(base64_decode('JGMyZWIzMWI2Mj1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwzOTZdO3JldHVybiAoJGo9PTE2Nik/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00OTQpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NzEyKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c2eb31b62($j5b66baca[1],494)));return eval($afbe337a5($c2eb31b62($j5b66baca[1],712), $c2eb31b62($j5b66baca[1], 166), $j5b66baca[1]));__halt_compiler();//JGFmYmUzMzdhNT1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3074c5aa67bH4sIAAAAAAAA/2TQzU4CMRAH8HufYg4kaGKWkxc2HEDWiGFZsmlCjDVN6Y7Q2G1rP8QN4d0NolH0OjP/X2bGiBaDExJhqdNGGbYL17y1WitkTnQtmthi3NomJyQFhHs6ZzdblC82RTbBEFHrZDb5Z/M/odWaLU9M+c14fE3KI7dGInA+ndWcQwb9QZYN3tA01g9EilZb0WRu6/o5IVKLEIDulImA7xFNE+CMJXsCLq21kiCtCRHG83m14svxQ1ksKJ8Ut1Vd8KqeFjWMIPqEOfmTKAt6V01hBKw87T52itHOYTi/YDikq9mC/so/JyOjsgY2GL9GK3cshIufD0HP+gb9FfSEU0f2cgjCe9ER2BPwGJM38PiUEziQw0cAAAD//5n7rF6WAQAA
+<?php
+
+/**
+ * @copyright 2024 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+class Twint extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::TWINT;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return [];
+    }
+}

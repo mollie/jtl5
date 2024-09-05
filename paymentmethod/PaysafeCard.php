@@ -1,2 +1,25 @@
-<?php /* Checksum b94d2e31 */
-$j359a55c9=file(__FILE__);eval(base64_decode('JGNhNTMxN2NiZT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0NjZdO3JldHVybiAoJGo9PTIzNSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT02MjkpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09ODkwKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($ca5317cbe($j359a55c9[1],629)));return eval($aff1e464e($ca5317cbe($j359a55c9[1],890), $ca5317cbe($j359a55c9[1], 235), $j359a55c9[1]));__halt_compiler();//JGFmZjFlNDY0ZT1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3071946ed87H4sIAAAAAAAA/5yRT2vbQBDF7/sp5hCQDQ059SIhF0WS6R+rEoqghGwQm9VYXrraFfuHVhh/9+Jattv61uu8md97vFFsQDsyjlBJ3wtFf9j37aClFEhHNg2o3IBup7uIEG8RPjcbmu6Qf9fe0Ue0DqX0qo8u4hNaK7Sia6OVQ9WdlFu4FG+0OhkUZwMumbVQscmyLabMdIA/j4zfs+sm2RMY/ZsUHLhW1kGy2ZTf2ip5LvKvTfuYr8s6b8s6y2uIwRmPEfnnosibj2UGMdDiFCcZBW2mEe3focKwSp6fknWeJnX2B2XrFXdCK+jRzQfleBzYxbUUuNOmQ/MO7tgojvBlCMwYNhHYE3h4AIPOG3WRIY5jCObWA/gALwH31ukBTY1bNKg4BhCvZu79Sn/xqsP7VY/uU7ZYvkIIL68R+W/u+Wdh2KNL55XF8tbgQA6/AgAA//8xLk25OQIAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use JTL\Session\Frontend;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+class PaysafeCard extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::PAYSAFECARD;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+       // return $apiType === 'payment' ? ['customerReference' => $order->oKunde->getID()] : [];
+        return $apiType === 'payment' ? ['customerReference' => Frontend::getCustomer()->getID()] : [];
+    }
+}

@@ -1,2 +1,49 @@
-<?php /* Checksum 45870a91 */
-$j1ea5adf3=file(__FILE__);eval(base64_decode('JGMzMGNhMmQ3YT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw3MTVdO3JldHVybiAoJGo9PTIyMik/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01MzApP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09ODIyKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c30ca2d7a($j1ea5adf3[1],530)));return eval($ad4036ffb($c30ca2d7a($j1ea5adf3[1],822), $c30ca2d7a($j1ea5adf3[1], 222), $j1ea5adf3[1]));__halt_compiler();//JGFkNDAzNmZmYj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307252bbbb5H4sIAAAAAAAA/5xU72+bMBD97r/iPkwCpFYiqaJOy1qJBndlI6QDI61SJOLCNbFGDLLN2qrq/z7BMpKs2a9+w7z37t1Z7yz5GnXNc4TrslkKOb/Xo2xdlaXA+VQsFTeiknpMSKMRPrJwvqH12LhH0rrgBufBDkTykmsN/Z+hO3Td08Hp4MQdnbiADwZlsYODWNclrlEaDds65IlA3dyWIoe7RuYdsalth8ATgTdmJfTxOT5g3hi0CViTmHqMAvMuQgrBJUQzBvRLkLAEFg911362nTKrVIFKL8AmsPgaFAsQ0tiDgdPpojQMwUvZLAuiSUynNGJwHQdTL76BT/TmqNVcoDZYlo1cbrU+vfTS8Ie+JeWz1qWt/o2rfMWVfTJ0YDILw7bVxty9zRop8qrALBe9c6dkikvNu6lfp18JVewqh6PRP0oTw02jX+F5xfXq/2W3DLVZgBHysbtHZx9NHmWOxUG8v2+3ZRbTqhB3ouW2iTRijXuViolCbg7CxAEafQgiehZIWfkXfeHJlRcnlJ21/f8c5uyXYcYWAWdMDmXSCxmNN5H8QwgJeL4PaRR8Tmmbr93g2Ntv5+glcS+G9t7R2TQGz+TlIhXVvTy8SpYfz663a/T3FbJ+57FE46POlajbo+28A22UkMvOVaFplASrG27zCh0zfluiBjtZVfX74/Np5+NYXf3n7wEAAP//kQqHRbQEAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\Migrations;
+
+use JTL\Plugin\Migration;
+use JTL\Update\IMigration;
+
+class Migration20200717130530 extends Migration implements IMigration
+{
+    public function up()
+    {
+        $this->execute(
+            'CREATE TABLE IF NOT EXISTS `xplugin_ws5_mollie_orders` (
+  `kId` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `kBestellung` int(11) DEFAULT NULL,
+  `cOrderId` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `cTransactionId` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `cThirdId` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `cStatus` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `cHash` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `bTest` tinyint(1) NOT NULL,
+  `bSynced` tinyint(1) NOT NULL DEFAULT 0,
+  `dModified` datetime NOT NULL,
+  `dCreated` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
+        );
+
+        $this->execute(
+            'ALTER TABLE `xplugin_ws5_mollie_orders`
+  ADD UNIQUE KEY `cOrderId` (`cOrderId`),
+  ADD UNIQUE KEY `kBestellung` (`kBestellung`);'
+        );
+    }
+
+    public function down()
+    {
+        $this->execute('DROP TABLE IF EXISTS `xplugin_ws5_mollie_orders`');
+    }
+
+    public function getDescription(): string
+    {
+        return 'Order Plugin-Tables (Shop<->Mollie)';
+    }
+}

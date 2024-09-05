@@ -1,2 +1,61 @@
-<?php /* Checksum f6435630 */
-$jc6151203=file(__FILE__);eval(base64_decode('JGMxMjk0ZWY1Mj1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw4MDJdO3JldHVybiAoJGo9PTI2Myk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01NzQpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09Nzc3KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c1294ef52($jc6151203[1],574)));return eval($a863b3d02($c1294ef52($jc6151203[1],777), $c1294ef52($jc6151203[1], 263), $jc6151203[1]));__halt_compiler();//JGE4NjNiM2QwMj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307cdaf1667H4sIAAAAAAAA/6RT3W7aShC+36eYIE5sSwk5uci5gBCJQyxBSxsKJGkLaLXYA6xY7M3uOGBFvHvlHxKqtE2kXtk7+ma+n52NxBqtFgFCXyULGU029oKvY6UkTpScTTpxvGowllgEfxugJhlHjfz4a3xR7aDSaArc/XDyYdS7mNyd83/5+X/5xElrZsmIgMrxgRLWQktrhX2RAm4Jo9DCIYo9MWCgk5mSAVgSJAOYJ1GQCQLcYpAQulVhFpYLY6AJ46lXh8dYhgyeGJBJs4+cg3uEa02pW+VDf3DnD8ZOZzTq86984H+59Ycj/5rfd0cdZ+rB8TFYMhSreIPmPQ3NZhOc7VotibTBhwQtOV7Ga5ASEzUY7BiDszMYoEWCtsFQUluY8HQUrzACMSc0cGNCNEeFWAZudYUpNMFqIyOau86qyJj/E/IgHxAIEzoncBh9vb5AKgqud3q1QOpeu57nscyTMEakfIUpx620ZHOGE8j8DYfdm8+58aNXKOe7WKokWlhhyDmEM8g9JpFFcp/L42zq1Cs958G/Hrmx5fJwkV2+FikXj0IqMVP4E0fOoB9cZ4kidLzTK6E1RqFbubSBkZquNjIK403t002v1/V5q9/v+f3WN97u+O2P/HbQgyY4Fai9kVJf0NKW//8Li7eDnutBDSp7eTW91E7j8qxkrRT+YAeBoGAJ7vMjgSrmmneF/9+urrStvWHXq8MsjhXbb+rf5lVs3Ut1/Of+aXlXZdtcKIuNN+RbpBf9mXioZpDEHj6+dwuA5r495939CAAA//8wVkP2ngQAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Hook;
+
+use Exception;
+use Plugin\ws5_mollie\lib\PluginHelper;
+use WS\JTL5\V1_0_16\Hook\AbstractHook;
+
+class ApplePay extends AbstractHook
+{
+    /**
+     * @param array $args_arr
+     * @throws Exception
+     */
+    public static function execute($args_arr = []): void
+    {
+        try {
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                return;
+            }
+
+            // Reset CreditCard-Token after Order!
+            if (
+                ($key = sprintf('kPlugin_%d_creditcard', PluginHelper::getPlugin()->getID()))
+                && array_key_exists($key, $_SESSION) && !array_key_exists('Zahlungsart', $_SESSION)
+            ) {
+                unset($_SESSION[$key]);
+            }
+
+            if (!array_key_exists('ws_mollie_applepay_available', $_SESSION)) {
+                pq('head')->append("<script>window.MOLLIE_APPLEPAY_CHECK_URL = '" . PluginHelper::getPlugin()->getPaths()->getBaseURL() . "applepay.php';</script>");
+            }
+        } catch (Exception $e) {
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isAvailable(): bool
+    {
+        if (array_key_exists('ws_mollie_applepay_available', $_SESSION)) {
+            return $_SESSION['ws_mollie_applepay_available'];
+        }
+
+        return false;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public static function setAvailable(bool $status): void
+    {
+        $_SESSION['ws_mollie_applepay_available'] = $status;
+    }
+}

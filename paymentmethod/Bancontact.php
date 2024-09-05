@@ -1,2 +1,23 @@
-<?php /* Checksum f3f675d8 */
-$jc5c3a026=file(__FILE__);eval(base64_decode('JGMyNmI5OWRkNz1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwzNTVdO3JldHVybiAoJGo9PTE4Myk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00OTQpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NzU1KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c26b99dd7($jc5c3a026[1],494)));return eval($ae707bb04($c26b99dd7($jc5c3a026[1],755), $c26b99dd7($jc5c3a026[1], 183), $jc5c3a026[1]));__halt_compiler();//JGFlNzA3YmIwND1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307e6ae5262H4sIAAAAAAAA/2TPQUszMRAG4Ht+xRx6+D7w6qVLD7vtiki3KUtAxMiSZsdtMJuEZIIupf9dahWtXmfeeXjHqRFTUBpha/NgnHxN193orTUog5pGdDQi7X1fMJYTwp1Yy+Ue9YvPJCtMhNZmNxQfy7+ENTu5PTPNF6OtSgkq5bR3pDQBvhG6PsFFkB0YhLyzRoP2LhGU6zW/77blQ1NvRFfVN7ytO96u6hYWQDFjwX5dNLW45StYgGzObcpgpJgCpstO83lVbpZ8I8ql+IE8Z6fJeAcD0meeh9Mg/ft+HGY+9hivYKaCOdn/56BiVBODA4OIlKODx6eCwZEd3wMAAP//2HX2820BAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+class Bancontact extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::BANCONTACT;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return [];
+    }
+}

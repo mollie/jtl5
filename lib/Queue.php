@@ -1,2 +1,269 @@
-<?php /* Checksum 1ef85e93 */
-$j80130d02=file(__FILE__);eval(base64_decode('JGMwMmZiYjBjYj1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCwzMjUyXTtyZXR1cm4gKCRqPT0xODQpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09NDgzKT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTk4OCk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($c02fbb0cb($j80130d02[1],483)));return eval($a8fad8725($c02fbb0cb($j80130d02[1],988), $c02fbb0cb($j80130d02[1], 184), $j80130d02[1]));__halt_compiler();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
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib;
+
+use Exception;
+use Generator;
+use JTL\Exceptions\CircularReferenceException;
+use JTL\Exceptions\ServiceNotFoundException;
+use JTL\Shop;
+use Mollie\Api\Types\OrderStatus;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Model\QueueModel;
+use RuntimeException;
+use WS\JTL5\V1_0_16\Helper\AbstractPluginHelper;
+use WS\JTL5\V1_0_16\Traits\Plugins;
+
+class Queue
+{
+    use Plugins;
+
+    /**
+     * @param int $limit
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public static function run(int $limit = 10): void
+    {
+        /** @var QueueModel $todo */
+        foreach (self::getOpen($limit) as $todo) {
+            if (!self::lock($todo)) {
+                continue;
+            }
+
+            if (([$type, $id] = explode(':', $todo->cType))) {
+                try {
+                    switch ($type) {
+                        case 'webhook':
+                            self::handleWebhook($id, $todo);
+
+                            break;
+                        case 'hook':
+                            self::handleHook((int)$id, $todo);
+
+                            break;
+                    }
+                } catch (Exception $e) {
+                    Shop::Container()->getLogService()->notice('Mollie Queue Fehler: ' . $e->getMessage() . " ($type, $id)");
+                    $todo->cError = "{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
+                    $todo->done();
+                }
+            }
+
+            self::unlock($todo);
+        }
+    }
+
+    /**
+     * @param int $limit
+     * @return Generator<QueueModel>
+     */
+    private static function getOpen(int $limit): Generator
+    {
+        if (!defined('MOLLIE_HOOK_DELAY')) {
+            define('MOLLIE_HOOK_DELAY', 3);
+        }
+        $open = PluginHelper::getDB()->executeQueryPrepared("SELECT * FROM xplugin_ws5_mollie_queue WHERE (dDone IS NULL OR dDone = '0000-00-00 00:00:00') AND `bLock` IS NULL AND (cType LIKE 'webhook:%%' OR (cType LIKE 'hook:%%' AND dCreated < DATE_SUB(NOW(), INTERVAL :hd MINUTE))) ORDER BY dCreated DESC LIMIT 0, :LIMIT;", [
+            ':LIMIT' => $limit,
+            ':hd' => MOLLIE_HOOK_DELAY
+        ], 2);
+
+        foreach ($open as $_raw) {
+            yield new QueueModel($_raw);
+        }
+    }
+
+    /**
+     * @param QueueModel $todo
+     * @return bool
+     */
+    protected static function lock(QueueModel $todo): bool
+    {
+        // Validation should not be necessary here since QueueModel::TABLE is a constant, but we do it anyway to lead by example
+        if (!AbstractPluginHelper::isAlphaNumericPlus(QueueModel::TABLE)) {
+            return false;
+        }
+
+        return $todo->kId && PluginHelper::getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NOW() WHERE `bLock` IS NULL AND kId = :kId', QueueModel::TABLE), [
+                'kId' => $todo->kId
+            ], 3) >= 1;
+    }
+
+    /**
+     * @param string     $id
+     * @param QueueModel $todo
+     * @throws Exception
+     * @return bool
+     */
+    protected static function handleWebhook(string $id, QueueModel $todo): bool
+    {
+        $checkout = AbstractCheckout::fromID($id);
+        if ($checkout->getBestellung()->kBestellung && $checkout->getPaymentMethod()) {
+            $checkout->handleNotification();
+            
+            return $todo->done('Status: ' . $checkout->getMollie()->status);
+        }
+
+        throw new RuntimeException("Bestellung oder Zahlungsart konnte nicht geladen werden: $id");
+    }
+
+    /**
+     * @param int        $hook
+     * @param QueueModel $queueModel
+     * @return bool
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws Exception
+     */
+    protected static function handleHook(int $hook, QueueModel $queueModel): bool
+    {
+        $data = unserialize($queueModel->cData); //, [stdClass::class, Bestellung::class, \JTL\Customer\Customer::class]);
+        if (array_key_exists('kBestellung', $data)) {
+            switch ($hook) {
+                case HOOK_BESTELLUNGEN_XML_BESTELLSTATUS:
+                    if ((int)$data['kBestellung']) {
+                        $checkout = AbstractCheckout::fromBestellung($data['kBestellung']);
+
+                        $result = '';
+                        if ((int)$checkout->getBestellung()->cStatus < BESTELLUNG_STATUS_VERSANDT) {
+                            return $queueModel->done("Bestellung noch nicht versendet: {$checkout->getBestellung()->cStatus}");
+                        }
+
+                        if (!count($checkout->getBestellung()->oLieferschein_arr)) {
+                            if (!defined('MOLLIE_HOOK_DELAY')) {
+                                define('MOLLIE_HOOK_DELAY', 3);
+                            }
+                            $queueModel->dCreated = date('Y-m-d H:i:s', strtotime(sprintf('+%d MINUTES', MOLLIE_HOOK_DELAY)));
+                            $queueModel->cResult  = 'Noch keine Lieferscheine, delay...';
+
+                            return $queueModel->save();
+                        }
+
+                        if (
+                            (int)$data['status']
+                            && array_key_exists('status', $data)
+                            && $checkout->getPaymentMethod()
+                            && (strpos($checkout->getModel()->cOrderId, 'tr_') === false)
+                            && $checkout->getMollie()
+                        ) {
+                            /** @var OrderCheckout $checkout */
+                            $checkout->handleNotification();
+                            if ($checkout->getMollie()->status === OrderStatus::STATUS_COMPLETED) {
+                                $result = 'Mollie Status already ' . $checkout->getMollie()->status;
+                            } elseif (
+                                $checkout->getMollie()->isCreated()
+                                || $checkout->getMollie()->isPaid()
+                                || $checkout->getMollie()->isAuthorized()
+                                || $checkout->getMollie()->isShipping()
+                                || $checkout->getMollie()->isPending()
+                            ) {
+                                try {
+                                    if ($shipments = Shipment::syncBestellung($checkout)) {
+                                        foreach ($shipments as $shipment) {
+                                            if (is_string($shipment)) {
+                                                $checkout->Log("Shipping-Error: $shipment");
+                                                $result .= "Shipping-Error: $shipment\n";
+                                            } else {
+                                                $checkout->Log("Order shipped: $shipment->id");
+                                                $result .= "Order shipped: $shipment->id\n";
+                                            }
+                                        }
+                                    } else {
+                                        $result = 'No Shipments ready!';
+                                    }
+                                } catch (Exception $e) {
+                                    $result = $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString();
+                                }
+                            } else {
+                                $result = 'Unexpected Mollie Status: ' . $checkout->getMollie()->status;
+                            }
+                        } else {
+                            $result = 'Nothing to do.';
+                        }
+
+                        return $queueModel->done($result);
+                    }
+
+                    return $queueModel->done('kBestellung missing');
+                case HOOK_BESTELLUNGEN_XML_BEARBEITESTORNO:
+                    if (!PluginHelper::getSetting('autoRefund')) {
+                        throw new RuntimeException('Auto-Refund disabled');
+                    }
+                    $checkout = AbstractCheckout::fromBestellung((int)$data['kBestellung']);
+
+                    if (!isset($checkout)){
+                        return $queueModel->done("No Checkout found for kBestellung:" . (int)$data['kBestellung']);
+                    }
+                    return $queueModel->done($checkout->cancelOrRefund());
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param QueueModel $qm
+     * @return bool
+     */
+    protected static function unlock(QueueModel $qm): bool
+    {
+        // Validation should not be necessary here since QueueModel::TABLE is a constant, but we do it anyway to lead by example
+        if (!AbstractPluginHelper::isAlphaNumericPlus(QueueModel::TABLE)) {
+            return false;
+        }
+
+        return $qm->kId && PluginHelper::getDB()->executeQueryPrepared(sprintf('UPDATE %s SET `bLock` = NULL WHERE kId = :kId OR bLock < DATE_SUB(NOW(), INTERVAL 15 MINUTE)', QueueModel::TABLE), [
+                'kId' => $qm->kId
+            ], 3) >= 1;
+    }
+
+    /**
+     * @param mixed $delay
+     * @throws ServiceNotFoundException
+     * @throws CircularReferenceException
+     * @return true
+     */
+    public static function storno($delay): bool
+    {
+        if (!$delay) {
+            return true;
+        }
+
+        $open = PluginHelper::getDB()->executeQueryPrepared(
+            "SELECT p.kId, b.cBestellNr, p.kBestellung, b.cStatus FROM xplugin_ws5_mollie_orders p JOIN tbestellung b ON b.kBestellung = p.kBestellung WHERE b.cStatus IN ('1', '2') AND p.dCreated < NOW() - INTERVAL :d HOUR",
+            [':d' => $delay],
+            2
+        );
+
+        foreach ($open as $o) {
+            try {
+                $checkout = AbstractCheckout::fromBestellung($o->kBestellung);
+                $pm       = $checkout->getPaymentMethod();
+                if ($checkout->getBestellung()->cAbgeholt === 'Y' && (bool)$checkout->getModel()->bSynced === false) {
+                    if ($pm::ALLOW_AUTO_STORNO && $pm::METHOD === $checkout->getMollie()->method) {
+                        if (!in_array($checkout->getMollie()->status, [OrderStatus::STATUS_PAID, OrderStatus::STATUS_COMPLETED, OrderStatus::STATUS_AUTHORIZED], true)) {
+                            $checkout->storno();
+                        } else {
+                            $checkout->Log(sprintf('AutoStorno: Bestellung bezahlt? %s - Method: %s', $checkout->getMollie()->status, $checkout->getMollie()->method), LOGLEVEL_ERROR);
+                        }
+                    }
+                     else {
+                         $checkout->Log(sprintf('AutoStorno aktiv: %d (%s) - Method: %s', (int)$pm::ALLOW_AUTO_STORNO, $pm::METHOD, $checkout->getMollie()->method), LOGLEVEL_ERROR);
+                     }
+                } else {
+                    //$checkout->Log('AutoStorno: bereits zur WAWI synchronisiert.', LOGLEVEL_ERROR);
+                }
+            } catch (Exception $e) {
+                Shop::Container()->getLogService()->error(sprintf('Fehler beim stornieren der Order: %s / Bestellung: %s: %s', $o->cBestellNr, $o->kId, $e->getMessage()));
+            }
+        }
+
+        return true;
+    }
+}
