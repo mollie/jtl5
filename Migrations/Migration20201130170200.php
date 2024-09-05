@@ -1,2 +1,37 @@
-<?php /* Checksum 847a2dfa */
-$jfb479581=file(__FILE__);eval(base64_decode('JGNhZDZmNTliMj1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw2MDhdO3JldHVybiAoJGo9PTMxNSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01NjMpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09ODMyKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($cad6f59b2($jfb479581[1],563)));return eval($aa35d78ee($cad6f59b2($jfb479581[1],832), $cad6f59b2($jfb479581[1], 315), $jfb479581[1]));__halt_compiler();//JGFhMzVkNzhlZT1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO30747a52e49H4sIAAAAAAAA/4SS0WvbMBDG3/VX3MPANizgpIyNpQ24sbpps53MUdYWDLZrX1IxR/YsiWaU/u8jIk2yjbDH0++7++74JMsNqq6sEOaNWQuZPal3+aZtGoFZLNZ9qUUr1ZgQoxC+8Cjbyw5sfCDLri41ZuwEkaoplYLDy8gf+cPhhT987498H3CrUdYnHMSma3CDUis4ziHPBDrz0IgKVkZWVmg61yPwTOCNfhRqMMEtVkaj60xTGnAKPLiOKLAbSGYc6B1b8AUU284unx9vzH8aNFiAS6D4weoChNTucOjZtmQZRRAs+SxnyTSlMU04zFMWB+k9fKX3bwkUFf/VYQHfg3T6OUjdi9Gx0+Kw1GUBnN5xCOlNsIw4ZE7mWJaiMo3eU+v1Knltr8NWYgFhwClnMT0jmvZYaqxPdScr1HFbi5X4k/89Bwh4QJNPLKFXTMo2vD7g3V0Lyq+MXn2A6SyKAk5tkRspqrbGvBJjxxsTeCH/xlS3T/JMUGE6mx9j+m9E5z3WqENUVS+6Xel6H0HpXsi1de1Rm16C8203ZP/HB7x8aBDc2+CWXQ4mi8e2uxxMYuvmOdbl5XcAAAD///oteoQYAwAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\Migrations;
+
+use JTL\Plugin\Migration;
+use JTL\Update\IMigration;
+
+class Migration20201130170200 extends Migration implements IMigration
+{
+    public function up()
+    {
+        $this->execute('CREATE TABLE IF NOT EXISTS `xplugin_ws5_mollie_queue` (
+                `kId` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                `cType` VARCHAR(32) NOT NULL,
+                `cData` TEXT DEFAULT \'\',
+                `cResult` TEXT NULL DEFAULT NULL,
+                `dDone`  DATETIME NULL DEFAULT NULL,
+                `dCreated` DATETIME NOT NULL,
+                `dModified` DATETIME NULL DEFAULT NULL 
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+    }
+
+    public function down()
+    {
+        $this->execute('DROP TABLE IF EXISTS `xplugin_ws5_mollie_queue`;');
+    }
+
+    public function getDescription(): string
+    {
+        return 'Queue Plugin-Table (WAWI<->Shop<->Mollie)';
+    }
+}

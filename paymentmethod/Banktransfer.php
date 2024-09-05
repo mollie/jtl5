@@ -1,2 +1,70 @@
-<?php /* Checksum c49dedea */
-$jc05000f3=file(__FILE__);eval(base64_decode('JGM4MWU4Y2M5OD1mdW5jdGlvbigkSSwkail7JGw9WzQ2NiwyNDAsOCwxMDU4XTtyZXR1cm4gKCRqPT0xNzYpP3N1YnN0cigkSSwkbFswXSskbFsxXSwkbFsyXSk6KCgkaj09NDA0KT9zdWJzdHIoJEksJGxbMF0sJGxbMV0pOigoJGo9PTkyMCk/dHJpbShzdWJzdHIoJEksJGxbMF0rJGxbMV0rJGxbMl0pKTpudWxsKSk7fTs'));eval(base64_decode($c81e8cc98($jc05000f3[1],404)));return eval($aa04c9806($c81e8cc98($jc05000f3[1],920), $c81e8cc98($jc05000f3[1], 176), $jc05000f3[1]));__halt_compiler();//JGFhMDRjOTgwNj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307088e63a5H4sIAAAAAAAA/6xU32/iOBB+918xQlROdNB9ON0LCKSwdLW9o6QC9k5VqZBxhmCtY0e2s7cc4n8/OU76c7fbh77Fk2++mfnmh2IF2pJxhGtZ5UKt/7V/bAotpcB1yQ4FKleg2+tsSEhlEf5czdYf98i/6sqtJ2gdSlmpfHj/c4nWCq3Wn4xWDlUW/rwkl2L7QJRsrTOMu9bwmtNMcybxNcR1yPuqyfsVYG39jLJEMySES2YtTJj66gxTdocG8LuvwcITSnIkUFZbKThwrayDZDZL/9kkX1bpZrlKF/MURrBj0uKQPENeXaw+p1MYwfoqpJGUYr06lGifZj0YTJL5X6tFMl9+ulgMyQPPrlLcCa0gR4WGObz+chk91w+6vPmKB2CdESoncCQEPnyAVTpNB7DAHeNOG3B7YcFp8Cp1HgsyGOTomqSW6JxQeQe04gjsGxOSbSUSEDuILMrdYBBcI/ogMY374xzdR612Io/C428mK4y6Pmh/XOiskng5hXOgm8r6SmgMo9EI6JzGcCRg0FVGtVrCiRDoOixKyRzCCF6mG5IIsepBEf8xr1ZjWvm+ymCh20eNrkP7bjURrTMbg6VkHCMCtwToGSt0pdwZ7fkHfi+FQZu0b881ZwU+eiacP3LwlongzasNu8AdGlQczyiBu14dqXO8b16dcxgUX0DIoD/+5kU8wS9xvDKe/HDq9AhkzGFEs/Pi/Ib2fH1OO1Fg9DOS+wrjuEfgZ6gMHRPS9setAG/FNuq8FT4R/C3QF7oGVe9nhkDcjNHLbWpnPS29wUYPxw262mRoetBlpfDLGg+AGcMOfqegWz7xgxHc3g3DZrT4MNMNLkz2M69buhVSCpVfFExIegejJmh/rBfI96pSuWWZQWuxP+ZXTMjhD0hkfRtr93Am660In1F7kWtbRPnlMl2WhvE90h7QHA2Ne69GnTGVef3e+4h0swqn7OCli4Ry8fsclIbUr3VoRhtlDL//uAU1wAX5wrrc9It+9mRdOr8dW6ITTJObZScOI1VPVXM9njHX/0//BwAA///q7Z3EagcAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use JTL\Session\Frontend;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
+use Plugin\ws5_mollie\lib\Locale;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+use Plugin\ws5_mollie\lib\PluginHelper;
+
+class Banktransfer extends PaymentMethod
+{
+    public const ALLOW_AUTO_STORNO = false;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::BANKTRANSFER;
+
+
+    public function generatePUI(AbstractCheckout $checkout): string
+    {
+
+        // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
+        if (self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_usePUI') === 'N') {
+            return false;
+        }
+
+        $template = PluginHelper::getPlugin()->getLocalization()->getTranslation('banktransferPUI');
+
+        return str_replace(
+            [
+                '%amount%',
+                '%expiresAt%',
+                '%bankName%',
+                '%bankAccount%',
+                '%bankBic%',
+                '%transferReference%'
+            ],
+            [
+                "{$checkout->getMollie()->amount->value} {$checkout->getMollie()->amount->currency}",
+                date('d.m.Y', strtotime($checkout->getMollie()->expiresAt)),
+                $checkout->getMollie()->details->bankName,
+                $checkout->getMollie()->details->bankAccount,
+                $checkout->getMollie()->details->bankBic,
+                $checkout->getMollie()->details->transferReference
+            ],
+            $template
+        );
+    }
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        $paymentOptions = [];
+        if ($apiType === 'payment') {
+            $paymentOptions['billingEmail'] = $order->oRechnungsadresse->cMail;
+            $paymentOptions['locale'] = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), $order->oRechnungsadresse->cLand);
+            // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
+            $dueDays = (int)self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_dueDays');
+            if ($dueDays > 3) {
+                $paymentOptions['dueDate'] = date('Y-m-d', strtotime("+{$dueDays} DAYS"));
+            }
+        }
+
+        return $paymentOptions;
+    }
+}

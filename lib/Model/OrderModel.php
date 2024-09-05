@@ -1,2 +1,53 @@
-<?php /* Checksum 8b4a3bef */
-$jb98a2976=file(__FILE__);eval(base64_decode('JGM5Y2U1M2M1NT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwzODZdO3JldHVybiAoJGo9PTI1NSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00OTkpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09OTc4KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c9ce53c55($jb98a2976[1],499)));return eval($ab8f9eed7($c9ce53c55($jb98a2976[1],978), $c9ce53c55($jb98a2976[1], 255), $jb98a2976[1]));__halt_compiler();//JGFiOGY5ZWVkNz1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307468968d5H4sIAAAAAAAA/3SO0WvqMBjF3/NXnAsXog+F+OB9aOkFNwZzKBMnG0KhpM3XLSwmJUk3Qf3fh5VN5hh8T9/5ncPPyg2FVtaEhemetS3ew7jcOGM0FUZXxdwpMhljXSA8PRR3q9m4eByVohz9O2XFpArRyzp+kqzRVhrURoaAe6/I9wloG8mqgG882zG0XWV0jdrZELGaXM1ukINv296nPPuU7jgWeHZRWSyn88lyfSy9ThXPGMMX0XS2jtpZBPlGg2GKyjnDsGPQDQZ//sYXHZL/6tqTjKSw3+Pylec5uBBCJP1BiLQ/Pjyu/KChZKQBXyebROE21Wngw4zhcEbnTulG/84yeIqdt2ilJxvT9KTejxw+AgAA///vO0qLrwEAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Model;
+
+use WS\JTL5\V1_0_16\Model\AbstractModel;
+
+/**
+ * Class OrderModel
+ * @package ws5_mollie\Model
+ *
+ * @property int $kId
+ * @property null|int $kBestellung
+ * @property string $cOrderId
+ * @property string $cTransactionId
+ * @property string $cThirdId
+ * @property string $cStatus
+ * @property string $cHash
+ * @property float $fAmount
+ * @property float $fAmountRefunded
+ * @property string $cMethod
+ * @property string $cCurrency
+ * @property string $cLocale
+ * @property bool $bTest
+ * @property bool $bSynced
+ * @property string $dModified
+ * @property string $dCreated
+ * @property string $cBestellNr;
+ * @property string $dReminder
+ *
+ */
+final class OrderModel extends AbstractModel
+{
+    public const TABLE   = 'xplugin_ws5_mollie_orders';
+    public const PRIMARY = 'kId';
+
+    /**
+     * @return bool
+     */
+    public function save(): bool
+    {
+        if (!$this->dCreated || $this->dCreated === '0000-00-00 00:00:00') {
+            $this->dCreated = date('Y-m-d H:i:s');
+        }
+        $this->dModified = date('Y-m-d H:i:s');
+
+        return parent::save();
+    }
+}

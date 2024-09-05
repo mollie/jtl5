@@ -1,2 +1,25 @@
-<?php /* Checksum 5acada3b */
-$jbe96b505=file(__FILE__);eval(base64_decode('JGM2Yzg2MGFlZT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0NzZdO3JldHVybiAoJGo9PTE0OSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01NTUpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NzQwKT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c6c860aee($jbe96b505[1],555)));return eval($a1d6ebce0($c6c860aee($jbe96b505[1],740), $c6c860aee($jbe96b505[1], 149), $jbe96b505[1]));__halt_compiler();//JGExZDZlYmNlMD1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3077d1ee02cH4sIAAAAAAAA/2TRXYvUMBQG4Pv8inOxUAW3A8t609KRWSei0tpSCsu6XUImPbbBNIn5cK3L/HcZZ/wYvc2b88B7juYzessFQqPiKHX/6F+y2Sglsbd8mVGHGcNkhpyQ6BHed2X/ekLx2cTQ36APqFTUY/4z/J9Qctc3R6b6xTj8EqVDZrRAYGz7rmUMUkhWabr6inowbsVjMMrwIbWTTXJChOLeQ+O+o8LH5eoa8FtAPXg4s8kTARt3SgoQRvsAm7Ksb1mzuavoh47d0Dd1S1ndbmkLBQQXMSf/TFS0e1tvoYC+OhbYWNl3i0V/XiPLmvYjLent3dX1X8inqEWQRsOI4fS/tocH/+zPruDCuAHdC7jgVh7s5xlw5/hC4ImAwxCd/p1BURSQnC6RwCu4T3ZSKalHOnOpEijWJ+9ybVoUk4569Hxw6D1erkXFpXqADO4fcgJ7sv8RAAD//zvaylrwAQAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\paymentmethod;
+
+use JTL\Checkout\Bestellung;
+use Plugin\ws5_mollie\lib\PaymentMethod;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+class Przelewy24 extends PaymentMethod
+{
+    public const ALLOW_PAYMENT_BEFORE_ORDER = true;
+
+    public const METHOD = \Mollie\Api\Types\PaymentMethod::PRZELEWY24;
+
+    public function getPaymentOptions(Bestellung $order, $apiType): array
+    {
+        return $apiType === 'payment' ? ['billingEmail' => $order->oRechnungsadresse->cMail] : [];
+    }
+}

@@ -1,2 +1,29 @@
-<?php /* Checksum c875506b */
-$jedfbfb81=file(__FILE__);eval(base64_decode('JGMzZjkyOTIyNT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw0MDBdO3JldHVybiAoJGo9PTI2MSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT01OTkpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NzA3KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c3f929225($jedfbfb81[1],599)));return eval($a8f4626c2($c3f929225($jedfbfb81[1],707), $c3f929225($jedfbfb81[1], 261), $jedfbfb81[1]));__halt_compiler();//JGE4ZjQ2MjZjMj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO3071a3a08d9H4sIAAAAAAAA/6SQwWrrMBBF9/qKWTxwssjDTmkXNRRc7ECL26bB2RliR546AllWpRExhPx7sShOoHTVpXRG91yNqju0uuYIa+laocqjvd11vZQCyxfRmppEr2zMmLMIz0Vefo9NLJ7IVjc1Yfl0hRiXtbUw3SzDZRSF0TKKbu7CEHAgVM0VB9FpiR0qsnDJYScG2u2l4PDhFPeDTs/mDE4M/tFB2MUDDsgd4SxI8iLbQJE85hlUg/Ztd5dP7T4dOqwgSVOoeGZMbyogHAhet3kOyWp8XfENWiepioN5zODMfvqb/qj+1iDdvK2nCr+LWqQULTdCj8fZ/B4sGaFarzZIzigIMr9IbOB9zIai3kuEo6AD+PjFSqBs/gdecf4KAAD//2tQdcjzAQAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\Migrations;
+
+use JTL\Plugin\Migration;
+use JTL\Update\IMigration;
+
+class Migration20211012113600 extends Migration implements IMigration
+{
+    public function up()
+    {
+        $this->execute('ALTER TABLE `xplugin_ws5_mollie_queue` ADD `cError` text NULL AFTER `cResult`;');
+    }
+
+    public function down()
+    {
+        $this->execute('ALTER TABLE `xplugin_ws5_mollie_queue` DROP `cError`;');
+    }
+
+    public function getDescription(): string
+    {
+        return 'Extended Queue Table with Error-Field.';
+    }
+}

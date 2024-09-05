@@ -1,2 +1,42 @@
-<?php /* Checksum 61e9c774 */
-$j52b56cbe=file(__FILE__);eval(base64_decode('JGMyYjQzZjFlNT1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCwzNzVdO3JldHVybiAoJGo9PTIwMSk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT02NDQpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09ODg5KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c2b43f1e5($j52b56cbe[1],644)));return eval($ac4441dbf($c2b43f1e5($j52b56cbe[1],889), $c2b43f1e5($j52b56cbe[1], 201), $j52b56cbe[1]));__halt_compiler();//JGFjNDQ0MWRiZj1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO30707eabb19H4sIAAAAAAAA/1yPQWvCQBBG7/sr5lCIHoR6sIcEC5YWalEQEyzCQtjsTurQzW7I7FpB/O8lEVva4zDfe/CcapBbpRE2Nn6Qk188KxtvLaG0VMm1N2gzISIjvBUrmWN3JI0s+2OnLBkVyDu5jRZZPquABTWYDfv3vF/N5G5a3pfTh6tLLioOndLhZhY1OWVBW8UM+YHaBl3g4Qt4CugMwx9GnAW0sbKkQXvHAYrF0+oF5pCc2qGh/G0o+SZMsn/UZrtcL7b7nvtcmiQTAn4WdXS6zwJWRxyNU6i8twLOAu7CgXjyaNbeUE1oYA5GBRwl+0kzMfCaUsrJuJd1GGLnoFUdupCmV1Mm4CIu3wEAAP//dMfpYXUBAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib\Model;
+
+use JTL\Services\JTL\Validation\Rules\DateTime;
+use WS\JTL5\V1_0_16\Model\AbstractModel;
+
+/**
+ * Class OrderModel
+ * @package ws5_mollie\Model
+ *
+ * @property int $kLieferschein
+ * @property int $kBestellung
+ * @property string $cOrderId
+ * @property string $cShipmentId
+ * @property string $cCarrier
+ * @property string $cCode
+ * @property string $cUrl
+ * @property DateTime $dModified
+ * @property DateTime $dCreated
+ *
+ */
+final class ShipmentsModel extends AbstractModel
+{
+    public const TABLE   = 'xplugin_ws5_mollie_shipments';
+    public const PRIMARY = 'kId';
+
+    /**
+     * @return bool
+     */
+    public function save(): bool
+    {
+        $this->dModified = date('Y-m-d H:i:s');
+
+        return parent::save();
+    }
+}

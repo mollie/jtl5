@@ -55,7 +55,7 @@
   {
     "id": "autoStorno",
     "label": "Unbezahlte Bestellungen stornieren",
-    "description": "Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert) Achtung: Gilt nur für Bestellungen, die noch nicht an die WaWi übertragen wurden.",
+    "description": "Soll bei fehlgeschlagener Zahlung die Bestellung storniert werden? Angabe in Stunden nach Bestellung. (0 = deaktiviert)",
     "settingType": "input",
     "type": "int",
     "defaultValue": 0
@@ -96,13 +96,6 @@
     "id": "trackingActive",
     "label": "Tracking URL den Versandinformationen anfügen?",
     "description": "Soll die Tracking URL für OrderAPI Methoden an Mollie gesendet werden?\n                        Achtung wenn die Tracking URL nicht im korrekt URL Format ist, wird dies von mollie abgelehnt. In diesem Fall kann der gesamte Versandstatus nicht an mollie übergeben werden.",
-    "settingType": "checkbox",
-    "defaultValue": false
-  },
-  {
-    "id": "syncExpirationDate",
-    "label": "Ablaufdatum als Bestellattribut an die WaWi übertragen",
-    "description": "Soll das Ablaufdatum von Bestellungen bei Mollie als Bestellattribut an die WaWi übertragen werden (mollieOrderExpirationDate)?",
     "settingType": "checkbox",
     "defaultValue": false
   },

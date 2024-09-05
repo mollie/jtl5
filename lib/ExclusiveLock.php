@@ -1,2 +1,80 @@
-<?php /* Checksum c5ef0313 */
-$j41605689=file(__FILE__);eval(base64_decode('JGMzZjY4MTllZD1mdW5jdGlvbigkSSwkail7JGw9WzQ2NSwyNDAsOCw4MjZdO3JldHVybiAoJGo9PTMxMCk/c3Vic3RyKCRJLCRsWzBdKyRsWzFdLCRsWzJdKTooKCRqPT00MjMpP3N1YnN0cigkSSwkbFswXSwkbFsxXSk6KCgkaj09NzE5KT90cmltKHN1YnN0cigkSSwkbFswXSskbFsxXSskbFsyXSkpOm51bGwpKTt9Ow'));eval(base64_decode($c3f6819ed($j41605689[1],423)));return eval($acd3620a8($c3f6819ed($j41605689[1],719), $c3f6819ed($j41605689[1], 310), $j41605689[1]));__halt_compiler();//JGFjZDM2MjBhOD1mdW5jdGlvbigkSSwkaiwkbCl7cmV0dXJuICRqPT1oYXNoKCdjcmMzMmInLHByZWdfcmVwbGFjZSgnL19faGFsdF9jb21waWxlci4qLycsJycsJGwpKT8oZ3pkZWNvZGUoYmFzZTY0X2RlY29kZSgkSSkpKTpkaWUoJzx0dD5DUkMgQ2hlY2sgZmFpbGVkLCBmaWxlIGNvcnJ1cHRlZD88L3R0PicpO307ed3ff6f1H4sIAAAAAAAA/6ST22vbMBjF3/VXnIaCHZbGT3upyWCXDMZCVwaFwTqCLH9ORBQp0yVuaPO/D9lO5vTGYE8J4nyXc36fNV+T23BBuFZhIfVt7d7O10YpSbdKFjljwRG+B+3lmqZ3gjZeGp0zJhR3DtM7oYKTW5oZsWL3DBtrPAlPJc5XtMuRZcGRxUJuSWPLVaATTSUVRZElZ4IVBG+gYqu+yNQaE1RcuUa75FtCTY2OShxKT0o23C8xQZLkjIFhEwolBaqgRVwf87kw2nkbhE/jniM4b6Ve9AqHDPcM534p3cW7Fe0waR0d3zql9VauU0tcxYe0aTAcIcmSIcbxJ2eQFdIz6ealtJ0ADw+IL7WVnheKuudhnOmX1tTQVD+JPR3EmHEdJydNRYLSkNOJB91J50cwFtJBG49D67PBMGfYM2SZsMQ9gTfNj5EbiwW1DaTXC9TSL+H4mrCi3dFuJBUpmA3ptB/BGIMYzDjiiKLBCEldvEnaqc9lX1IXfZtxTKdr2JCeTOBtoGEv/6Bj97Qzsn+W6UFzicIY1dLruB0h5q9PazhVTZue6xFm3z5+nd9cRTzIsopLRSUDWWvsXJlFOjj5DC4vYwd8fv9lNv0UD9qSIu7ag8XPuNSvyITBkg9Wd5fdWKsiNTqdntzo7tQvkGCMtRTWxLtI28XHGNzqBnJVqeCW/erh33vtf0UMe5ByFE2/bKNNFIIrRSWM7nZHETykb6+Mi99BWipR7FqhHRzAd+7ikvGzhQtCkHMv8XtC71Ua0x94aP9dfXjE5R9Tnf1Hpo9CbSy+7nj/JwAA//8TA+/FaQUAAA
+<?php
+
+/**
+ * @copyright 2021 WebStollen GmbH
+ * @link https://www.webstollen.de
+ */
+
+namespace Plugin\ws5_mollie\lib;
+
+use RuntimeException;
+
+class ExclusiveLock
+{
+    protected $key;           //user given value
+    protected $file;          //resource to lock
+    protected $own  = false; //have we locked resource
+    protected $path = '';
+
+    /**
+     * @param $key
+     * @param string $path
+     */
+    public function __construct($key, string $path = '')
+    {
+        $this->key  = $key;
+        $this->path = rtrim(realpath($path), '/') . '/';
+        if (!is_dir($path) || !is_writable($path)) {
+            throw new RuntimeException("Lock Path '$path' doesn't exist, or is not writable!");
+        }
+        //create a new resource or get exisitng with same key
+        $this->file = fopen($this->path . "$key.lockfile", 'wb+');
+    }
+
+    public function __destruct()
+    {
+        if ($this->own === true) {
+            $this->unlock();
+        }
+    }
+
+    /**
+     * @noinspection ForgottenDebugOutputInspection
+     *
+     * @return bool
+     */
+    public function unlock(): bool
+    {
+        $key = $this->key;
+        if ($this->own === true) {
+            if (!flock($this->file, LOCK_UN)) { //failed
+                error_log("ExclusiveLock::lock FAILED to release lock [$key]");
+
+                return false;
+            }
+            fwrite($this->file, 'Unlocked - ' . microtime(true) . "\n");
+            fflush($this->file);
+            $this->own = false;
+        } else {
+            error_log("ExclusiveLock::unlock called on [$key] but its not acquired by caller");
+        }
+
+        return true; // success
+    }
+
+    /**
+     * @return bool
+     */
+    public function lock(): bool
+    {
+        if (!flock($this->file, LOCK_EX | LOCK_NB)) { //failed
+            return false;
+        }
+        fwrite($this->file, 'Locked - ' . microtime(true) . "\n");
+        fflush($this->file);
+
+        $this->own = true;
+
+        return true; // success
+    }
+}
