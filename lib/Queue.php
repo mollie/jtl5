@@ -12,6 +12,7 @@ use Generator;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
+use JTL\Helpers\Request;
 use Mollie\Api\Types\OrderStatus;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
@@ -24,12 +25,13 @@ class Queue
 {
     use Plugins;
 
+
     /**
      * @param int $limit
      * @throws CircularReferenceException
      * @throws ServiceNotFoundException
      */
-    public static function run(int $limit = 10): void
+    public static function runSynchronous(int $limit = 10): void
     {
         /** @var QueueModel $todo */
         foreach (self::getOpen($limit) as $todo) {
@@ -58,7 +60,90 @@ class Queue
 
             self::unlock($todo);
         }
+
+        ifndef('MOLLIE_REMINDER_PROP', 10);
+        if (random_int(1, MOLLIE_REMINDER_PROP) % MOLLIE_REMINDER_PROP === 0) {
+            /** @noinspection PhpUndefinedConstantInspection */
+            $lock = new ExclusiveLock('mollie_reminder', PFAD_ROOT . PFAD_COMPILEDIR);
+            if ($lock->lock()) {
+                AbstractCheckout::sendReminders();
+                Queue::storno(PluginHelper::getSetting('autoStorno'));
+            }
+        }
     }
+
+
+    /**
+     * @throws CircularReferenceException
+     * @throws ServiceNotFoundException
+     */
+    public static function runAsynchronous(): void
+    {
+        ifndef('MOLLIE_QUEUE_MAX', 3);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && Request::isAjaxRequest()) {
+            $limit = MOLLIE_QUEUE_MAX;
+        } else {
+            $response = [
+                "status" => "error",
+                "message" => "Invalid request"
+            ];
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit;
+        }
+
+        /** @var QueueModel $todo */
+        foreach (self::getOpen($limit) as $todo) {
+            if (!self::lock($todo)) {
+                continue;
+            }
+
+            if (([$type, $id] = explode(':', $todo->cType))) {
+                try {
+                    switch ($type) {
+                        case 'webhook':
+                            self::handleWebhook($id, $todo);
+
+                            break;
+                        case 'hook':
+                            self::handleHook((int)$id, $todo);
+
+                            break;
+                    }
+                } catch (Exception $e) {
+                    Shop::Container()->getLogService()->notice('Mollie Queue Fehler: ' . $e->getMessage() . " ($type, $id)");
+                    $todo->cError = "{$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
+                    $todo->done();
+                }
+            }
+
+            self::unlock($todo);
+        }
+
+        ifndef('MOLLIE_REMINDER_PROP', 10);
+        if (random_int(1, MOLLIE_REMINDER_PROP) % MOLLIE_REMINDER_PROP === 0) {
+            /** @noinspection PhpUndefinedConstantInspection */
+            $lock = new ExclusiveLock('mollie_reminder', PFAD_ROOT . PFAD_COMPILEDIR);
+            if ($lock->lock()) {
+                AbstractCheckout::sendReminders();
+                Queue::storno(PluginHelper::getSetting('autoStorno'));
+            }
+        }
+
+        $response = [
+            "status" => "success",
+            "data" => [
+                "message" => "Request was successful"
+            ]
+        ];
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+
 
     /**
      * @param int $limit
@@ -78,6 +163,7 @@ class Queue
             yield new QueueModel($_raw);
         }
     }
+
 
     /**
      * @param QueueModel $todo

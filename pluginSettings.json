@@ -286,5 +286,17 @@
       {"value": "A" , "label": "Nur Authorized"},
       {"value": "N" , "label": "Keine"}
     ]
+  },
+  {
+    "id": "queue",
+    "label": "Abarbeitung der Queue",
+    "description": "Soll die Queue schrittweise bei jedem Aufruf abgearbeitet werden (wie bisher), oder über asynchrone Aufrufe via Javascript auf der Shopseite?",
+    "settingType": "select",
+    "type": "string",
+    "defaultValue": "sync",
+    "selectItems": [
+      {"value": "sync" , "label": "Synchron"},
+      {"value": "async" , "label": "Asynchron"}
+    ]
   }
 ]
