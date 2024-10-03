@@ -24,15 +24,8 @@ class ApplePay extends AbstractHook
                 return;
             }
 
-            // Reset CreditCard-Token after Order!
-            if (
-                ($key = sprintf('kPlugin_%d_creditcard', PluginHelper::getPlugin()->getID()))
-                && array_key_exists($key, $_SESSION) && !array_key_exists('Zahlungsart', $_SESSION)
-            ) {
-                unset($_SESSION[$key]);
-            }
-
-            if (!array_key_exists('ws_mollie_applepay_available', $_SESSION)) {
+            // append applepay script
+            if (!array_key_exists('ws_mollie_applepay_available', $_SESSION) && self::isActive()) {
                 pq('head')->append("<script>window.MOLLIE_APPLEPAY_CHECK_URL = '" . PluginHelper::getPlugin()->getPaths()->getBaseURL() . "applepay.php';</script>");
             }
         } catch (Exception $e) {
@@ -57,5 +50,24 @@ class ApplePay extends AbstractHook
     public static function setAvailable(bool $status): void
     {
         $_SESSION['ws_mollie_applepay_available'] = $status;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isActive(): bool
+    {
+        $kZahlunsgart = PluginHelper::getDB()->executeQueryPrepared('SELECT kZahlungsart FROM tzahlungsart WHERE cModulId = :cModulId',
+            [
+                ':cModulId' => 'kPlugin_' . PluginHelper::getPlugin()->getID() . '_applepay'
+            ], 1)->kZahlungsart ?? null;
+        if ($kZahlunsgart > 0) {
+            return PluginHelper::getDB()->executeQueryPrepared('SELECT * FROM tversandartzahlungsart WHERE kZahlungsart = :kZahlungsart',
+                [
+                    ':kZahlungsart' => $kZahlunsgart
+                ], 3) > 0;
+        } else {
+            return false;
+        }
     }
 }
