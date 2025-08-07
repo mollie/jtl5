@@ -353,4 +353,15 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
 
         return new AbstractResult($checkout->getMollie());
     }
+
+    public static function releaseAuthorization(stdClass $data): AbstractResult
+    {
+        if (strpos($data->id, 'tr_') !== 0) {
+            throw new RuntimeException('Invalid Payment ID!');
+        }
+
+        $checkout = PaymentCheckout::fromID($data->id);
+
+        return new AbstractResult($checkout->releaseAuthorization());
+    }
 }

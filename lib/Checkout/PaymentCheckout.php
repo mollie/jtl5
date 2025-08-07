@@ -290,9 +290,36 @@ class PaymentCheckout extends AbstractCheckout
         }
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function releaseAuthorization(): string
+    {
+        if (!is_null($this->getMollie())) {
+            if ($this->getMollie()->isAuthorized()) {
+                $this->getAPI()->getClient()->payments->releaseAuthorization($this->getMollie()->id);
+                $status = $this->getMollie(true)->status;
+                if ($status === PaymentStatus::STATUS_CANCELED) {
+                    PluginHelper::getDB()->executeQueryPrepared('UPDATE tbestellung SET cStatus = -1 WHERE kBestellung = :kBestellung',
+                        [
+                            ':kBestellung' => $this->getBestellung()->kBestellung
+                        ], 10);
 
+                }
 
-/**
+                return 'Released Payment authorization.';
+            }
+
+            return 'Payment status invalid for releasing authorization: ' . $this->getMollie()->id;
+        } else {
+            throw new Exception('Mollie Payment zur Bestellung (' .  $this->getBestellung()->cBestellNr  . ') konnte nicht geladen werden.');
+        }
+
+        throw new RuntimeException('Bestellung konnte nicht storniert werden: ' . $this->getBestellung()->cBestellNr);
+    }
+
+    /**
      * @throws Exception
      * @return null|stdClass
      */
@@ -326,6 +353,10 @@ class PaymentCheckout extends AbstractCheckout
                     $res = $this->getAPI()->getClient()->payments->cancel($this->getMollie()->id);
 
                     return 'Payment cancelled, Status: ' . $res->status;
+                } elseif ($this->getMollie()->isAuthorized() && $this->getMollie()->captureMode === "manual") {
+                    $this->getAPI()->getClient()->payments->releaseAuthorization($this->getMollie()->id);
+                    $status = $this->getMollie(true)->status;
+                    return 'Payment cancelled, Status: ' . $status;
                 }
                 $res = $this->getAPI()->getClient()->payments->refund($this->getMollie(), ['amount' => $this->getMollie()->amount]);
 

@@ -116,15 +116,15 @@ class OrderLine implements JsonSerializable
             case C_WARENKORBPOS_TYP_ARTIKEL:
             case C_WARENKORBPOS_TYP_GRATISGESCHENK:
                 // TODO: digital / Download Artikel?
-                return OrderLineType::TYPE_PHYSICAL;
+                return $positive ? OrderLineType::TYPE_PHYSICAL : OrderLineType::TYPE_DISCOUNT;
             case C_WARENKORBPOS_TYP_VERSANDPOS:
-                return OrderLineType::TYPE_SHIPPING_FEE;
+                return $positive ? OrderLineType::TYPE_SHIPPING_FEE : OrderLineType::TYPE_DISCOUNT;
             case C_WARENKORBPOS_TYP_VERPACKUNG:
             case C_WARENKORBPOS_TYP_VERSANDZUSCHLAG:
             case C_WARENKORBPOS_TYP_ZAHLUNGSART:
             case C_WARENKORBPOS_TYP_VERSAND_ARTIKELABHAENGIG:
             case C_WARENKORBPOS_TYP_NACHNAHMEGEBUEHR:
-                return OrderLineType::TYPE_SURCHARGE;
+                return $positive ? OrderLineType::TYPE_SURCHARGE : OrderLineType::TYPE_DISCOUNT;
             case C_WARENKORBPOS_TYP_GUTSCHEIN:
             case C_WARENKORBPOS_TYP_KUPON:
             case C_WARENKORBPOS_TYP_NEUKUNDENKUPON:
