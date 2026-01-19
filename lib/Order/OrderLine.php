@@ -16,7 +16,7 @@ use JTL\Checkout\Bestellung;
 use Mollie\Api\Types\OrderLineType;
 use RuntimeException;
 use stdClass;
-use WS\JTL5\V2_0_5\Traits\Jsonable;
+use WS\JTL5\V2_0_7\Traits\Jsonable;
 
 class OrderLine implements JsonSerializable
 {

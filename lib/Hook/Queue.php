@@ -23,7 +23,7 @@ use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\PluginHelper;
 use RuntimeException;
-use WS\JTL5\V2_0_5\Hook\AbstractHook;
+use WS\JTL5\V2_0_7\Hook\AbstractHook;
 
 class Queue extends AbstractHook
 {

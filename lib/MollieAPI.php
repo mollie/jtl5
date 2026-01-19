@@ -15,7 +15,7 @@ use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\MollieApiClient;
-use WS\JTL5\V2_0_5\Traits\Plugins;
+use WS\JTL5\V2_0_7\Traits\Plugins;
 
 class MollieAPI
 {
@@ -71,7 +71,8 @@ class MollieAPI
         if (!$this->client) {
             $this->client = new MollieApiClient(new Client([
                 RequestOptions::VERIFY  => CaBundle::getBundledCaBundlePath(),
-                RequestOptions::TIMEOUT => 60,
+                RequestOptions::TIMEOUT => 20,
+                RequestOptions::CONNECT_TIMEOUT => 20
             ]));
             $this->client->setApiKey(self::getAPIKey($this->test));
             $this->client->addVersionString('JTL-Shop/' . APPLICATION_VERSION);

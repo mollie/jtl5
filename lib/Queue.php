@@ -19,8 +19,8 @@ use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use RuntimeException;
-use WS\JTL5\V2_0_5\Helper\AbstractPluginHelper;
-use WS\JTL5\V2_0_5\Traits\Plugins;
+use WS\JTL5\V2_0_7\Helper\AbstractPluginHelper;
+use WS\JTL5\V2_0_7\Traits\Plugins;
 
 class Queue
 {

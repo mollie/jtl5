@@ -17,7 +17,7 @@ use Mollie\Api\Types\OrderLineType;
 use Plugin\ws5_mollie\lib\Order\Amount;
 use RuntimeException;
 use stdClass;
-use WS\JTL5\V2_0_5\Traits\Jsonable;
+use WS\JTL5\V2_0_7\Traits\Jsonable;
 
 class OrderLine implements JsonSerializable
 {

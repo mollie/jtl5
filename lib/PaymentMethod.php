@@ -23,7 +23,7 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
-use WS\JTL5\V2_0_5\Traits\Plugins;
+use WS\JTL5\V2_0_7\Traits\Plugins;
 
 abstract class PaymentMethod extends Method
 {
@@ -180,15 +180,21 @@ abstract class PaymentMethod extends Method
 
         $key = md5(serialize([$locale, $billingCountry, $currency, $amount]));
         if (!array_key_exists($key, $_SESSION['mollie_possibleMethods'])) {
-            $active = $api->getClient()->methods->allActive([
-                'locale' => $locale,
-                'amount' => [
-                    'currency' => $currency,
-                    'value'    => number_format($amount, 2, '.', '')
-                ],
-                'billingCountry' => $billingCountry,
-                'includeWallets' => 'applepay',
-            ]);
+            try {
+                $active = $api->getClient()->methods->allActive([
+                    'locale' => $locale,
+                    'amount' => [
+                        'currency' => $currency,
+                        'value'    => number_format($amount, 2, '.', '')
+                    ],
+                    'billingCountry' => $billingCountry,
+                    'includeWallets' => 'applepay',
+                ]);
+
+            } catch (\Exception $e) {
+                PluginHelper::getLogger()->error('Error while fetching methods from mollie. Message: ' . $e->getMessage());
+                return false;
+            }
             foreach ($active as $a) {
                 $_SESSION['mollie_possibleMethods'][$key][] = (object)['id' => $a->id];
             }

@@ -28,7 +28,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-class Bootstrap extends \WS\JTL5\V2_0_5\Bootstrap
+class Bootstrap extends \WS\JTL5\V2_0_7\Bootstrap
 {
     private const CRON_TYPE = 'cronjob_mollie_cleanup';
 

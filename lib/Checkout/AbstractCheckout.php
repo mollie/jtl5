@@ -44,8 +44,8 @@ use Plugin\ws5_mollie\lib\PluginHelper;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
 use stdClass;
-use WS\JTL5\V2_0_5\Model\ModelInterface;
-use WS\JTL5\V2_0_5\Traits\Plugins;
+use WS\JTL5\V2_0_7\Model\ModelInterface;
+use WS\JTL5\V2_0_7\Traits\Plugins;
 
 /**
  * Class AbstractCheckout

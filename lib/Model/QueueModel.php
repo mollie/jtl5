@@ -12,7 +12,7 @@ use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\PluginHelper;
-use WS\JTL5\V2_0_5\Model\AbstractModel;
+use WS\JTL5\V2_0_7\Model\AbstractModel;
 
 /**
  * Class QueueModel
@@ -49,7 +49,7 @@ class QueueModel extends AbstractModel
      * @param null|string $date
      * @return bool
      */
-    public function done(string $result = null, string $date = null): bool
+    public function done(?string $result = null, ?string $date = null): bool
     {
         $this->cResult = $result       ?? self::NULL;
         $this->cError  = $this->cError ?? self::NULL;

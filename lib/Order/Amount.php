@@ -11,7 +11,7 @@ use JsonSerializable;
 use JTL\Catalog\Currency;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\PluginHelper;
-use WS\JTL5\V2_0_5\Traits\Jsonable;
+use WS\JTL5\V2_0_7\Traits\Jsonable;
 
 class Amount implements JsonSerializable
 {
@@ -27,7 +27,7 @@ class Amount implements JsonSerializable
      * @param bool $useRounding (is it total SUM => true [5 Rappen Rounding])
      * @todo: prüfe mit Shop4
      */
-    public function __construct($value, Currency $currency = null, bool $useRounding = false)
+    public function __construct($value, ?Currency $currency = null, bool $useRounding = false)
     {
         if (!$currency) {
             $currency = self::fallbackCurrency();

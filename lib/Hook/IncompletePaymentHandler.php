@@ -14,7 +14,7 @@ use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Helpers\Request;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\PluginHelper;
-use WS\JTL5\V2_0_5\Hook\AbstractHook;
+use WS\JTL5\V2_0_7\Hook\AbstractHook;
 
 class IncompletePaymentHandler extends AbstractHook
 {

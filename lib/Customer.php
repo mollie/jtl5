@@ -11,7 +11,7 @@ use JTL\Session\Frontend;
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
 use stdClass;
-use WS\JTL5\V2_0_5\Traits\Jsonable;
+use WS\JTL5\V2_0_7\Traits\Jsonable;
 
 /**
  * Class Customer

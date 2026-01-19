@@ -18,8 +18,8 @@ use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\PluginHelper;
 use stdClass;
-use WS\JTL5\V2_0_5\Backend\AbstractResult;
-use WS\JTL5\V2_0_5\Backend\Controller\AbstractController;
+use WS\JTL5\V2_0_7\Backend\AbstractResult;
+use WS\JTL5\V2_0_7\Backend\Controller\AbstractController;
 
 /**
  * Class OrdersController
