@@ -223,11 +223,33 @@ class Queue
                         }
 
                         if (!count($checkout->getBestellung()->oLieferschein_arr)) {
-                            if (!defined('MOLLIE_HOOK_DELAY')) {
-                                define('MOLLIE_HOOK_DELAY', 3);
+                            // Count retries by checking for retry markers in cResult
+                            $retryCount = substr_count($queueModel->cResult ?? '', '[LIEFERSCHEIN_RETRY]');
+                            
+                            if ($retryCount >= 4) {
+                                // After 4 retries, mark as done
+                                return $queueModel->done("Keine Lieferscheine vorhanden nach 4 Retries (5 Min, 1 Std, 1 Tag, 1 Woche). Kein Capture der Bestellung: {$checkout->getBestellung()->cBestellNr}");
                             }
-                            $queueModel->dCreated = date('Y-m-d H:i:s', strtotime(sprintf('+%d MINUTES', MOLLIE_HOOK_DELAY)));
-                            $queueModel->cResult  = 'Noch keine Lieferscheine, delay...';
+                            
+                            // Define retry delays: 5 minutes, 1 hour, 1 day, 1 week
+                            $retryDelays = [
+                                0 => 5,       // First retry: 5 minutes
+                                1 => 60,      // Second retry: 1 hour (60 minutes)
+                                2 => 1440,    // Third retry: 1 day (1440 minutes)
+                                3 => 10080,   // Fourth retry: 1 week (10080 minutes = 7 days)
+                            ];
+                            
+                            $delayMinutes = $retryDelays[$retryCount] ?? 5;
+                            $delayDescription = match($retryCount) {
+                                0 => '5 Minuten',
+                                1 => '1 Stunde',
+                                2 => '1 Tag',
+                                3 => '1 Woche',
+                                default => '5 Minuten',
+                            };
+                            
+                            $queueModel->dCreated = date('Y-m-d H:i:s', strtotime(sprintf('+%d MINUTES', $delayMinutes)));
+                            $queueModel->cResult  = ($queueModel->cResult ? $queueModel->cResult . "\n" : '') . '[LIEFERSCHEIN_RETRY] Noch keine Lieferscheine, Retry ' . ($retryCount + 1) . "/4 nach {$delayDescription}...";
 
                             return $queueModel->save();
                         }

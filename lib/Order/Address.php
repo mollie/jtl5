@@ -8,6 +8,7 @@
 namespace Plugin\ws5_mollie\lib\Order;
 
 use JTL\Shop;
+use Normalizer;
 
 /**
  * Class Address
@@ -54,8 +55,31 @@ class Address extends \Plugin\ws5_mollie\lib\Payment\Address
         parent::__construct($address);
 
         $this->title = html_entity_decode(substr(trim(($address->cAnrede === 'm' ? Shop::Lang()->get('mr') : Shop::Lang()->get('mrs')) . ' ' . $address->cTitel), 0, 20)) ?? null;
-        $this->givenName = html_entity_decode($address->cVorname);
-        $this->familyName = html_entity_decode($address->cNachname);
+
+        // Normalize and strip diacritics to comply with Mollie API restrictions
+        // Handle null/empty values and ensure Normalizer doesn't return false
+        $givenNameInput = (string)($address->cVorname ?? '');
+        $familyNameInput = (string)($address->cNachname ?? '');
+        
+        // Normalize to decomposed form (NFKD) to separate base characters from diacritics
+        $normalizedGivenName = Normalizer::normalize($givenNameInput, Normalizer::FORM_KD);
+        $normalizedFamilyName = Normalizer::normalize($familyNameInput, Normalizer::FORM_KD);
+        
+        // Fallback to original if normalization fails (intl extension not available)
+        // Still try to strip diacritics from original if normalization failed
+        $normalizedGivenName = $normalizedGivenName !== false ? $normalizedGivenName : $givenNameInput;
+        $normalizedFamilyName = $normalizedFamilyName !== false ? $normalizedFamilyName : $familyNameInput;
+        
+        // Remove combining marks (diacritics) to comply with Mollie API
+        // This removes characters like Vietnamese tone marks (ễ, ạ, etc.)
+        $strippedGivenName = preg_replace('/\p{Mn}/u', '', $normalizedGivenName);
+        $strippedFamilyName = preg_replace('/\p{Mn}/u', '', $normalizedFamilyName);
+        
+        // Decode HTML entities and ensure non-empty result
+        // If stripping resulted in empty string, use original (edge case)
+        $this->givenName = trim(html_entity_decode($strippedGivenName ?: $givenNameInput)) ?: '';
+        $this->familyName = trim(html_entity_decode($strippedFamilyName ?: $familyNameInput)) ?: '';
+
         $this->email = html_entity_decode($address->cMail) ?? null;
 
         if ($organizationName = isset($address->cFirma) ? trim($address->cFirma) : null) {
