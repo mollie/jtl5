@@ -12,6 +12,7 @@ use JTL\Catalog\Currency;
 use JTL\Catalog\Product\Artikel;
 use JTL\Catalog\Product\EigenschaftWert;
 use JTL\Catalog\Product\Preise;
+use JTL\CheckBox;
 use JTL\Checkout\Bestellung;
 use JTL\Checkout\OrderHandler;
 use JTL\Checkout\StockUpdater;
@@ -169,6 +170,13 @@ abstract class AbstractCheckout
                         // Calculate execution time in seconds
                         $executionTime = $endTime - $startTime;
                         PluginHelper::getLogger()->debug("Mollie - Order finalized in DB. Execution Time: " . number_format($executionTime, 6) . " seconds");
+
+                        // Handle clicked checkboxes from bestellabschluss
+                        if (isset($_SESSION['ws5_mollie_checkboxes'])) {
+                            self::handleCheckboxes($order);
+                            unset($_SESSION['ws5_mollie_checkboxes']);
+                        }
+
 
                         try {
                             $checkout = self::fromID($id, false, $order);
@@ -448,7 +456,9 @@ abstract class AbstractCheckout
                 ':kBestellung' => $this->oBestellung->kBestellung
             ], 1)
         ) {
-            return (float)$row->fBetragSumme >= ($this->oBestellung->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor);
+            // Berechne Bestellwert anhand des Waehrungsfaktors und runde den Wert ab um Fehler aufgrund der Nachkommastellen zu verhindern
+            $sum = floor(($this->oBestellung->fGesamtsumme * $this->getBestellung()->fWaehrungsFaktor) * 100) / 100;
+            return (float)$row->fBetragSumme >= $sum;
         }
 
         return false;
@@ -816,6 +826,58 @@ abstract class AbstractCheckout
         }
 
         return $inventory;
+    }
+
+
+    private static function handleCheckboxes(Bestellung $order): void
+    {
+        // Trigger checkbox function nachträglich, wenn diese im bestellabschluss geklickt wurden
+        /**
+         * @var \JTL\Customer\Customer $customer
+         */
+        $customer = $_SESSION['Kunde'] ?? $order->oKunde;
+        if (!($customer instanceof Customer)) {
+            $customer = new Customer();
+        }
+        $customerGroupID   = $customer->getGroupID();
+        $checkbox          = new CheckBox(0, PluginHelper::getDB());
+        $checkbox->triggerSpecialFunction(
+            \CHECKBOX_ORT_BESTELLABSCHLUSS,
+            $customerGroupID,
+            true,
+            $_SESSION['ws5_mollie_checkboxes'],
+            ['oBestellung' => $order, 'oKunde' => $customer]
+        );
+
+        // Logge checkboxen nachträglich
+        $checkboxes = $checkbox->getCheckBoxFrontend(\CHECKBOX_ORT_BESTELLABSCHLUSS, $customerGroupID, true, false, false, true);
+        foreach ($checkboxes as $checkbox) {
+            $checked          = self::checkboxWasChecked($checkbox->cID, $_SESSION['ws5_mollie_checkboxes']);
+            if ($checked) {
+                PluginHelper::getDB()->executeQueryPrepared('UPDATE tcheckboxlogging SET bChecked = 1 WHERE kCheckbox = :kCheckbox AND kBestellung = :kBestellung',
+                    [
+                        'kCheckbox' => $checkbox->kCheckBox,
+                        'kBestellung' => $order->kBestellung
+                    ], 10);
+            }
+        }
+    }
+
+    private static function checkboxWasChecked(string $idx, array $post): bool
+    {
+        $value = $post[$idx] ?? null;
+        if ($value === null) {
+            return false;
+        }
+        if ($value === 'on' || $value === 'Y' || $value === 'y') {
+            $value = true;
+        } elseif ($value === 'N' || $value === 'n' || $value === '') {
+            $value = false;
+        } else {
+            $value = (bool)$value;
+        }
+
+        return $value;
     }
 
     /**

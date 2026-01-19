@@ -244,7 +244,7 @@ abstract class PaymentMethod extends Method
 
             if ($this->duringCheckout) {
                 // Handle Checkboxes bei Bezahlung vor Bestellabschluss, da diese durch POST parameter getriggert werden, die beim Redirect verloren gehen
-                self::handleCheckboxes($order);
+                self::saveCheckboxesForHandling();
             } else if (\JTL\Shopsetting::getInstance()->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlussseite') === 'S') {
                 // Cleanup Session bei Bezahlung nach Bestellabschluss, wenn Abschlussseite = Statusseite
                 Frontend::getInstance()->cleanUp();
@@ -311,21 +311,8 @@ abstract class PaymentMethod extends Method
         }
     }
 
-    private static function handleCheckboxes(Bestellung $order): void
+    private static function saveCheckboxesForHandling(): void
     {
-        /**
-         * @var \JTL\Customer\Customer $customer
-         */
-        $customer = $_SESSION['Kunde'];
-        $customerGroupID   = $customer->getGroupID();
-        $checkbox          = new CheckBox(0, PluginHelper::getDB());
-        $checkbox->triggerSpecialFunction(
-            \CHECKBOX_ORT_BESTELLABSCHLUSS,
-            $customerGroupID,
-            true,
-            $_POST,
-            ['oBestellung' => $order, 'oKunde' => $customer]
-        );
-
+        $_SESSION['ws5_mollie_checkboxes'] = $_POST;
     }
 }
