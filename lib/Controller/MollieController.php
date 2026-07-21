@@ -49,7 +49,7 @@ class MollieController extends AbstractController
         $_methods_arr = [];
         try {
             // Get methods for default currency EUR
-            $_methods = $api->getClient()->methods->allActive(['includeWallets' => 'applepay', 'amount' => (object)['value' => '10.00', 'currency' => 'EUR']]);
+            $_methods = $api->getClient()->methods->allActive(['includeWallets' => 'applepay', 'amount' => (object)['value' => '50.00', 'currency' => 'EUR']]);
             $_methods_arr['EUR'] = $_methods;
 
             // Get methods for all other active currencies

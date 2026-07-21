@@ -332,7 +332,7 @@ class PaymentCheckout extends AbstractCheckout
             $data['cZahler']  = $this->getMollie()->details->paypalPayerId   ?? $this->getMollie()->customerId;
 
             $cHinweis = $this->getMollie()->id;
-            if ($this->getMollie()->details->paypalReference && PluginHelper::getSetting('paypalID') === 'paypal') {
+            if (isset($this->getMollie()->details->paypalReference) && PluginHelper::getSetting('paypalID') === 'paypal') {
                 $cHinweis = $this->getMollie()->details->paypalReference;
             }
             $data['cHinweis'] = $cHinweis;

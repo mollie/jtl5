@@ -148,7 +148,12 @@ class Queue extends AbstractHook
             if (isset($_GET['hash'])) {
                 $sessionHash = $_GET['hash'];
                 $paymentSession = PluginHelper::getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash);
-                if ($paymentSession && $paymentSession->kBestellung) {
+                if (isset($paymentSession->kBestellung)) {
+                    $order = PluginHelper::getDB()->select('tbestellung', 'kBestellung', $paymentSession->kBestellung);
+                }
+
+                if (isset($paymentSession) && $paymentSession->kBestellung && isset($order) && (int)$order->cStatus === \BESTELLUNG_STATUS_BEZAHLT) {
+
                     // Order was finalized (return Status 200 Success): customer will be redirected to success url
                     http_response_code(200);
                     $response = [

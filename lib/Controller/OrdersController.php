@@ -40,15 +40,36 @@ class OrdersController extends AbstractController
         return new AbstractResult(AbstractCheckout::makeFetchable($oBestellung, $orderModel));
     }
 
-    public static function fetchMollieOrders(): AbstractResult
+    public static function fetchMollieOrders(?stdClass $data = null): AbstractResult
     {
+        $page = isset($data->page) ? max(1, (int)$data->page) : 1;
+        $pageSize = isset($data->pageSize) ? (int)$data->pageSize : 500;
+        $pageSize = max(1, min(1000, $pageSize));
+        $offset = ($page - 1) * $pageSize;
+
         if (PluginHelper::getSetting('hideCompleted')) {
-            $sqlQuery = "SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung WHERE !(o.cStatus IN ('paid', 'completed') AND b.cStatus = '4') ORDER BY b.dErstellt DESC;";
+            $whereClause = "WHERE !(o.cStatus IN ('paid', 'completed') AND b.cStatus = '4')";
         } else {
-            $sqlQuery = "SELECT o.*, b.cStatus AS cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung ORDER BY b.dErstellt DESC;";
+            $whereClause = '';
         }
-        $results = PluginHelper::getDB()->executeQuery($sqlQuery, 2);
-        return new AbstractResult($results);
+        $baseFrom = " FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung {$whereClause}";
+
+        $countQuery = "SELECT COUNT(*) AS total{$baseFrom}";
+        $totalResult = PluginHelper::getDB()->executeQuery($countQuery, 1);
+        $total = isset($totalResult->total) ? (int)$totalResult->total : 0;
+
+        $sqlQuery = "SELECT o.*, b.cStatus AS cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme{$baseFrom} ORDER BY b.dErstellt DESC LIMIT :limit OFFSET :offset";
+        $results = PluginHelper::getDB()->executeQueryPrepared($sqlQuery, [
+            ':limit' => $pageSize,
+            ':offset' => $offset
+        ], 2);
+
+        return new AbstractResult((object)[
+            'items' => $results,
+            'total' => $total,
+            'page' => $page,
+            'pageSize' => $pageSize
+        ]);
     }
 
     /**

@@ -131,33 +131,51 @@ abstract class AbstractCheckout
                 if (
                     (!isset($_SESSION['Warenkorb']->PositionenArr, $paymentSession->nBezahlt, $paymentSession->kBestellung)
                         || !($paymentSession->nBezahlt && $paymentSession->kBestellung))
-                    && count($_SESSION['Warenkorb']->PositionenArr)
+                    && (isset($_SESSION['Warenkorb']->PositionenArr) && count($_SESSION['Warenkorb']->PositionenArr))
                 ) {
-                    $paymentSession->cNotifyID = $id;
-                    $paymentSession->dNotify   = 'NOW()';
+                    $orderAlreadyExists = false;
 
-                    $api    = new MollieAPI($test);
-                    $mollie = strpos($id, 'tr_') === 0 ?
-                        $api->getClient()->payments->get($id) :
-                        $api->getClient()->orders->get($id, ['embed' => 'payments']);
-
-                    if (in_array($mollie->status, [OrderStatus::STATUS_PENDING, OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PAID], true)) {
-                        if ($debug) PluginHelper::getLogger()->debug('Mollie: order is going to be finalized: ' . $sessionHash);
-                        $orderHandler  = new OrderHandler(Shop::Container()->getDB(), Frontend::getCustomer(), Frontend::getCart());
-                        $order = $orderHandler->finalizeOrder();
-                        $session->cleanUp();
-                        $paymentSession->nBezahlt     = 1;
-                        $paymentSession->dZeitBezahlt = 'now()';
-                    } else if (in_array($mollie->status, [OrderStatus::STATUS_CANCELED, OrderStatus::STATUS_EXPIRED, 'failed'], true)) {
-                        if ($debug) PluginHelper::getLogger()->debug("Mollie - Order was canceled by Webhook Call: " . $sessionHash);
-
-                        PluginHelper::getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET cStatus = :status WHERE cOrderId = :id', [':status' => $mollie->status, ':id' => $mollie->id]);
-                        throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
-                    } else {
-                        throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
+                    // CRITICAL: Check if processing already started but didn't finish
+                    // This prevents duplicate orders if a previous webhook crashed during finalization
+                    if ($paymentSession->cNotifyID && (!$paymentSession->nBezahlt || !$paymentSession->kBestellung)) {
+                        // Processing started (cNotifyID set) but not finished (nBezahlt = 0 or kBestellung = NULL) Skip finalizing order
+                        $orderAlreadyExists = true;
                     }
 
-                    if ($order->kBestellung) {
+                    // Mark processing as started BEFORE creating order
+                    $paymentSession->cNotifyID = $id;
+                    $paymentSession->dNotify = 'NOW()';
+
+
+                    $api = new MollieAPI($test);
+                    $mollie = strpos($id, 'tr_') === 0 ?
+                        $api->getClient()->payments->get($id, ['embed' => 'refunds']) :
+                        $api->getClient()->orders->get($id, ['embed' => 'payments,shipments,refunds']);
+
+                    if (!$orderAlreadyExists) {
+                        if (in_array($mollie->status, [OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PAID], true)) {
+                            PluginHelper::getDB()->update('tzahlungsession', 'cZahlungsID', $sessionHash, $paymentSession);
+                            if ($debug) PluginHelper::getLogger()->debug('Mollie: order is going to be finalized: ' . $sessionHash);
+                            $orderHandler  = new OrderHandler(Shop::Container()->getDB(), Frontend::getCustomer(), Frontend::getCart());
+                            $order = $orderHandler->finalizeOrder();
+                            $session->cleanUp();
+                            $paymentSession->nBezahlt     = 1;
+                            $paymentSession->dZeitBezahlt = 'now()';
+                        } else if (in_array($mollie->status, [OrderStatus::STATUS_CANCELED, OrderStatus::STATUS_EXPIRED, 'failed'], true)) {
+                            if ($debug) PluginHelper::getLogger()->debug("Mollie - Order was canceled by Webhook Call: " . $sessionHash);
+                            PluginHelper::getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET cStatus = :status WHERE cOrderId = :id', [':status' => $mollie->status, ':id' => $mollie->id]);
+                            throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
+                        } else if ($mollie->status === OrderStatus::STATUS_PENDING) {
+                            if ($debug) PluginHelper::getLogger()->debug("Mollie - Order was not finalized by Webhook Call. Payment is still pending: " . $sessionHash);
+                            throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
+                        } else {
+                            throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
+                        }
+                    } else {
+                        $session->cleanUp();
+                    }
+
+                    if (isset($order->kBestellung)) {
                         $paymentSession->kBestellung = $order->kBestellung;
                         PluginHelper::getDB()->update('tzahlungsession', 'cZahlungsID', $sessionHash, $paymentSession);
                         if ($debug) {
@@ -204,13 +222,23 @@ abstract class AbstractCheckout
                             ->handleNotification($sessionHash);
 
                     } else {
-                        if ($debug) PluginHelper::getLogger()->debug('Mollie: no kBestellung after order was finalized: ' . json_encode($order, JSON_PRETTY_PRINT));
+                        if ($debug) {
+                            if ($orderAlreadyExists) {
+                                PluginHelper::getLogger()->debug('Mollie: finalizeOrder was skipped, because order to this payment already exists: ' . json_encode($paymentSession, JSON_PRETTY_PRINT));
+                            } else {
+                                PluginHelper::getLogger()->debug('Mollie: no kBestellung after order was finalized: ' . json_encode($order, JSON_PRETTY_PRINT));
+                            }
+                        }
                         throw new Exception(sprintf('Bestellung nicht finalisiert: %s', print_r($order, 1)));
                     }
                 } else {
                     QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
 
-                    throw new Exception(sprintf('PaymentSession bereits bezahlt: %s - ID: %s => Queue', $sessionHash, $id));
+                    if (isset($paymentSession->nBezahlt, $paymentSession->kBestellung) && ($paymentSession->nBezahlt && $paymentSession->kBestellung)) {
+                        throw new Exception(sprintf('PaymentSession bereits bezahlt: %s - ID: %s => Queue', $sessionHash, $id));
+                    } else {
+                        throw new Exception(sprintf('Bestellung konnte nicht finalisiert werden. Session ist bereits abgelaufen: %s - ID: %s => Queue', $sessionHash, $id));
+                    }
                 }
             } else {
                 QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
