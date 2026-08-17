@@ -27,7 +27,7 @@ class Banktransfer extends PaymentMethod
 
         // TODO: Refactor this to use "PluginHelper::getPaymentSetting" once available
         if (self::Plugin('ws5_mollie')->getConfig()->getValue($this->moduleID . '_usePUI') === 'N') {
-            return false;
+            return '';
         }
 
         $template = PluginHelper::getPlugin()->getLocalization()->getTranslation('banktransferPUI');

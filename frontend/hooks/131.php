@@ -102,6 +102,6 @@ try {
         exit((string) QueueModel::cleanUp());
     }
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     Shop::Container()->getLogService()->error($e->getMessage() . " (Trace: {$e->getTraceAsString()})");
 }

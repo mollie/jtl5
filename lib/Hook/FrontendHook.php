@@ -9,9 +9,8 @@ namespace Plugin\ws5_mollie\lib\Hook;
 
 use Exception;
 use JTL\Shop;
-use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\PluginHelper;
-use WS\JTL5\V2_0_7\Hook\AbstractHook;
+use WS\JTL5\V2_1_4\Hook\AbstractHook;
 
 class FrontendHook extends AbstractHook
 {

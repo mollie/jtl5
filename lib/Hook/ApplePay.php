@@ -13,7 +13,7 @@ use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
 use Plugin\ws5_mollie\lib\PluginHelper;
 use Psr\Http\Message\ResponseInterface;
-use WS\JTL5\V2_0_7\Hook\AbstractHook;
+use WS\JTL5\V2_1_4\Hook\AbstractHook;
 
 class ApplePay extends AbstractHook
 {

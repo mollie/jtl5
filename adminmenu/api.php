@@ -5,7 +5,7 @@
  * @link https://www.webstollen.de
  */
 
-use WS\JTL5\V2_0_7\Backend\API;
+use WS\JTL5\V2_1_4\Backend\API;
 
 if ($_SERVER['HTTP_HOST'] === 'localhost') {
     header('Access-Control-Allow-Origin: *');

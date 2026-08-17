@@ -11,7 +11,7 @@ use JsonSerializable;
 use JTL\Catalog\Currency;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\PluginHelper;
-use WS\JTL5\V2_0_7\Traits\Jsonable;
+use WS\JTL5\V2_1_4\Traits\Jsonable;
 
 class Amount implements JsonSerializable
 {

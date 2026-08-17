@@ -12,8 +12,8 @@
   },
   "require": {
     "php": "8.1 - 8.3",
-    "webstollen/jtl5-core-plugin-library-v2_0_7": "*",
-    "mollie/mollie-api-php": "^v2.79.0"
+    "webstollen/jtl5-core-plugin-library-v2_1_4": "*",
+    "mollie/mollie-api-php": "^v3.13.1"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "3.x.x"

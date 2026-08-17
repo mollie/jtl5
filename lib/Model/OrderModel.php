@@ -7,7 +7,7 @@
 
 namespace Plugin\ws5_mollie\lib\Model;
 
-use WS\JTL5\V2_0_7\Model\AbstractModel;
+use WS\JTL5\V2_1_4\Model\AbstractModel;
 
 /**
  * Class OrderModel

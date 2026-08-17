@@ -13,9 +13,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
-use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Exceptions\IncompatiblePlatformException;
 use Mollie\Api\MollieApiClient;
-use WS\JTL5\V2_0_7\Traits\Plugins;
+use WS\JTL5\V2_1_4\Traits\Plugins;
 
 class MollieAPI
 {
@@ -63,7 +63,7 @@ class MollieAPI
 
     /**
      * @throws ApiException
-     * @throws IncompatiblePlatform
+     * @throws IncompatiblePlatformException
      * @return MollieApiClient
      */
     public function getClient(): MollieApiClient

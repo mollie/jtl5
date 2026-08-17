@@ -31,9 +31,7 @@ use JTL\Plugin\Payment\MethodInterface;
 use JTL\Session\Frontend;
 use JTL\Shop;
 use JTL\Shopsetting;
-use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
-use Mollie\Api\Types\OrderStatus;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Locale;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
@@ -44,8 +42,8 @@ use Plugin\ws5_mollie\lib\PluginHelper;
 use Plugin\ws5_mollie\lib\Traits\RequestData;
 use RuntimeException;
 use stdClass;
-use WS\JTL5\V2_0_7\Model\ModelInterface;
-use WS\JTL5\V2_0_7\Traits\Plugins;
+use WS\JTL5\V2_1_4\Model\ModelInterface;
+use WS\JTL5\V2_1_4\Traits\Plugins;
 
 /**
  * Class AbstractCheckout
@@ -56,6 +54,7 @@ use WS\JTL5\V2_0_7\Traits\Plugins;
  * @property string $redirectUrl
  * @property null|array $metadata
  * @property string $webhookUrl
+ * @property string $cancelUrl
  * @property null|string $method
  *
  */
@@ -63,6 +62,10 @@ abstract class AbstractCheckout
 {
     use Plugins;
     use RequestData;
+
+    public const LEGACY_ORDER_DEGRADE_MESSAGE = 'Legacy Order API (ord_*) ohne verknüpfte Payment-ID (cTransactionId). Bitte in Mollie Dashboard abschließen.';
+
+    public const LEGACY_ORDER_SHIPMENT_MESSAGE = 'Legacy Order API (ord_*): Capture/Shipments sind nicht mehr über die Payment API möglich. Bitte Shipment im Mollie Dashboard anlegen.';
 
     /**
      * @var OrderModel
@@ -148,12 +151,15 @@ abstract class AbstractCheckout
 
 
                     $api = new MollieAPI($test);
-                    $mollie = strpos($id, 'tr_') === 0 ?
-                        $api->getClient()->payments->get($id, ['embed' => 'refunds']) :
-                        $api->getClient()->orders->get($id, ['embed' => 'payments,shipments,refunds']);
+                    $paymentId = self::resolvePaymentId($id);
+                    if ($paymentId === null) {
+                        QueueModel::saveToQueue($id, $_REQUEST, 'webhook');
+                        throw new Exception(self::LEGACY_ORDER_DEGRADE_MESSAGE . ' ID: ' . $id);
+                    }
+                    $mollie = $api->getClient()->payments->get($paymentId, ['embed' => 'refunds']);
 
                     if (!$orderAlreadyExists) {
-                        if (in_array($mollie->status, [OrderStatus::STATUS_AUTHORIZED, OrderStatus::STATUS_PAID], true)) {
+                        if (in_array($mollie->status, [PaymentStatus::AUTHORIZED, PaymentStatus::PAID], true)) {
                             PluginHelper::getDB()->update('tzahlungsession', 'cZahlungsID', $sessionHash, $paymentSession);
                             if ($debug) PluginHelper::getLogger()->debug('Mollie: order is going to be finalized: ' . $sessionHash);
                             $orderHandler  = new OrderHandler(Shop::Container()->getDB(), Frontend::getCustomer(), Frontend::getCart());
@@ -161,11 +167,15 @@ abstract class AbstractCheckout
                             $session->cleanUp();
                             $paymentSession->nBezahlt     = 1;
                             $paymentSession->dZeitBezahlt = 'now()';
-                        } else if (in_array($mollie->status, [OrderStatus::STATUS_CANCELED, OrderStatus::STATUS_EXPIRED, 'failed'], true)) {
+                        } else if (in_array($mollie->status, [PaymentStatus::CANCELED, PaymentStatus::EXPIRED, PaymentStatus::FAILED], true)) {
                             if ($debug) PluginHelper::getLogger()->debug("Mollie - Order was canceled by Webhook Call: " . $sessionHash);
-                            PluginHelper::getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET cStatus = :status WHERE cOrderId = :id', [':status' => $mollie->status, ':id' => $mollie->id]);
+                            PluginHelper::getDB()->executeQueryPrepared('UPDATE xplugin_ws5_mollie_orders SET cStatus = :status WHERE cOrderId = :id OR cTransactionId = :txnId', [
+                                ':status' => $mollie->status,
+                                ':id' => $id,
+                                ':txnId' => $paymentId,
+                            ]);
                             throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
-                        } else if ($mollie->status === OrderStatus::STATUS_PENDING) {
+                        } else if ($mollie->status === PaymentStatus::PENDING) {
                             if ($debug) PluginHelper::getLogger()->debug("Mollie - Order was not finalized by Webhook Call. Payment is still pending: " . $sessionHash);
                             throw new Exception('Mollie Status invalid: ' . $mollie->status . '\n' . print_r([$sessionHash, $id], 1));
                         } else {
@@ -199,21 +209,10 @@ abstract class AbstractCheckout
                         try {
                             $checkout = self::fromID($id, false, $order);
                         } catch (Exception $e) {
-                            if (strpos($id, 'tr_') === 0) {
-                                $checkoutClass = PaymentCheckout::class;
-                            } else {
-                                $checkoutClass = OrderCheckout::class;
-                            }
-                            $checkout = new $checkoutClass($order, $api);
-                        }
-
-                        if (strpos($mollie->id, 'ord_') === 0) {
-                            /** @var Payment $payment */
-                            foreach ($mollie->payments() as $payment) {
-                                if (in_array($payment->status, [PaymentStatus::STATUS_AUTHORIZED, PaymentStatus::STATUS_PAID, PaymentStatus::STATUS_PENDING])) {
-                                    $checkout->getModel()->cTransactionId = $payment->id;
-                                    $checkout->getModel()->save();
-                                }
+                            $checkout = new PaymentCheckout($order, $api);
+                            if (str_starts_with($id, 'ord_')) {
+                                $checkout->getModel()->cOrderId = $id;
+                                $checkout->getModel()->cTransactionId = $paymentId;
                             }
                         }
 
@@ -245,22 +244,86 @@ abstract class AbstractCheckout
 
                 throw new Exception(sprintf('PaymentSession nicht gefunden: %s - ID: %s => Queue', $sessionHash, $id));
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $logger->notice(__NAMESPACE__ . ' finalize order:' . $e->getMessage());
         }
+    }
+
+    /**
+     * Resolve a Mollie payment id (tr_*) from a stored resource id (tr_* or ord_* + cTransactionId).
+     */
+    public static function resolvePaymentId(string $id): ?string
+    {
+        if (str_starts_with($id, 'tr_')) {
+            return $id;
+        }
+
+        try {
+            /** @var OrderModel $model */
+            $model = OrderModel::fromID($id, 'cOrderId', true);
+            if (!empty($model->cTransactionId) && str_starts_with((string)$model->cTransactionId, 'tr_')) {
+                return $model->cTransactionId;
+            }
+        } catch (Exception $e) {
+            // ignore – caller handles missing mapping
+        }
+
+        return null;
+    }
+
+    public static function isLegacyOrderId(string $id): bool
+    {
+        return str_starts_with($id, 'ord_');
+    }
+
+    /**
+     * True only when the loaded Mollie Payment is still bound to an Order (orderId=ord_*).
+     * Historical cOrderId=ord_* alone is not enough (e.g. repay creates a standalone tr_*).
+     */
+    public function isOrderLinkedPayment(?Payment $payment = null): bool
+    {
+        return $payment !== null
+            && !empty($payment->orderId)
+            && self::isLegacyOrderId((string)$payment->orderId);
+    }
+
+    /**
+     * Prefer payment id (tr_*). Legacy ord_* rows use cTransactionId.
+     */
+    public function getPaymentResourceId(): ?string
+    {
+        $orderId = (string)($this->getModel()->cOrderId ?? '');
+        if (str_starts_with($orderId, 'tr_')) {
+            return $orderId;
+        }
+        $txn = (string)($this->getModel()->cTransactionId ?? '');
+        if (str_starts_with($txn, 'tr_')) {
+            return $txn;
+        }
+
+        return null;
     }
 
     /**
      * @param string          $id
      * @param bool            $bFill
      * @param null|Bestellung $order
+     * @param bool            $allowMissingPaymentId  Allow loading legacy ord_* without cTransactionId (e.g. repay → new payment)
      * @throws RuntimeException
-     * @return static
+     * @return PaymentCheckout
      */
-    public static function fromID(string $id, bool $bFill = true, ?Bestellung $order = null): self
+    public static function fromID(string $id, bool $bFill = true, ?Bestellung $order = null, bool $allowMissingPaymentId = false): self
     {
         /** @var OrderModel $model */
         $model = OrderModel::fromID($id, 'cOrderId', true);
+
+        if (
+            !$allowMissingPaymentId
+            && self::isLegacyOrderId((string)$model->cOrderId)
+            && self::resolvePaymentId((string)$model->cOrderId) === null
+        ) {
+            throw new RuntimeException(self::LEGACY_ORDER_DEGRADE_MESSAGE);
+        }
 
         $oBestellung = $order;
         if (!$oBestellung) {
@@ -270,13 +333,7 @@ abstract class AbstractCheckout
             $oBestellung = new Bestellung($model->kBestellung, $bFill);
         }
 
-        if (static::class !== __CLASS__) {
-            $self = new static($oBestellung, new MollieAPI($model->bTest));
-        } elseif (strpos($model->cOrderId, 'tr_') !== false) {
-            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
-        } else {
-            $self = new OrderCheckout($oBestellung, new MollieAPI($model->bTest));
-        }
+        $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
         $self->setModel($model);
 
         return $self;
@@ -425,13 +482,26 @@ abstract class AbstractCheckout
      */
     public function updateModel(): self
     {
-        if ($this->getMollie()) {
-            $this->getModel()->cOrderId  = $this->getMollie()->id;
-            $this->getModel()->cLocale   = $this->getMollie()->locale;
-            $this->getModel()->fAmount   = $this->getMollie()->amount->value;
-            $this->getModel()->cMethod   = $this->getMollie()->method;
-            $this->getModel()->cCurrency = $this->getMollie()->amount->currency;
-            $this->getModel()->cStatus   = $this->getMollie()->status;
+        if ($mollie = $this->getMollie()) {
+            $existingOrderId = (string)($this->getModel()->cOrderId ?? '');
+
+            // Never overwrite legacy ord_* with the linked payment id (tr_*)
+            if (self::isLegacyOrderId($existingOrderId)) {
+                if (!empty($mollie->id) && str_starts_with((string)$mollie->id, 'tr_')) {
+                    $this->getModel()->cTransactionId = $mollie->id;
+                }
+            } else {
+                $this->getModel()->cOrderId = $mollie->id;
+                if (!empty($mollie->id) && str_starts_with((string)$mollie->id, 'tr_')) {
+                    $this->getModel()->cTransactionId = $mollie->id;
+                }
+            }
+
+            $this->getModel()->cLocale   = $mollie->locale;
+            $this->getModel()->fAmount   = $mollie->amount->value;
+            $this->getModel()->cMethod   = $mollie->method;
+            $this->getModel()->cCurrency = $mollie->amount->currency;
+            $this->getModel()->cStatus   = $mollie->status;
         }
 
         // TODO: DOKU, Reminder Email, name der paymentmethod in array
@@ -579,7 +649,7 @@ abstract class AbstractCheckout
     /**
      * @param int   $kBestellung
      * @param mixed $fill
-     * @return OrderCheckout|PaymentCheckout
+     * @return PaymentCheckout
      */
     public static function fromBestellung(int $kBestellung, $fill = true)
     {
@@ -592,11 +662,10 @@ abstract class AbstractCheckout
         if (!$oBestellung->kBestellung) {
             throw new RuntimeException(sprintf("Bestellung '%d' konnte nicht geladen werden.", $kBestellung));
         }
-        if (strpos($model->cOrderId, 'tr_') !== false) {
-            $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
-        } else {
-            $self = new OrderCheckout($oBestellung, new MollieAPI($model->bTest));
+        if (self::isLegacyOrderId((string)$model->cOrderId) && self::resolvePaymentId((string)$model->cOrderId) === null) {
+            throw new RuntimeException(self::LEGACY_ORDER_DEGRADE_MESSAGE);
         }
+        $self = new PaymentCheckout($oBestellung, new MollieAPI($model->bTest));
         $self->setModel($model);
 
         return $self;
@@ -718,6 +787,7 @@ abstract class AbstractCheckout
             Shop::Container()->getLinkService()->getStaticRoute('bestellabschluss.php') . "?" . http_build_query(['hash' => $this->getHash()]) :
                 $this->getPaymentMethod()->getReturnURL($this->getBestellung());
 
+            $this->cancelUrl = $this->getPaymentMethod()->duringCheckout ? $this->getCancelUrl() : null;
             $this->webhookUrl = $this->getWebhookUrl();
         }
 
@@ -757,6 +827,15 @@ abstract class AbstractCheckout
         }
 
         return Shop::getURL(true) . '/?' . http_build_query($query);
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    protected function getCancelUrl(): string
+    {
+        return Shop::Container()->getLinkService()->getSpecialPage(LINKTYP_BESTELLVORGANG)->getURL() . '?' . http_build_query(['mollie_payment_canceled' => '1']);
     }
 
     /**

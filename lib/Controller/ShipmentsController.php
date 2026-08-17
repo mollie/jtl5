@@ -7,63 +7,26 @@
 
 namespace Plugin\ws5_mollie\lib\Controller;
 
-use JTL\Customer\Customer;
-use Mollie\Api\Exceptions\IncompatiblePlatform;
-use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
-use Plugin\ws5_mollie\lib\PluginHelper;
-use Plugin\ws5_mollie\lib\Shipment;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use stdClass;
-use WS\JTL5\V2_0_7\Backend\AbstractResult;
-use WS\JTL5\V2_0_7\Backend\Controller\AbstractController;
-use WS\JTL5\V2_0_7\Exception\APIException;
+use WS\JTL5\V2_1_4\Backend\AbstractResult;
+use WS\JTL5\V2_1_4\Backend\Controller\AbstractController;
+use WS\JTL5\V2_1_4\Exception\APIException;
 
 class ShipmentsController extends AbstractController
 {
     /**
+     * Shipments API is removed — legacy ord_* must be completed in Mollie Dashboard.
+     *
      * @param stdClass $data
      * @return AbstractResult
-     * @throws IncompatiblePlatform
-     * @throws \Mollie\Api\Exceptions\ApiException
-     * @throws \Exception
+     * @throws APIException
      */
     public static function sync(stdClass $data): AbstractResult
     {
-        if (!$data->kBestellung || !$data->kLieferschein || !$data->orderId) {
-            throw new APIException('Bestellung, Liefererschein oder Mollie OrderId fehlen.');
-        }
-
-        $checkout = OrderCheckout::fromID($data->orderId);
-
-        if ($checkout->getModel()->kBestellung) {
-            $shipment = new Shipment((int)$data->kLieferschein, $checkout);
-
-            $oKunde = new Customer($checkout->getBestellung()->kKunde);
-
-            $mode = PluginHelper::getSetting('shippingMode');
-            switch ($mode) {
-                case 'A':
-                    // ship directly
-                    if (!$shipment->send() && !$shipment->getShipment()) {
-                        throw new APIException('Shipment konnte nicht gespeichert werden.');
-                    }
-
-                    return new AbstractResult(true);
-                case 'B':
-                    // only ship if complete shipping
-                    if ($oKunde->nRegistriert || (int)$checkout->getBestellung()->cStatus === BESTELLUNG_STATUS_VERSANDT) {
-                        if (!$shipment->send() && !$shipment->getShipment()) {
-                            throw new APIException('Shipment konnte nicht gespeichert werden.');
-                        }
-
-                        return new AbstractResult(true);
-                    }
-
-                    throw new APIException('Gastbestellung noch nicht komplett versendet!');
-            }
-        } else {
-            throw new APIException('Bestellung konnte nicht geladen werden');
-        }
-
-        return new AbstractResult($shipment);
+        throw new APIException(
+            AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE
+            . ' Shipments-Sync ist nicht mehr verfügbar — bitte Mollie Dashboard nutzen.'
+        );
     }
 }

@@ -12,14 +12,12 @@ use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
-use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
-use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\PluginHelper;
 use stdClass;
-use WS\JTL5\V2_0_7\Backend\AbstractResult;
-use WS\JTL5\V2_0_7\Backend\Controller\AbstractController;
+use WS\JTL5\V2_1_4\Backend\AbstractResult;
+use WS\JTL5\V2_1_4\Backend\Controller\AbstractController;
 
 /**
  * Class OrdersController
@@ -108,25 +106,17 @@ class OrdersController extends AbstractController
      */
     public static function get(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'tr_') !== false) {
-            $checkout = PaymentCheckout::fromID($data->id);
-        } else {
-            $checkout = OrderCheckout::fromID($data->id);
+        $checkout = AbstractCheckout::fromID($data->id, true, null, true);
+        if ($checkout->getPaymentResourceId()) {
+            $checkout->updateModel()->saveModel();
         }
-        $checkout->updateModel()->saveModel();
 
         return new AbstractResult($checkout->getBestellung());
     }
 
     public static function getQueue(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'tr_') !== false) {
-            $checkout = PaymentCheckout::fromID($data->id);
-        } else {
-            $checkout = OrderCheckout::fromID($data->id);
-        }
-
-        $checkout->updateModel()->saveModel();
+        $checkout = AbstractCheckout::fromID($data->id, true, null, true);
 
         return new AbstractResult(PluginHelper::getDB()
             ->executeQueryPrepared(

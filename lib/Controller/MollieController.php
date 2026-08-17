@@ -14,17 +14,17 @@ use JTL\Plugin\Helper;
 use JTL\Plugin\Payment\LegacyMethod;
 use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
-use Mollie\Api\Exceptions\IncompatiblePlatform;
+use Mollie\Api\Exceptions\IncompatiblePlatformException;
 use Mollie\Api\Resources\Refund;
 use Mollie\Api\Types\PaymentMethod;
-use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\PluginHelper;
 use RuntimeException;
 use stdClass;
-use WS\JTL5\V2_0_7\Backend\AbstractResult;
-use WS\JTL5\V2_0_7\Backend\Controller\AbstractController;
+use WS\JTL5\V2_1_4\Backend\AbstractResult;
+use WS\JTL5\V2_1_4\Backend\Controller\AbstractController;
 
 class MollieController extends AbstractController
 {
@@ -32,13 +32,17 @@ class MollieController extends AbstractController
      * @param stdClass $data
      * @return AbstractResult
      * @throws ApiException
-     * @throws IncompatiblePlatform
+     * @throws IncompatiblePlatformException
      */
     public static function methods(stdClass $data): AbstractResult
     {
         if (PluginHelper::getSetting('apiKey') === '' && PluginHelper::getSetting('test_apiKey') === '') {
-            return new AbstractResult([]);
+            return new AbstractResult((object)[
+                'reason' => 'missing_api_key',
+                'methods' => new stdClass(),
+            ]);
         }
+
 
         $test = false;
         if (PluginHelper::getSetting('apiKey') === '' && PluginHelper::getSetting('test_apiKey') !== '') {
@@ -49,25 +53,40 @@ class MollieController extends AbstractController
         $_methods_arr = [];
         try {
             // Get methods for default currency EUR
-            $_methods = $api->getClient()->methods->allActive(['includeWallets' => 'applepay', 'amount' => (object)['value' => '50.00', 'currency' => 'EUR']]);
-            $_methods_arr['EUR'] = $_methods;
+            try {
+                $_methods = $api->getClient()->methods->allEnabled([
+                    'includeWallets' => ['applepay'],
+                    'amount' => [
+                        'value' => '50.00',
+                        'currency' => 'EUR',
+                    ],
+                ]);
+                $_methods_arr['EUR'] = $_methods;
+            } catch (\Exception $e) {
+                PluginHelper::getLogger()->error('Error while fetching methods from mollie for currency EUR. Message: ' . $e->getMessage());
+            }
+
 
             // Get methods for all other active currencies
             $currencies = Currency::loadAll();
             if (is_array($currencies) && count($currencies) > 0) {
                 foreach ($currencies as $currency) {
                     if ($currency->getCode() !== 'EUR') {
-                        $_methods = $api->getClient()->methods->allActive(
-                            [
-                                'includeWallets' => 'applepay',
-                                'amount' => (object)[
-                                    'value' => '10.00',
-                                    'currency' => $currency->getCode()
+                        try {
+                            $_methods = $api->getClient()->methods->allEnabled(
+                                [
+                                    'includeWallets' => ['applepay'],
+                                    'amount' => [
+                                        'value' => '10.00',
+                                        'currency' => $currency->getCode(),
+                                    ],
                                 ]
-                            ]
-                        );
-                        if ($_methods->count() > 0) {
-                            $_methods_arr[$currency->getCode()] = $_methods;
+                            );
+                            if ($_methods->count() > 0) {
+                                $_methods_arr[$currency->getCode()] = $_methods;
+                            }
+                        } catch (\Exception $e) {
+                            PluginHelper::getLogger()->error('Error while fetching methods from mollie for currency ' . $currency->getCode() . '. Message: ' . $e->getMessage());
                         }
                     }
                 }
@@ -123,10 +142,19 @@ WHERE z.cModulId = :cModulID', [':cModulID' => $id], 2),
                 }
             }
 
-            return new AbstractResult($methods);
+            $reason = count($methods) > 0 ? 'ok' : 'no_methods';
+
+            return new AbstractResult((object)[
+                'reason' => $reason,
+                'methods' => (object)$methods,
+            ]);
         } catch (\Exception $e) {
             PluginHelper::getLogger()->error('Error while fetching methods from mollie. Message: ' . $e->getMessage());
-            return new AbstractResult([]);
+            return new AbstractResult((object)[
+                'reason' => 'error',
+                'methods' => new stdClass(),
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -193,27 +221,7 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
      */
     public static function cancelOrderLine(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'ord_') !== 0) {
-            throw new RuntimeException('Invalid Order ID!');
-        }
-        if (strpos($data->lineId, 'odl_') !== 0) {
-            throw new RuntimeException('Invalid Orderline ID!');
-        }
-        if (!$data->quantity || $data->quantity <= 0) {
-            throw new RuntimeException('Invalid Quantity!');
-        }
-
-        $checkout = OrderCheckout::fromID($data->id);
-        $checkout->getMollie()->cancelLines([
-            'lines' => [
-                [
-                    'id' => $data->lineId,
-                    'quantity' => $data->quantity,
-                ],
-            ],
-        ]);
-
-        return new AbstractResult(true);
+        throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE . ' Line-Cancel ist nicht mehr verfügbar.');
     }
 
     /**
@@ -222,13 +230,25 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
      */
     public static function cancelOrder(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'ord_') !== 0) {
-            throw new RuntimeException('Invalid Order ID!');
+        $checkout = AbstractCheckout::fromID($data->id);
+        /** @var PaymentCheckout $checkout */
+        $payment = $checkout->getMollie();
+        if ($payment === null) {
+            throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE);
         }
 
-        $checkout = OrderCheckout::fromID($data->id);
+        if ($payment->isCancelable) {
+            $res = $checkout->getAPI()->getClient()->payments->cancel($payment->id);
 
-        return new AbstractResult($checkout->getMollie()->cancel()->isCanceled());
+            return new AbstractResult($res->isCanceled());
+        }
+        if ($payment->isAuthorized() && $payment->captureMode === 'manual') {
+            $checkout->releaseAuthorization();
+
+            return new AbstractResult(true);
+        }
+
+        throw new RuntimeException('Payment kann nicht storniert werden (Status: ' . $payment->status . ').');
     }
 
     /**
@@ -237,15 +257,22 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
      */
     public static function refundOrder(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'tr_') !== false) {
-            $checkout = PaymentCheckout::fromID($data->id);
-            $checkout->getMollie()->refund([
-                'amount' => $checkout->getMollie()->amountRemaining,
-            ]);
-        } else {
-            $checkout = OrderCheckout::fromID($data->id);
-            $checkout->getMollie()->refundAll();
+        $checkout = AbstractCheckout::fromID($data->id);
+        /** @var PaymentCheckout $checkout */
+        $payment = $checkout->getMollie();
+        if ($payment === null) {
+            throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE);
         }
+        if (empty($payment->amountRemaining)) {
+            throw new RuntimeException('Payment kann nicht erstattet werden (kein amountRemaining).');
+        }
+
+        $payment->refund([
+            'amount' => [
+                'currency' => $payment->amountRemaining->currency,
+                'value' => $payment->amountRemaining->value,
+            ],
+        ]);
 
         return new AbstractResult(true);
     }
@@ -260,12 +287,13 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
             throw new RuntimeException('Missing Mollie ID or Refund ID!');
         }
 
-        if (strpos($data->id, 'tr_') !== false) {
-            $checkout = PaymentCheckout::fromID($data->id);
-        } else {
-            $checkout = OrderCheckout::fromID($data->id);
+        $checkout = AbstractCheckout::fromID($data->id);
+        $payment = $checkout->getMollie();
+        if ($payment === null) {
+            throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE);
         }
-        $refunds = $checkout->getMollie()->refunds();
+
+        $refunds = $payment->refunds();
         /** @var Refund $refund */
         foreach ($refunds as $refund) {
             if ($refund->id === $data->refundId) {
@@ -284,27 +312,7 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
      */
     public static function refundOrderLine(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'ord_') !== 0) {
-            throw new RuntimeException('Invalid Order ID!');
-        }
-        if (strpos($data->lineId, 'odl_') !== 0) {
-            throw new RuntimeException('Invalid Order ID!');
-        }
-        if (!$data->quantity || $data->quantity <= 0) {
-            throw new RuntimeException('Invalid Quantity!');
-        }
-
-        $checkout = OrderCheckout::fromID($data->id);
-        $checkout->getMollie()->refund([
-            'lines' => [
-                [
-                    'id' => $data->lineId,
-                    'quantity' => $data->quantity,
-                ],
-            ],
-        ]);
-
-        return new AbstractResult(true);
+        throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE . ' Line-Refund ist nicht mehr verfügbar.');
     }
 
 
@@ -314,19 +322,22 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
      */
     public static function refundAmount(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'tr_') !== 0) {
-            throw new RuntimeException('Invalid Payment ID!');
-        }
+        $checkout = AbstractCheckout::fromID($data->id);
+        /** @var PaymentCheckout $checkout */
 
         if (!$data->amount) {
             throw new RuntimeException('Invalid Amount!');
         }
 
-        $checkout = PaymentCheckout::fromID($data->id);
-        $result = $checkout->getMollie()->refund([
+        $payment = $checkout->getMollie();
+        if ($payment === null) {
+            throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE);
+        }
+
+        $result = $payment->refund([
             'amount' => [
-                'value' => number_format((float)$data->amount, 2),
-                'currency' => $checkout->getMollie()->amount->currency,
+                'value' => number_format((float)$data->amount, 2, '.', ''),
+                'currency' => $payment->amount->currency,
             ],
             'description' => 'Refund for order ' . $checkout->getBestellung()->cBestellNr,
         ]);
@@ -339,11 +350,14 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
      */
     public static function getOrder(stdClass $data)
     {
-        if (strpos($data->id, 'ord_') !== 0) {
-            throw new RuntimeException('Invalid Order ID!');
+        // Legacy ord_* → Payment via cTransactionId (Payment API only)
+        $checkout = AbstractCheckout::fromID($data->id);
+        $payment = $checkout->getMollie();
+        if ($payment === null) {
+            throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE);
         }
-        $checkout = OrderCheckout::fromID($data->id);
-        return new AbstractResult($checkout->getMollie());
+
+        return new AbstractResult($payment);
     }
 
     /**
@@ -351,21 +365,19 @@ AND b.dErstellt > DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
      */
     public static function getPayment(stdClass $data)
     {
-        if (strpos($data->id, 'tr_') !== 0) {
-            throw new RuntimeException('Invalid Payment ID!');
+        $checkout = AbstractCheckout::fromID($data->id);
+        $payment = $checkout->getMollie();
+        if ($payment === null) {
+            throw new RuntimeException(AbstractCheckout::LEGACY_ORDER_DEGRADE_MESSAGE);
         }
-        $checkout = PaymentCheckout::fromID($data->id);
 
-        return new AbstractResult($checkout->getMollie());
+        return new AbstractResult($payment);
     }
 
     public static function releaseAuthorization(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'tr_') !== 0) {
-            throw new RuntimeException('Invalid Payment ID!');
-        }
-
-        $checkout = PaymentCheckout::fromID($data->id);
+        $checkout = AbstractCheckout::fromID($data->id);
+        /** @var PaymentCheckout $checkout */
 
         return new AbstractResult($checkout->releaseAuthorization());
     }
