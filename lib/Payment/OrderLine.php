@@ -10,14 +10,13 @@ namespace Plugin\ws5_mollie\lib\Payment;
 use Exception;
 use JsonSerializable;
 use JTL\Cart\CartItem;
-use JTL\Cart\CartItemProperty;
 use JTL\Catalog\Currency;
 use JTL\Checkout\Bestellung;
 use Mollie\Api\Types\OrderLineType;
 use Plugin\ws5_mollie\lib\Order\Amount;
 use RuntimeException;
 use stdClass;
-use WS\JTL5\V2_0_5\Traits\Jsonable;
+use WS\JTL5\V2_1_4\Traits\Jsonable;
 
 class OrderLine implements JsonSerializable
 {
@@ -116,21 +115,21 @@ class OrderLine implements JsonSerializable
             case C_WARENKORBPOS_TYP_ARTIKEL:
             case C_WARENKORBPOS_TYP_GRATISGESCHENK:
                 // TODO: digital / Download Artikel?
-                return OrderLineType::TYPE_PHYSICAL;
+                return $positive ? OrderLineType::PHYSICAL : OrderLineType::DISCOUNT;
             case C_WARENKORBPOS_TYP_VERSANDPOS:
-                return OrderLineType::TYPE_SHIPPING_FEE;
+                return $positive ? OrderLineType::SHIPPING_FEE : OrderLineType::DISCOUNT;
             case C_WARENKORBPOS_TYP_VERPACKUNG:
             case C_WARENKORBPOS_TYP_VERSANDZUSCHLAG:
             case C_WARENKORBPOS_TYP_ZAHLUNGSART:
             case C_WARENKORBPOS_TYP_VERSAND_ARTIKELABHAENGIG:
             case C_WARENKORBPOS_TYP_NACHNAHMEGEBUEHR:
-                return OrderLineType::TYPE_SURCHARGE;
+                return $positive ? OrderLineType::SURCHARGE : OrderLineType::DISCOUNT;
             case C_WARENKORBPOS_TYP_GUTSCHEIN:
             case C_WARENKORBPOS_TYP_KUPON:
             case C_WARENKORBPOS_TYP_NEUKUNDENKUPON:
-                return OrderLineType::TYPE_DISCOUNT;
+                return OrderLineType::DISCOUNT;
             default:
-                return $positive ? OrderLineType::TYPE_SURCHARGE : OrderLineType::TYPE_DISCOUNT;
+                return $positive ? OrderLineType::SURCHARGE : OrderLineType::DISCOUNT;
         }
     }
 
@@ -150,7 +149,7 @@ class OrderLine implements JsonSerializable
             $diff = (round((float)$amount->value - $sum, 2));
             if ($diff !== 0.0) {
                 $line              = new self();
-                $line->type        = $diff > 0 ? OrderLineType::TYPE_SURCHARGE : OrderLineType::TYPE_DISCOUNT;
+                $line->type        = $diff > 0 ? OrderLineType::SURCHARGE : OrderLineType::DISCOUNT;
                 $line->description        = 'Rundungsausgleich';
                 $line->quantity    = 1;
                 $line->unitPrice   = new Amount($diff, $currency, false);
@@ -172,7 +171,7 @@ class OrderLine implements JsonSerializable
     public static function getCredit(Bestellung $oBestellung): self
     {
         $line            = new self();
-        $line->type      = OrderLineType::TYPE_STORE_CREDIT;
+        $line->type      = OrderLineType::STORE_CREDIT;
         $line->description      = 'Guthaben';
         $line->quantity  = 1;
         $line->unitPrice = (object)[

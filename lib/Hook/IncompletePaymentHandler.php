@@ -14,11 +14,12 @@ use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Helpers\Request;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\PluginHelper;
-use WS\JTL5\V2_0_5\Hook\AbstractHook;
+use WS\JTL5\V2_1_4\Hook\AbstractHook;
 
 class IncompletePaymentHandler extends AbstractHook
 {
     const MOLLIE_PAYMENT_NOT_COMPLETED_STRING = 'mollie_payment_not_completed';
+    const MOLLIE_PAYMENT_CANCELED_STRING = 'mollie_payment_canceled';
 
     /**
      * @return void
@@ -45,7 +46,7 @@ class IncompletePaymentHandler extends AbstractHook
                 header('Location: ' . $checkoutURL . '?' . $queryString);
             }
 
-            // Add error alert to frontend
+            // Add error alert to frontend if payment failed
             if (array_key_exists(static::MOLLIE_PAYMENT_NOT_COMPLETED_STRING, $_REQUEST) && $_REQUEST[static::MOLLIE_PAYMENT_NOT_COMPLETED_STRING] === '1') {
 
                 $translatedErrorMessage = PluginHelper::getPlugin()->getLocalization()->getTranslation('paymentNotCompleted');
@@ -53,6 +54,17 @@ class IncompletePaymentHandler extends AbstractHook
                     Alert::TYPE_ERROR,
                     $translatedErrorMessage,
                     'mollie_payment_incomplete'
+                );
+            }
+
+            // Add error alert to frontend if payment was canceled
+            if (array_key_exists(static::MOLLIE_PAYMENT_CANCELED_STRING, $_REQUEST) && $_REQUEST[static::MOLLIE_PAYMENT_CANCELED_STRING] === '1') {
+
+                $translatedErrorMessage = PluginHelper::getPlugin()->getLocalization()->getTranslation('error_canceled');
+                Shop::Container()->getAlertService()->addAlert(
+                    Alert::TYPE_ERROR,
+                    $translatedErrorMessage,
+                    'mollie_payment_canceled'
                 );
             }
 

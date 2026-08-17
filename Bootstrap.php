@@ -28,7 +28,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-class Bootstrap extends \WS\JTL5\V2_0_5\Bootstrap
+class Bootstrap extends \WS\JTL5\V2_1_4\Bootstrap
 {
     private const CRON_TYPE = 'cronjob_mollie_cleanup';
 
@@ -141,6 +141,13 @@ class Bootstrap extends \WS\JTL5\V2_0_5\Bootstrap
                 $router->addRoute('/' . self::getPlugin()->getPluginID() . '/queue', [\Plugin\ws5_mollie\lib\Queue::class, 'runAsynchronous'], null, ['POST']);
             });
         }
+
+        // Add route for applePay check
+        $this->listen(HOOK_ROUTER_PRE_DISPATCH, function($args) {
+            /** @var Router $router */
+            $router = $args['router'];
+            $router->addRoute('/plugins/' . self::getPlugin()->getPluginID() . '/applepay', [ApplePay::class, 'check'], 'mollieApplePayCheck', ['POST']);
+        });
     }
 
     /**

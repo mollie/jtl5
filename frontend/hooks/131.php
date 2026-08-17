@@ -7,6 +7,7 @@
 
 use JTL\Helpers\Request;
 use JTL\Helpers\Text;
+use JTL\Session\Frontend;
 use JTL\Shop;
 use Plugin\ws5_mollie\lib\Helper\UrlHelper;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
@@ -61,9 +62,17 @@ try {
 
         // Check if order is already finalized
         if ($paymentSession && $paymentSession->kBestellung) {
+
             // If order is finalized: redirect to bestellabschluss/bestellstatus according to shop setting
             $oBestellung = new \JTL\Checkout\Bestellung($paymentSession->kBestellung);
-            Shop::Container()->getLogService()->debug("Mollie - Order finalized -> redirect to bestellabschluss");
+            if (intval($oBestellung->cStatus) !== \BESTELLUNG_STATUS_BEZAHLT) {
+                // If order is not marked as paid yet: redirect to processPaymentPage
+                Shop::Container()->getLogService()->debug("Mollie - Order finalized but not marked as paid yet -> redirect to loading screen");
+                header("Location: " . Shop::getURL() . '/' . PluginHelper::getPlugin()->getPluginID() . '/processPayment?hash=' . $sessionHash);
+                exit();
+            }
+
+            Shop::Container()->getLogService()->debug("Mollie - Order finalized and marked as paid -> redirect to bestellabschluss");
 
             if (
                 \JTL\Shopsetting::getInstance()
@@ -93,6 +102,6 @@ try {
         exit((string) QueueModel::cleanUp());
     }
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     Shop::Container()->getLogService()->error($e->getMessage() . " (Trace: {$e->getTraceAsString()})");
 }

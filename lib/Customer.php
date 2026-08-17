@@ -10,8 +10,7 @@ namespace Plugin\ws5_mollie\lib;
 use JTL\Session\Frontend;
 use Mollie\Api\Exceptions\ApiException;
 use Plugin\ws5_mollie\lib\Model\CustomerModel;
-use stdClass;
-use WS\JTL5\V2_0_5\Traits\Jsonable;
+use WS\JTL5\V2_1_4\Traits\Jsonable;
 
 /**
  * Class Customer
@@ -37,7 +36,7 @@ class Customer
     public $locale;
 
     /**
-     * @var stdClass
+     * @var array
      */
     public $metadata;
 
@@ -69,7 +68,7 @@ class Customer
         $customer->name     = trim($oKunde->cVorname . ' ' . $oKunde->cNachname);
         $customer->email    = $oKunde->cMail;
         $customer->locale   = Locale::getLocale(Frontend::get('cISOSprache', 'ger'), $oKunde->cLand);
-        $customer->metadata = (object)[
+        $customer->metadata = [
             'kKunde'        => $oKunde->getID(),
             'kKundengruppe' => $oKunde->getGroupID(),
             'cKundenNr'     => $oKunde->cKundenNr,

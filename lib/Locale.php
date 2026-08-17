@@ -7,7 +7,7 @@
 
 namespace Plugin\ws5_mollie\lib;
 
-use WS\JTL5\V2_0_5\Traits\Plugins;
+use WS\JTL5\V2_1_4\Traits\Plugins;
 
 class Locale
 {

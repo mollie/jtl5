@@ -265,6 +265,19 @@
       "selectItems": [
         {"value": "api" , "label": "Je nach API, Order- oder Payment-ID verwenden"},
         {"value": "tr" , "label": "Immer Payment-ID verwenden"}
+      ],
+      "isHidden": true
+    },
+    {
+      "id": "paypalID",
+      "label": "PayPal ID im Zahlungseingang",
+      "description": "Welche ID soll bei PayPal-Zahlungen im Zahlungseingang für die WaWi hinterlegt werden?",
+      "settingType": "select",
+      "type": "string",
+      "defaultValue": "paypal",
+      "selectItems": [
+        {"value": "paypal" , "label": "PayPal Referenz-ID"},
+        {"value": "mollie" , "label": "Mollie Transaktion-ID"}
       ]
     },
     {

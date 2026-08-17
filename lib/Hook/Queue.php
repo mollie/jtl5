@@ -7,23 +7,19 @@
 
 namespace Plugin\ws5_mollie\lib\Hook;
 
-use Exception;
 use JTL\Alert\Alert;
-use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use JTL\Helpers\Text;
 use JTL\Shop;
-use Mollie\Api\Types\OrderStatus;
 use Mollie\Api\Types\PaymentStatus;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
-use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\QueueModel;
 use Plugin\ws5_mollie\lib\MollieAPI;
 use Plugin\ws5_mollie\lib\PluginHelper;
 use RuntimeException;
-use WS\JTL5\V2_0_5\Hook\AbstractHook;
+use WS\JTL5\V2_1_4\Hook\AbstractHook;
 
 class Queue extends AbstractHook
 {
@@ -84,7 +80,7 @@ class Queue extends AbstractHook
                 } else {
                     QueueModel::saveToQueue($_REQUEST['id'], $_REQUEST, 'webhook');
                 }
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 Shop::Container()->getLogService()->error(__NAMESPACE__ . ' could not finalize order or add to queue: ' . $e->getMessage() . "\n" . json_encode($_REQUEST));
             }
 
@@ -104,15 +100,15 @@ class Queue extends AbstractHook
                     throw new RuntimeException(PluginHelper::getPlugin()->getLocalization()->getTranslation('errOrderNotFound'));
                 }
 
-                if (strpos($raw->cOrderId, 'tr_') === 0) {
-                    $checkout = PaymentCheckout::fromID($raw->cOrderId);
-                } else {
-                    $checkout = OrderCheckout::fromID($raw->cOrderId);
+                // Always Payment API — legacy ord_* without txn creates a new tr_* payment
+                /** @var PaymentCheckout $checkout */
+                $checkout = AbstractCheckout::fromID($raw->cOrderId, true, null, true);
+                if ($checkout->getPaymentResourceId()) {
+                    $checkout->getMollie(true);
+                    $checkout->updateModel()->saveModel();
                 }
-                $checkout->getMollie(true);
-                $checkout->updateModel()->saveModel();
 
-                if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->cStatus, ['completed', 'paid', 'authorized', 'pending'])) {
+                if ($checkout->getBestellung()->dBezahltDatum !== null || in_array($checkout->getModel()->cStatus, ['completed', 'paid', 'authorized', 'pending'], true)) {
                     throw new RuntimeException(PluginHelper::getPlugin()->getLocalization()->getTranslation('errAlreadyPaid'));
                 }
 
@@ -128,7 +124,7 @@ class Queue extends AbstractHook
             } catch (RuntimeException $e) {
                 $alertHelper = Shop::Container()->getAlertService();
                 $alertHelper->addAlert(Alert::TYPE_ERROR, $e->getMessage(), 'mollie_repay', ['dismissable' => true]);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 Shop::Container()->getLogService()->error('mollie:repay:error: ' . $e->getMessage() . "\n" . print_r($_REQUEST, 1));
             }
         }
@@ -148,7 +144,12 @@ class Queue extends AbstractHook
             if (isset($_GET['hash'])) {
                 $sessionHash = $_GET['hash'];
                 $paymentSession = PluginHelper::getDB()->select('tzahlungsession', 'cZahlungsID', $sessionHash);
-                if ($paymentSession && $paymentSession->kBestellung) {
+                if (isset($paymentSession->kBestellung)) {
+                    $order = PluginHelper::getDB()->select('tbestellung', 'kBestellung', $paymentSession->kBestellung);
+                }
+
+                if (isset($paymentSession) && $paymentSession->kBestellung && isset($order) && (int)$order->cStatus === \BESTELLUNG_STATUS_BEZAHLT) {
+
                     // Order was finalized (return Status 200 Success): customer will be redirected to success url
                     http_response_code(200);
                     $response = [
@@ -163,13 +164,12 @@ class Queue extends AbstractHook
                 } else {
                     $order = PluginHelper::getDB()->select('xplugin_ws5_mollie_orders', 'cHash', '_' . $sessionHash);
 
-                    if (str_starts_with($order->cOrderId, 'ord_')) {
-                        // Order was cancelled or failed, but webhook was not called because it was an order via OrderAPI (return Status 422 Unprocessable Content): customer will be redirected to error url
-                        $api     = new MollieAPI(true);
-                        $mollie  = $api->getClient()->orders->get($order->cOrderId, ['embed' => 'payments']);
-                        foreach ($mollie->payments() as $payment) {
-                            if (in_array($payment->status, [PaymentStatus::STATUS_CANCELED, PaymentStatus::STATUS_EXPIRED, PaymentStatus::STATUS_FAILED])) {
-                                // Order was cancelled or failed (return Status 422 Unprocessable Content): customer will be redirected to error url
+                    if ($order && !empty($order->cOrderId)) {
+                        $paymentId = AbstractCheckout::resolvePaymentId($order->cOrderId);
+                        if ($paymentId !== null) {
+                            $api = new MollieAPI(!empty($order->bTest));
+                            $payment = $api->getClient()->payments->get($paymentId);
+                            if (in_array($payment->status, [PaymentStatus::CANCELED, PaymentStatus::EXPIRED, PaymentStatus::FAILED], true)) {
                                 http_response_code(422);
                                 $response = [
                                     "status" => 422,
@@ -184,7 +184,7 @@ class Queue extends AbstractHook
                         }
                     }
 
-                    if (in_array($order->cStatus, [OrderStatus::STATUS_CANCELED, OrderStatus::STATUS_EXPIRED, 'failed'], true)) {
+                    if ($order && in_array($order->cStatus, [PaymentStatus::CANCELED, PaymentStatus::EXPIRED, PaymentStatus::FAILED], true)) {
                         // Order was cancelled or failed (return Status 422 Unprocessable Content): customer will be redirected to error url
                         http_response_code(422);
                         $response = [
@@ -213,7 +213,7 @@ class Queue extends AbstractHook
             echo json_encode($response);
             exit;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Unknown error occures (return Status 500 Internal Server Error): customer will be redirected to error url
             http_response_code(500);
             $response = [

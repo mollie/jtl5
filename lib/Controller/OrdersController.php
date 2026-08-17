@@ -12,14 +12,12 @@ use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
 use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
-use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
-use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
 use Plugin\ws5_mollie\lib\Model\OrderModel;
 use Plugin\ws5_mollie\lib\Model\ShipmentsModel;
 use Plugin\ws5_mollie\lib\PluginHelper;
 use stdClass;
-use WS\JTL5\V2_0_5\Backend\AbstractResult;
-use WS\JTL5\V2_0_5\Backend\Controller\AbstractController;
+use WS\JTL5\V2_1_4\Backend\AbstractResult;
+use WS\JTL5\V2_1_4\Backend\Controller\AbstractController;
 
 /**
  * Class OrdersController
@@ -40,15 +38,36 @@ class OrdersController extends AbstractController
         return new AbstractResult(AbstractCheckout::makeFetchable($oBestellung, $orderModel));
     }
 
-    public static function fetchMollieOrders(): AbstractResult
+    public static function fetchMollieOrders(?stdClass $data = null): AbstractResult
     {
+        $page = isset($data->page) ? max(1, (int)$data->page) : 1;
+        $pageSize = isset($data->pageSize) ? (int)$data->pageSize : 500;
+        $pageSize = max(1, min(1000, $pageSize));
+        $offset = ($page - 1) * $pageSize;
+
         if (PluginHelper::getSetting('hideCompleted')) {
-            $sqlQuery = "SELECT o.*, b.cStatus as cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung WHERE !(o.cStatus IN ('paid', 'completed') AND b.cStatus = '4') ORDER BY b.dErstellt DESC;";
+            $whereClause = "WHERE !(o.cStatus IN ('paid', 'completed') AND b.cStatus = '4')";
         } else {
-            $sqlQuery = "SELECT o.*, b.cStatus AS cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung ORDER BY b.dErstellt DESC;";
+            $whereClause = '';
         }
-        $results = PluginHelper::getDB()->executeQuery($sqlQuery, 2);
-        return new AbstractResult($results);
+        $baseFrom = " FROM xplugin_ws5_mollie_orders o JOIN tbestellung b ON b.kbestellung = o.kBestellung {$whereClause}";
+
+        $countQuery = "SELECT COUNT(*) AS total{$baseFrom}";
+        $totalResult = PluginHelper::getDB()->executeQuery($countQuery, 1);
+        $total = isset($totalResult->total) ? (int)$totalResult->total : 0;
+
+        $sqlQuery = "SELECT o.*, b.cStatus AS cJTLStatus, b.cAbgeholt, b.cVersandartName, b.cZahlungsartName, b.fGuthaben, b.fGesamtsumme{$baseFrom} ORDER BY b.dErstellt DESC LIMIT :limit OFFSET :offset";
+        $results = PluginHelper::getDB()->executeQueryPrepared($sqlQuery, [
+            ':limit' => $pageSize,
+            ':offset' => $offset
+        ], 2);
+
+        return new AbstractResult((object)[
+            'items' => $results,
+            'total' => $total,
+            'page' => $page,
+            'pageSize' => $pageSize
+        ]);
     }
 
     /**
@@ -87,25 +106,17 @@ class OrdersController extends AbstractController
      */
     public static function get(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'tr_') !== false) {
-            $checkout = PaymentCheckout::fromID($data->id);
-        } else {
-            $checkout = OrderCheckout::fromID($data->id);
+        $checkout = AbstractCheckout::fromID($data->id, true, null, true);
+        if ($checkout->getPaymentResourceId()) {
+            $checkout->updateModel()->saveModel();
         }
-        $checkout->updateModel()->saveModel();
 
         return new AbstractResult($checkout->getBestellung());
     }
 
     public static function getQueue(stdClass $data): AbstractResult
     {
-        if (strpos($data->id, 'tr_') !== false) {
-            $checkout = PaymentCheckout::fromID($data->id);
-        } else {
-            $checkout = OrderCheckout::fromID($data->id);
-        }
-
-        $checkout->updateModel()->saveModel();
+        $checkout = AbstractCheckout::fromID($data->id, true, null, true);
 
         return new AbstractResult(PluginHelper::getDB()
             ->executeQueryPrepared(

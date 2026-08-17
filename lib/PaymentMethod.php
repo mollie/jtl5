@@ -11,7 +11,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Exception;
 use JTL\Alert\Alert;
-use JTL\CheckBox;
 use JTL\Checkout\Bestellung;
 use JTL\Exceptions\CircularReferenceException;
 use JTL\Exceptions\ServiceNotFoundException;
@@ -20,10 +19,12 @@ use JTL\Plugin\Payment\Method;
 use JTL\Session\Frontend;
 use JTL\Shop;
 use Mollie\Api\Exceptions\ApiException;
-use Mollie\Api\Exceptions\IncompatiblePlatform;
-use Plugin\ws5_mollie\lib\Checkout\OrderCheckout;
+use Mollie\Api\Exceptions\IncompatiblePlatformException;
+use Mollie\Api\Exceptions\ValidationException;
+use Throwable;
+use Plugin\ws5_mollie\lib\Checkout\AbstractCheckout;
 use Plugin\ws5_mollie\lib\Checkout\PaymentCheckout;
-use WS\JTL5\V2_0_5\Traits\Plugins;
+use WS\JTL5\V2_1_4\Traits\Plugins;
 
 abstract class PaymentMethod extends Method
 {
@@ -165,7 +166,7 @@ abstract class PaymentMethod extends Method
      * @param $billingCountry
      * @param $currency
      * @param $amount
-     * @throws IncompatiblePlatform
+     * @throws IncompatiblePlatformException
      * @throws ApiException
      * @return bool
      */
@@ -180,16 +181,21 @@ abstract class PaymentMethod extends Method
 
         $key = md5(serialize([$locale, $billingCountry, $currency, $amount]));
         if (!array_key_exists($key, $_SESSION['mollie_possibleMethods'])) {
-            $active = $api->getClient()->methods->allActive([
-                'locale' => $locale,
-                'amount' => [
-                    'currency' => $currency,
-                    'value'    => number_format($amount, 2, '.', '')
-                ],
-                'billingCountry' => $billingCountry,
-                'resource'       => 'orders',
-                'includeWallets' => 'applepay',
-            ]);
+            try {
+                $active = $api->getClient()->methods->allEnabled([
+                    'locale' => $locale,
+                    'amount' => [
+                        'currency' => $currency,
+                        'value'    => number_format($amount, 2, '.', '')
+                    ],
+                    'billingCountry' => $billingCountry,
+                    'includeWallets' => ['applepay'],
+                ]);
+
+            } catch (\Exception $e) {
+                PluginHelper::getLogger()->error('Error while fetching methods from mollie. Message: ' . $e->getMessage());
+                return false;
+            }
             foreach ($active as $a) {
                 $_SESSION['mollie_possibleMethods'][$key][] = (object)['id' => $a->id];
             }
@@ -245,7 +251,7 @@ abstract class PaymentMethod extends Method
 
             if ($this->duringCheckout) {
                 // Handle Checkboxes bei Bezahlung vor Bestellabschluss, da diese durch POST parameter getriggert werden, die beim Redirect verloren gehen
-                self::handleCheckboxes($order);
+                self::saveCheckboxesForHandling();
             } else if (\JTL\Shopsetting::getInstance()->getValue(CONF_KAUFABWICKLUNG, 'bestellabschluss_abschlussseite') === 'S') {
                 // Cleanup Session bei Bezahlung nach Bestellabschluss, wenn Abschlussseite = Statusseite
                 Frontend::getInstance()->cleanUp();
@@ -256,7 +262,7 @@ abstract class PaymentMethod extends Method
                     $order->cPUIZahlungsdaten = $pui;
                     $order->updateInDB();
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->doLog('mollie::preparePaymentProcess: PUI - ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_NOTICE);
             }
 
@@ -274,9 +280,30 @@ abstract class PaymentMethod extends Method
                     }
                 }
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->doLog('mollie::preparePaymentProcess: ' . $e->getMessage() . ' - ' . print_r(['cBestellNr' => $order->cBestellNr], 1), LOGLEVEL_ERROR);
 
+            if ($this->duringCheckout) {
+                $message = $this->getPaymentErrorAlert($e);
+                // Zahlung während Bestellung: zurück zum Bestellvorgang, Alert über Session
+                Shop::Container()->getAlertService()->addAlert(
+                    Alert::TYPE_ERROR,
+                    $message,
+                    'paymentFailed',
+                    ['saveInSession' => true]
+                );
+
+                if (!headers_sent()) {
+                    $checkoutURL = Shop::Container()->getLinkService()
+                        ->getSpecialPage(LINKTYP_BESTELLVORGANG)->getURL();
+                    header('Location: ' . $checkoutURL . '?' . http_build_query(['editZahlungsart' => '1']));
+                    exit();
+                }
+
+                return;
+            }
+
+            // Zahlung nach Bestellung: auf Bestellabschluss bleiben, Alert im gleichen Request
             Shop::Container()->getAlertService()->addAlert(
                 Alert::TYPE_ERROR,
                 PluginHelper::getPlugin()->getLocalization()->getTranslation('error_create'),
@@ -284,6 +311,35 @@ abstract class PaymentMethod extends Method
             );
         }
     }
+
+    private function getPaymentErrorAlert(Throwable $exception): string
+    {
+        $validationException = $this->getValidationException($exception);
+        if ($validationException !== null) {
+            $field = (string)$validationException->getField();
+            if (str_starts_with($field, 'billingAddress')) {
+                return PluginHelper::getPlugin()->getLocalization()->getTranslation('error_invalid_billing_address_characters');
+            }
+            if (str_starts_with($field, 'shippingAddress')) {
+                return PluginHelper::getPlugin()->getLocalization()->getTranslation('error_invalid_shipping_address_characters');
+            }
+        }
+
+        return PluginHelper::getPlugin()->getLocalization()->getTranslation('error_create');
+    }
+
+    private function getValidationException(Throwable $exception): ?ValidationException
+    {
+        do {
+            if ($exception instanceof ValidationException) {
+                return $exception;
+            }
+            $exception = $exception->getPrevious();
+        } while ($exception instanceof Throwable);
+
+        return null;
+    }
+
 
     abstract public function getPaymentOptions(Bestellung $order, $apiType): array;
 
@@ -300,33 +356,16 @@ abstract class PaymentMethod extends Method
 
         try {
             $orderId = $args['id'];
-            if (strpos($orderId, 'tr_') === 0) {
-                $checkout = PaymentCheckout::factory($order);
-            } else {
-                $checkout = OrderCheckout::factory($order);
-            }
+            $checkout = AbstractCheckout::fromID($orderId);
             $checkout->handleNotification($hash);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->doLog("ERROR: mollie::handleNotification: Bestellung '$order->cBestellNr': {$e->getMessage()}", LOGLEVEL_ERROR);
             Shop::Container()->getBackendLogService()->critical($e->getMessage(), $_REQUEST);
         }
     }
 
-    private static function handleCheckboxes(Bestellung $order): void
+    private static function saveCheckboxesForHandling(): void
     {
-        /**
-         * @var \JTL\Customer\Customer $customer
-         */
-        $customer = $_SESSION['Kunde'];
-        $customerGroupID   = $customer->getGroupID();
-        $checkbox          = new CheckBox(0, PluginHelper::getDB());
-        $checkbox->triggerSpecialFunction(
-            \CHECKBOX_ORT_BESTELLABSCHLUSS,
-            $customerGroupID,
-            true,
-            $_POST,
-            ['oBestellung' => $order, 'oKunde' => $customer]
-        );
-
+        $_SESSION['ws5_mollie_checkboxes'] = $_POST;
     }
 }
